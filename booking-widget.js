@@ -481,6 +481,14 @@
             // la confirmación.
             go(5);
             B().rememberMyAppointment(created);
+            // La cita nueva entra en el token push de este dispositivo, para
+            // que los avisos de esta cita (aprobación, cancelación,
+            // recordatorios) lleguen por push sin esperar a otra apertura.
+            try {
+                if (window.GabyNotifications && typeof window.GabyNotifications.refreshPushToken === 'function') {
+                    window.GabyNotifications.refreshPushToken();
+                }
+            } catch (_) { /* el push del token no bloquea la confirmación */ }
             Data().toast(created.status === 'APROBADA' ? '¡Tu cita fue confirmada!' : 'Recibimos tu solicitud de cita.', 'success');
             if (typeof opts.onDone === 'function') opts.onDone(created);
         }

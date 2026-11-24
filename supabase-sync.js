@@ -472,6 +472,29 @@
         }
     }
 
+    // Registra o renueva el token push de este dispositivo (RPC SECURITY
+    // DEFINER: el visitante no puede mantener sus códigos al día con el sync
+    // normal — pull() vacía pushTokens para anon, así que el UPDATE directo
+    // nunca llega y cada activación insertaba otra fila con el mismo endpoint.
+    // La RPC une los códigos por endpoint y borra duplicados). Devuelve el id
+    // de la fila o null si no se pudo registrar. Nunca lanza: si falla, el
+    // push queda como estaba y se reintentará en la próxima apertura.
+    // Sin configuración de Supabase no hace nada.
+    async function registerPushToken(endpoint, codes, userAgent) {
+        try {
+            if (!endpoint) return null;
+            const list = Array.isArray(codes) ? codes.filter(Boolean) : [];
+            const client = await getClient();
+            if (!client) return null;
+            const { data, error } = await client.rpc('register_push_token', { p_endpoint: endpoint, p_codes: list, p_user_agent: userAgent || '' });
+            if (error) throw error;
+            return (typeof data === 'string' && data) ? data : null;
+        } catch (error) {
+            console.error('[GabyCloud] No se pudo registrar el token push en el servidor:', error);
+            return null;
+        }
+    }
+
     // -------------------------------------------------------------------------
     let ready = Promise.resolve();
     if (enabled) {
@@ -498,6 +521,7 @@
         appointmentStatus,
         myNotifications,
         markNotificationsRead,
+        registerPushToken,
         myAppointmentCodes,
         transferClient,
         friendly
