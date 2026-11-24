@@ -445,9 +445,21 @@
                 return;
             }
             view.result = created;
+            // El servidor puede confirmar la cita automáticamente (el trigger fija
+            // APROBADA cuando la confirmación automática está activa en la base de
+            // datos): se consulta el estado real para no mostrar PENDIENTE cuando
+            // la cita ya está confirmada.
+            try {
+                const server = await B().lookupByCode(created.code);
+                if (server && server.status) created.status = server.status;
+            } catch (_) { /* sin conexión: se muestra lo último que se sabía */ }
+            // Primero se muestra la confirmación (paso 5) y después se guarda la
+            // cita en este dispositivo: guardar dispara 'gabymyappointments' y
+            // booking.html no debe cambiar a la vista "Tu cita" mientras se ve
+            // la confirmación.
+            go(5);
             B().rememberMyAppointment(created);
             Data().toast(created.status === 'APROBADA' ? '¡Tu cita fue confirmada!' : 'Recibimos tu solicitud de cita.', 'success');
-            go(5);
             if (typeof opts.onDone === 'function') opts.onDone(created);
         }
 
