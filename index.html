@@ -120,6 +120,8 @@
         .nav-actions { display: flex; gap: 1rem; align-items: center; }
         .icon-btn { background: transparent; border: 1px solid rgba(212, 175, 55, 0.3); color: var(--gold-2); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 0.9rem; }
         .icon-btn:hover { background: var(--gold-2); color: #000; transform: rotate(180deg); }
+        .icon-btn.site-header-bell { position: relative; }
+        .icon-btn.site-header-bell:hover { transform: none; }
         .barber-view-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.3rem; border-radius: 50px; border: 1px solid rgba(212,175,55,0.4); color: var(--gold-2); background: transparent; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: all 0.3s ease; white-space: nowrap; }
         .barber-view-btn:hover { background: var(--gold-2); color: #000; }
         .flag-btn { padding: 0; overflow: hidden; }
@@ -723,6 +725,7 @@
             <li><a onclick="document.getElementById('quick-links').scrollIntoView({behavior:'smooth'})">Explorar</a></li>
         </ul>
         <div class="nav-actions">
+            <a class="icon-btn site-header-bell" href="notificaciones.html" title="Avisos" aria-label="Avisos"><i class="fas fa-bell"></i><span class="site-bell-badge" data-bell-badge hidden></span></a>
             <button class="icon-btn flag-btn" id="language-toggle" onclick="toggleLanguage()" title="Cambiar idioma" aria-label="Cambiar idioma"></button>
             <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Cambiar tema"><i class="fas fa-moon"></i></button>
             <button class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.75rem;" onclick="openDashboard()" data-i18n="staffPortal">Portal del personal</button>
