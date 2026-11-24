@@ -379,6 +379,15 @@
             meta.content = '#070707';
             document.head.appendChild(meta);
         }
+        // Icono de pantalla de inicio en iPhone: sin esto, al añadir desde una
+        // página interna iOS usa una captura en vez del logo. index.html ya lo
+        // trae, así que solo se inyecta cuando la página no tiene uno.
+        if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+            const icon = document.createElement('link');
+            icon.rel = 'apple-touch-icon';
+            icon.href = LOGO;
+            document.head.appendChild(icon);
+        }
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register(`${SCRIPT_BASE}sw.js`).catch(() => { /* sin service worker: la página funciona igual */ });
         }

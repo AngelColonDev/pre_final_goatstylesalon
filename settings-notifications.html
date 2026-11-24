@@ -40,6 +40,7 @@
         .status strong { color:var(--gold); }
         .guide { margin:.9rem 0 0 1.2rem; color:var(--muted); font-size:.9rem; line-height:1.8; }
         .guide li { margin-bottom:.3rem; }
+        .guide.highlight { border:1px solid rgba(212,175,55,.6); background:rgba(212,175,55,.08); border-radius:14px; padding:.8rem 1rem .8rem 2.2rem; }
         .link-row { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.95rem 0; color:var(--text); font-weight:700; }
         .link-row i { color:#9ca3af; }
         .mobile-bottom-nav{display:none}.mobile-bottom-nav a,.mobile-bottom-nav button{background:transparent;border:none;color:#d8d2c3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;font-size:.68rem;font-weight:600;letter-spacing:.02em;min-width:0;cursor:pointer}.mobile-bottom-nav i{font-size:1.05rem;color:#d4af37}.mobile-bottom-nav .active{color:#d4af37}
@@ -76,6 +77,7 @@
             <button class="btn" type="button" id="install-btn" data-i18n="installBtn">Instalar app</button>
             <p class="status" id="install-status"></p>
             <ol class="guide" id="ios-guide" hidden>
+                <li id="ios-safari-step" data-i18n="iosStep0" hidden>Abre esta página en Safari: este navegador no tiene «Añadir a pantalla de inicio».</li>
                 <li data-i18n="iosStep1">Toca el botón Compartir (el cuadrado con la flecha hacia arriba) en la barra de Safari.</li>
                 <li data-i18n="iosStep2">Baja y toca «Añadir a pantalla de inicio».</li>
                 <li data-i18n="iosStep3">Toca «Añadir» arriba a la derecha. La app quedará en tu pantalla de inicio con el logo de GOAT Style Salon.</li>
@@ -119,7 +121,8 @@
                 pushFailed: 'No se pudo activar el push. Inténtalo de nuevo.',
                 pushUnsupported: 'Este navegador no soporta notificaciones push.',
                 installTitle: 'Instalar la app', installDesc: 'Pon GOAT Style Salon en tu pantalla de inicio para no perder la página. Se abre como app, sin la barra del navegador.',
-                installBtn: 'Instalar app', installNote: 'El navegador siempre pide tu confirmación; la app no se instala sola.',
+                installBtn: 'Instalar app', installBtnIOS: 'Cómo instalar en iPhone', installNote: 'El navegador siempre pide tu confirmación; la app no se instala sola.',
+                iosStep0: 'Abre esta página en Safari: este navegador no tiene «Añadir a pantalla de inicio».',
                 iosStep1: 'Toca el botón Compartir (el cuadrado con la flecha hacia arriba) en la barra de Safari.',
                 iosStep2: 'Baja y toca «Añadir a pantalla de inicio».',
                 iosStep3: 'Toca «Añadir» arriba a la derecha. La app quedará en tu pantalla de inicio con el logo de GOAT Style Salon.',
@@ -147,7 +150,8 @@
                 pushFailed: 'Push could not be turned on. Try again.',
                 pushUnsupported: 'This browser does not support push notifications.',
                 installTitle: 'Install the app', installDesc: 'Add GOAT Style Salon to your home screen so you never lose the site. It opens as an app, without the browser bar.',
-                installBtn: 'Install app', installNote: 'The browser always asks for your confirmation; the app never installs by itself.',
+                installBtn: 'Install app', installBtnIOS: 'How to install on iPhone', installNote: 'The browser always asks for your confirmation; the app never installs by itself.',
+                iosStep0: 'Open this page in Safari: this browser has no “Add to Home Screen”.',
                 iosStep1: 'Tap the Share button (the square with the arrow pointing up) in the Safari bar.',
                 iosStep2: 'Scroll down and tap “Add to Home Screen”.',
                 iosStep3: 'Tap “Add” at the top right. The app will stay on your home screen with the GOAT Style Salon logo.',
@@ -201,7 +205,16 @@
                 installStatus.innerHTML = '<strong>' + t('installInstalled') + '</strong>';
                 return;
             }
-            if (N().isIOS()) document.getElementById('ios-guide').hidden = false;
+            if (N().isIOS()) {
+                // En iPhone no hay instalación en un toque: el botón muestra la guía,
+                // así que su texto lo dice (se cambia el data-i18n antes de que
+                // initPreferences traduzca la página, y así se mantiene al cambiar de idioma).
+                installBtn.setAttribute('data-i18n', 'installBtnIOS');
+                document.getElementById('ios-guide').hidden = false;
+                // Fuera de Safari no existe "Añadir a pantalla de inicio": primero
+                // hay que abrir la página en Safari.
+                if (!N().isIOSSafari()) document.getElementById('ios-safari-step').hidden = false;
+            }
         }
 
         installBtn.addEventListener('click', async () => {
@@ -212,7 +225,13 @@
             } else if (result.reason === 'accepted') {
                 installStatus.innerHTML = '<strong>' + t('installAccepted') + '</strong>';
             } else if (result.reason === 'ios-manual') {
-                document.getElementById('ios-guide').hidden = false;
+                // En iPhone el botón no instala solo: lleva a la guía y la resalta,
+                // para que el toque haga algo visible.
+                const guide = document.getElementById('ios-guide');
+                guide.hidden = false;
+                guide.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                guide.classList.add('highlight');
+                window.setTimeout(() => guide.classList.remove('highlight'), 2500);
             } else if (result.reason === 'dismissed') {
                 installStatus.textContent = t('installDismissed');
             } else {
