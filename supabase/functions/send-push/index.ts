@@ -14,7 +14,9 @@
 //       de 24 h y el de 1 h para las citas APROBADA/PENDIENTE que los necesiten
 //       y los envía por push. Usa las mismas reglas que notifications.js, para
 //       no duplicar avisos: marca reminder_sent_at / reminder_1h_sent_at y
-//       comprueba que el aviso no exista ya.
+//       comprueba que el aviso no exista ya. El estado se vuelve a comprobar
+//       justo antes de crear cada aviso: una cita cancelada o rechazada después
+//       de la selección nunca recibe recordatorio.
 //
 // Despliegue (desde la raíz del repo, con Supabase CLI y el proyecto creado):
 //   supabase functions deploy send-push --no-verify-jwt
@@ -136,6 +138,11 @@ async function sendReminders(supabase: ReturnType<typeof createClient>) {
   let created = 0;
   let sent = 0;
   for (const appt of appointments || []) {
+    // La cita pudo cancelarse o rechazarse después de la selección: se vuelve
+    // a comprobar su estado justo antes de crear el recordatorio, para que una
+    // cita cancelada o rechazada nunca reciba uno.
+    const { data: fresh } = await supabase.from('appointments').select('status').eq('code', appt.code).maybeSingle();
+    if (!fresh || !['PENDIENTE', 'APROBADA'].includes(fresh.status)) continue;
     const start = new Date(appt.date_time).getTime();
     const jobs: { type: string; field: string; title: string }[] = [];
     if (start <= new Date(in24h).getTime() && !appt.reminder_sent_at) {

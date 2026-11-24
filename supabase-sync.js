@@ -423,6 +423,71 @@
         }
     }
 
+    // Transfiere UNA cita a otro barbero (RPC SECURITY DEFINER: el personal no
+    // puede cambiar el barbero por sync directo — la política
+    // appointments_staff_update exige que la fila nueva sea del mismo barbero).
+    // La RPC actualiza la cita y su historial en el servidor; aquí se refleja
+    // el mismo cambio en local con saveState (sin commit) para que el próximo
+    // commit no intente subirlo por sync. Los avisos los crea después el motor
+    // (GabyBooking.transferAppointment) en un commit normal.
+    // Devuelve la cita actualizada o null si no hay Supabase.
+    async function transferAppointment(code, toBarberId, actorName) {
+        const client = await getClient();
+        if (!client) return null;
+        const { data, error } = await client.rpc('transfer_appointment', {
+            p_code: String(code || '').trim().toUpperCase(), p_to_barber_id: toBarberId, p_by: actorName || 'Personal'
+        });
+        if (error) raise(error);
+        if (!data) return null;
+        const row = tables.appointments.fromRow(data);
+        const state = window.GabyData.getState();
+        const local = (state.appointments || []).find(item => item.code === row.code);
+        if (local) {
+            local.barber = row.barber;
+            local.barberName = row.barberName;
+            local.history = row.history;
+            window.GabyData.saveState(state);
+        }
+        return row;
+    }
+
+    // Elimina una cita y sus avisos (RPC SECURITY DEFINER: solo el admin puede
+    // borrar citas por sync directo — appointments_admin_delete). Como en la
+    // transferencia, el borrado local va por saveState (sin commit) para que el
+    // próximo commit no intente borrarlo por sync.
+    async function deleteAppointment(code) {
+        const client = await getClient();
+        if (!client) return false;
+        const { data, error } = await client.rpc('delete_appointment', {
+            p_code: String(code || '').trim().toUpperCase()
+        });
+        if (error) raise(error);
+        if (!data) return false;
+        const state = window.GabyData.getState();
+        state.appointments = (state.appointments || []).filter(item => item.code !== code);
+        state.notifications = (state.notifications || []).filter(item => item.appointmentCode !== code);
+        window.GabyData.saveState(state);
+        return true;
+    }
+
+    // Envía el push de UN aviso que ya existe (misma llamada que hace el
+    // compositor de avisos). Best-effort: nunca lanza; el aviso en la app ya
+    // está guardado aunque el push falle. Se usa para avisos del personal
+    // (por ejemplo, la transferencia), que el guardado automático no empuja:
+    // push() solo empuja avisos de cliente.
+    async function sendPushForNotification(notificationId) {
+        try {
+            const client = await getClient();
+            if (!client || !client.functions || typeof client.functions.invoke !== 'function') return false;
+            if (!notificationId) return false;
+            await client.functions.invoke('send-push', { body: { mode: 'send', notificationId } });
+            return true;
+        } catch (error) {
+            console.error('[GabyCloud] No se pudo enviar el push del aviso:', error);
+            return false;
+        }
+    }
+
     // Códigos de las citas reservadas desde este navegador (sin cuenta).
     function myAppointmentCodes() {
         try {
@@ -524,6 +589,9 @@
         registerPushToken,
         myAppointmentCodes,
         transferClient,
+        transferAppointment,
+        deleteAppointment,
+        sendPushForNotification,
         friendly
     };
 })();

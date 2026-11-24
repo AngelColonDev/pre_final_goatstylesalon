@@ -336,11 +336,13 @@
     // ---------------------------------------------------------------------
     function notify(state, { barberId, clientId, audience, type, title, body, code }) {
         state.notifications = state.notifications || [];
-        state.notifications.unshift({
+        const notice = {
             id: uid('ntf'), audience: audience || 'staff', barberId: barberId || null, clientId: clientId || null,
             type, title, body, appointmentCode: code || null, createdAt: nowIso(), readAt: null
-        });
+        };
+        state.notifications.unshift(notice);
         if (state.notifications.length > 500) state.notifications.length = 500;
+        return notice;
     }
 
     // Textos de los avisos al cliente en el idioma de este navegador (es/en).
@@ -363,6 +365,18 @@
         const barber = state.barbers.find(item => item.id === barberId);
         if (!barber) return barberId || '';
         return barber.alias && barber.alias !== barber.name ? `${barber.name} (${barber.alias})` : barber.name;
+    }
+
+    // Enlace de Google Calendar con la cita ya rellenada (no hacen falta
+    // credenciales: abre calendar.google.com con el evento listo para guardar).
+    // La hora guardada es local (Puerto Rico); se pasa a UTC para el enlace.
+    function googleCalendarUrl(appointment, state) {
+        const start = parseLocal(appointment.dateTime);
+        if (!start) return '';
+        const end = new Date(start.getTime() + appointmentDuration(appointment, state) * 60000);
+        const fmt = d => `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}00Z`;
+        const q = `action=TEMPLATE&text=${encodeURIComponent(`Cita GOAT Style Salon — ${appointment.client} (${appointment.service})`)}&dates=${fmt(start)}/${fmt(end)}&details=${encodeURIComponent(`${appointment.service} con ${appointment.barberName || barberLabel(state, appointment.barber)} · Código ${appointment.code} · Pago presencial en la barbería.`)}&location=${encodeURIComponent('GOAT Style Salon, Barranquitas, Puerto Rico')}`;
+        return `https://calendar.google.com/calendar/render?${q}`;
     }
 
     // ---------------------------------------------------------------------
@@ -428,9 +442,23 @@
         const manual = source === 'manual';
         const typedName = cleanName(walkIn && walkIn.name);
         if (!manual && !client && typedName.length < 2) throw Object.assign(new Error('name'), { userMessage: 'Escribe tu nombre completo.' });
-        const record = client || (!manual ? matchClientByName(state, typedName) : null);
+        let record = client || (!manual ? matchClientByName(state, typedName) : null);
         const error = validateBooking({ clientId: record && record.id, barberId, services, date, time, staff: manual }, state);
         if (error) throw Object.assign(new Error('booking'), { userMessage: error });
+        // Si nadie reservó antes con ese nombre, se crea su ficha de cliente para
+        // que aparezca en Clientes con su historial, no-shows y bloqueos. En
+        // línea solo se conoce el nombre; el teléfono llega cuando lo escribe el
+        // personal (o en la cita manual sin ficha).
+        if (!record) {
+            record = {
+                id: uid('cl'), name: typedName, email: '', phone: (walkIn && walkIn.phone) || '',
+                birthDate: '', haircut: '', beard: '', preferredBarber: barberId,
+                photo: '', consent: null, marketingConsent: null,
+                registeredAt: nowIso(), status: 'Activo', address: '', altPhones: [], lastModifiedAt: null
+            };
+            state.clients = state.clients || [];
+            state.clients.push(record);
+        }
         const code = uniqueCode(state);
         const status = manual || rules.autoConfirm ? 'APROBADA' : 'PENDIENTE';
         const appointment = {
@@ -622,6 +650,13 @@
                 body: clientText(state, `${describe(appointment)} con ${appointment.barberName} no pudo confirmarse. Comunícate con la barbería para buscar otro horario.`, `${describe(appointment)} with ${appointment.barberName} could not be confirmed. Contact the barbershop to find another time.`)
             });
         }
+        if (status === 'PENDIENTE' && previous !== 'PENDIENTE') {
+            notify(state, {
+                audience: 'client', clientId: appointment.clientId, code, type: 'pendiente',
+                title: clientText(state, 'Cita pendiente de confirmación', 'Appointment pending confirmation'),
+                body: clientText(state, `${describe(appointment)} con ${appointment.barberName} está pendiente de confirmación. Te avisaremos en cuanto el barbero la confirme.`, `${describe(appointment)} with ${appointment.barberName} is pending confirmation. We will let you know as soon as the barber confirms it.`)
+            });
+        }
         if (status === 'COMPLETADA') {
             notify(state, {
                 audience: 'client', clientId: appointment.clientId, code, type: 'completada',
@@ -696,6 +731,49 @@
         state.clientChangeLog = state.clientChangeLog || [];
         state.clientChangeLog.unshift({ id: uid('chg'), clientId, field: 'Barbero asignado', oldValue: fromLabel, newValue: barberLabel(state, toBarberId), changedBy: by, changedAt: nowIso() });
         return { moved, kept };
+    }
+
+    // Transferir UNA cita a otro barbero (no al cliente entero): la cita pasa a
+    // la lista del barbero nuevo a la misma fecha y hora, y ambos (barbero nuevo
+    // y cliente) reciben un aviso. Es idempotente: si la cita ya está con ese
+    // barbero (por ejemplo, el servidor ya aplicó la transferencia y se
+    // reintenta), no vuelve a moverla ni a duplicar el historial; solo crea
+    // los avisos si todavía no existen para ese barbero.
+    function transferAppointment(state, code, { toBarberId, by, actor }) {
+        const appointment = state.appointments.find(item => item.code === code);
+        if (!appointment) throw Object.assign(new Error('appt'), { userMessage: 'No encontramos esa cita.' });
+        const target = state.barbers.find(item => item.id === toBarberId && item.active !== false);
+        if (!target) throw Object.assign(new Error('barber'), { userMessage: 'Escoge el barbero que recibirá la cita.' });
+        if (!ACTIVE.includes(appointment.status)) throw Object.assign(new Error('status'), { userMessage: 'Solo se puede transferir una cita pendiente o confirmada.' });
+        const toLabel = barberLabel(state, toBarberId);
+        if (appointment.barber !== toBarberId) {
+            const services = findServices(appointmentServiceNames(appointment), state);
+            if (!services.every(service => barberOffers(target, service))) throw Object.assign(new Error('service'), { userMessage: `${target.alias || target.name} no ofrece uno de los servicios de esta cita.` });
+            const date = String(appointment.dateTime).slice(0, 10);
+            const time = String(appointment.dateTime).slice(11, 16);
+            const error = validateBooking({ clientId: appointment.clientId, barberId: toBarberId, services, date, time, excludeCode: code, staff: true }, state);
+            if (error) throw Object.assign(new Error('slot'), { userMessage: error });
+            const fromLabel = barberLabel(state, appointment.barber);
+            const last = (appointment.history || [])[(appointment.history || []).length - 1];
+            appointment.barber = toBarberId;
+            appointment.barberName = toLabel;
+            if (!last || last.action !== 'Transferida' || !String(last.detail || '').includes(`Ahora: ${toLabel}`)) {
+                pushHistory(appointment, 'Transferida', actor || by, `Antes: ${fromLabel} · Ahora: ${toLabel}`);
+            }
+        }
+        let staffNotice = (state.notifications || []).find(n => n.type === 'transferencia' && n.appointmentCode === code && n.barberId === toBarberId);
+        if (!staffNotice) {
+            staffNotice = notify(state, { barberId: toBarberId, type: 'transferencia', code, title: 'Te transfirieron una cita', body: `${appointment.client}: ${describe(appointment)} con ${toLabel}.` });
+        }
+        let clientNotice = (state.notifications || []).find(n => n.type === 'transferencia' && n.audience === 'client' && n.appointmentCode === code && String(n.body || '').includes(toLabel));
+        if (!clientNotice) {
+            clientNotice = notify(state, {
+                audience: 'client', clientId: appointment.clientId, code, type: 'transferencia',
+                title: clientText(state, 'Tu cita cambió de barbero', 'Your appointment changed barber'),
+                body: clientText(state, `Tu cita ${describe(appointment)} ahora es con ${toLabel}. La fecha y la hora no cambian.`, `Your appointment ${describe(appointment)} is now with ${toLabel}. The date and time stay the same.`)
+            });
+        }
+        return { appointment, staffNotice, clientNotice };
     }
 
     function blockClient(state, clientId, { reason, by }) {
@@ -836,10 +914,10 @@
         serviceMinutes, totalMinutes, priceLabel, findServices, appointmentServiceNames, appointmentDuration,
         barberOffers, barbersForServices, weeklySchedule, scheduleSummary, blocksFor, dayWindow,
         getSlots, nextAvailable, availableDates,
-        clientAppointments, clientStats, noShowLevel, activeBlock, blockClient, unblockClient, transferClient,
+        clientAppointments, clientStats, noShowLevel, activeBlock, blockClient, unblockClient, transferClient, transferAppointment,
         validateBooking, createAppointment, cancelAppointment, rescheduleAppointment, setStatus, hoursUntil, matchClientByName, lookupByCode,
         rememberMyAppointment, forgetMyAppointment, myUpcomingAppointments, refreshMyAppointments,
         addPublicReview, setReviewStatus, publicReviews, isLegacyReview, reviewBarber, barberRating, reviewServiceLabel,
-        stats, notify, describe, barberLabel
+        stats, notify, describe, barberLabel, googleCalendarUrl
     };
 })();

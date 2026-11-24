@@ -215,6 +215,9 @@
             due.forEach(item => {
                 const current = (state.appointments || []).find(a => a.code === item.appt.code);
                 if (!current) return;
+                // La cita pudo cancelarse o rechazarse después de calcular los
+                // pendientes: una cita cancelada o rechazada nunca recibe recordatorio.
+                if (!['PENDIENTE', 'APROBADA'].includes(current.status)) return;
                 // Re-comprobación dentro del cambio: otra pestaña pudo generarlo antes.
                 if (item.type === 'recordatorio-24h' && current.reminderSentAt) return;
                 if (item.type === 'recordatorio-1h' && current.reminder1hSentAt) return;

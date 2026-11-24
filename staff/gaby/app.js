@@ -6,5 +6,5 @@ window.AdminPortalConfig = {
 };
 
 const sharedScript = document.createElement('script');
-sharedScript.src = '../shared-admin.js';
+sharedScript.src = '../shared-admin.js?v=20261124c';
 document.body.appendChild(sharedScript);

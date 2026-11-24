@@ -5,7 +5,9 @@
     // a otro barbero), Servicios, Horarios, Resenas, Inventario (productos, materiales y proveedores),
     // Reportes, Notificaciones y Configuracion.
     // shared-admin.js le pasa un "ctx" con los datos de la sesion y utilidades.
-    // Roles: el administrador ve todo; cada barbero ve solo lo suyo.
+    // Roles: cada panel es de un barbero (gabriel, darialex o wilo) y ve solo sus
+    // propias citas, aunque sea administrador general; una cita transferida
+    // aparece en la lista del barbero nuevo, no en la del anterior.
     // =========================================================================
     const B = () => window.GabyBooking;
     const esc = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
@@ -28,10 +30,16 @@
     const fmtDateTime = appointment => `${B().formatDate(dayOf(appointment), { weekday: 'short', day: 'numeric', month: 'short' })} · ${timeOf(appointment)}`;
     const fmtStamp = iso => iso ? new Date(iso).toLocaleString('es-PR', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
 
+    // Cada panel es de un barbero (gabriel, darialex o wilo): cada uno ve solo
+    // sus propias citas, aunque sea administrador general. Una cita transferida
+    // aparece en la lista del barbero nuevo, no en la del anterior.
+    function isBarberRole(ctx) {
+        return (ctx.getDb().barbers || []).some(b => b.id === ctx.config.role);
+    }
+
     function scopedAppointments(ctx) {
-        const db = ctx.getDb();
-        const list = db.appointments || [];
-        return ctx.isAdmin() ? list : list.filter(item => item.barber === ctx.config.role);
+        const list = ctx.getDb().appointments || [];
+        return isBarberRole(ctx) ? list.filter(item => item.barber === ctx.config.role) : list;
     }
 
     function scopedClients(ctx) {
@@ -101,9 +109,19 @@
                 ${a.status === 'CANCELADA' ? `<div class="wide ap-kv-cancel"><small>Cancelación</small>Por ${esc(a.canceledBy || (a.canceledByClient ? 'cliente' : 'barbería'))} · ${fmtStamp(a.canceledAt)}${a.cancelReason ? ` · ${esc(a.cancelReason)}` : ''}${a.lateCancellation ? ' · <span class="ap-badge red">Tardía</span>' : ''}</div>` : ''}
             </div>
             ${a.referencePhoto && /^data:image\/(jpeg|png|webp);base64,/.test(a.referencePhoto) ? `<div><div class="item-meta" style="margin-bottom:6px;">Foto de referencia del cliente</div><a href="${a.referencePhoto}" target="_blank" rel="noopener"><img class="ap-ref-photo" src="${a.referencePhoto}" alt="Foto de referencia del cliente"></a></div>` : ''}
-            <div class="form-actions" style="justify-content:flex-start; flex-wrap:wrap; align-items:center;">
-                ${a.status === 'PENDIENTE' ? '<button class="action-btn approve" data-decide="APROBADA"><i class="fas fa-check"></i> Aprobar</button><button class="action-btn reject" data-decide="RECHAZADA"><i class="fas fa-xmark"></i> Rechazar</button>' : ''}
-                ${moreButton(a.code, 'Más opciones', true)}
+            <div class="ap-modal-actions">
+                <div class="form-actions" style="justify-content:flex-start; flex-wrap:wrap; align-items:center;">
+                    ${a.status === 'PENDIENTE' ? '<button class="action-btn approve" data-decide="APROBADA"><i class="fas fa-check"></i> Aprobar</button><button class="action-btn reject" data-decide="RECHAZADA"><i class="fas fa-xmark"></i> Rechazar</button>' : ''}
+                    ${a.status === 'APROBADA' ? '<button class="action-btn approve" data-decide="COMPLETADA"><i class="fas fa-circle-check"></i> Completar</button><button class="action-btn reject" data-decide="CANCELADA"><i class="fas fa-ban"></i> Cancelar</button><button class="action-btn pending" data-decide="PENDIENTE"><i class="fas fa-clock"></i> Marcar como pendiente</button>' : ''}
+                    ${(a.status === 'RECHAZADA' || a.status === 'CANCELADA') ? '<button class="action-btn pending" data-decide="PENDIENTE"><i class="fas fa-clock"></i> Marcar como pendiente</button>' : ''}
+                    ${moreButton(a.code, 'Más opciones', true)}
+                </div>
+                <div class="form-actions" style="justify-content:flex-start; flex-wrap:wrap; align-items:center;">
+                    ${active ? `<button class="action-btn notify" type="button" data-notify-modal="${esc(a.code)}"><i class="fas fa-paper-plane"></i> Avisar al cliente</button><button class="action-btn notify" type="button" data-transfer-modal="${esc(a.code)}"><i class="fas fa-arrow-right-arrow-left"></i> Transferir cita</button>` : ''}
+                    ${a.status === 'APROBADA' ? `<a class="action-btn approve" href="${esc(B().googleCalendarUrl(a, db))}" target="_blank" rel="noopener"><i class="fas fa-calendar-plus"></i> Añadir a Google Calendar</a>` : ''}
+                    ${!active ? `<button class="action-btn reject" type="button" data-delete-modal="${esc(a.code)}"><i class="fas fa-trash"></i> Eliminar cita</button>` : ''}
+                </div>
+                <div id="ap-transfer"></div>
             </div>
             <div id="ap-edit"></div>
             <div><div class="item-meta" style="margin-bottom:6px;">Historial de cambios</div>
@@ -113,8 +131,12 @@
         modal.el.querySelectorAll('[data-decide]').forEach(button => button.addEventListener('click', async () => {
             if (await changeStatus(ctx, code, button.dataset.decide)) modal.close();
         }));
+        modal.el.querySelector('[data-notify-modal]')?.addEventListener('click', () => { modal.close(); openNotifyFor(ctx, code); });
+        modal.el.querySelector('[data-transfer-modal]')?.addEventListener('click', () => renderTransferForm(ctx, a, modal));
+        modal.el.querySelector('[data-delete-modal]')?.addEventListener('click', async () => { if (await deleteAppointment(ctx, code)) modal.close(); });
         bindMoreButtons(ctx, modal.el, { modal, onEdit: () => renderEditForm(ctx, a, modal) });
         if (options && options.edit && active) renderEditForm(ctx, a, modal);
+        if (options && options.transfer && active) renderTransferForm(ctx, a, modal);
     }
 
     // Cambia el estado de una cita (aprobar, rechazar, completar, no-show o cancelar).
@@ -129,9 +151,116 @@
             if (reason === null) return false;
         }
         if (status === 'NO_SHOW' && !window.confirm('¿Marcar esta cita como no-show? Se sumará al contador del cliente.')) return false;
-        const labels = { APROBADA: 'aprobada. Se avisó al cliente', RECHAZADA: 'rechazada. El horario quedó libre', COMPLETADA: 'completada', NO_SHOW: 'marcada como no-show', CANCELADA: 'cancelada' };
+        const labels = { APROBADA: 'aprobada. Se avisó al cliente', RECHAZADA: 'rechazada. El horario quedó libre', COMPLETADA: 'completada', NO_SHOW: 'marcada como no-show', CANCELADA: 'cancelada', PENDIENTE: 'marcada como pendiente. Se avisó al cliente' };
         return ctx.commit(state => { B().setStatus(state, code, status, { actor: ctx.actorName, reason: String(reason || '').trim() }); },
             { success: `Cita ${code} ${labels[status] || B().statusLabel(status)}.`, error: 'No se pudo actualizar la cita.' });
+    }
+
+    // Transfiere una cita a otro barbero: primero se valida en local (mismo
+    // motor que reserva), luego la RPC mueve la cita en el servidor y por
+    // último un commit crea los avisos (al barbero nuevo y al cliente). El
+    // commit no vuelve a subir la cita: la RPC ya la movió y saveState la
+    // reflejó en local.
+    async function transferAppointmentHandler(ctx, code, toBarberId) {
+        const db = ctx.getDb();
+        const a = db.appointments.find(item => item.code === code);
+        if (!a) return false;
+        const target = db.barbers.find(b => b.id === toBarberId);
+        if (!target) { window.GabyData.toast('Escoge el barbero que recibirá la cita.', 'error'); return false; }
+        try {
+            // Validación en local (servicios, horario libre) sin tocar los datos.
+            B().transferAppointment(window.GabyData.clone(db), code, { toBarberId, by: ctx.actorName });
+        } catch (error) {
+            window.GabyData.toast(error.userMessage || 'No se puede transferir esta cita.', 'error');
+            return false;
+        }
+        let staffNoticeId = null;
+        try {
+            if (window.GabyCloud?.enabled) {
+                await window.GabyCloud.transferAppointment(code, toBarberId, ctx.actorName);
+            }
+            const saved = await ctx.commit(state => {
+                const result = B().transferAppointment(state, code, { toBarberId, by: ctx.actorName });
+                staffNoticeId = result.staffNotice && result.staffNotice.id;
+            }, { success: `Cita ${code} transferida a ${ctx.barberLabel(target)}. Se avisó al barbero y al cliente.`, error: 'No se pudo transferir la cita.' });
+            if (!saved) return false;
+        } catch (error) {
+            window.GabyData.toast(error.userMessage || 'No se pudo transferir la cita.', 'error');
+            return false;
+        }
+        // Push al barbero nuevo (best-effort): el aviso al cliente ya lo empuja
+        // el guardado; el del personal no, así que se invoca aquí, como el compositor.
+        if (staffNoticeId && window.GabyCloud?.sendPushForNotification) {
+            window.GabyCloud.sendPushForNotification(staffNoticeId);
+        }
+        return true;
+    }
+
+    // Formulario de transferencia dentro del detalle de la cita.
+    function renderTransferForm(ctx, appointment, modal) {
+        const db = ctx.getDb();
+        const box = modal.el.querySelector('#ap-transfer');
+        const targets = db.barbers.filter(b => b.active !== false && b.id !== appointment.barber);
+        if (!targets.length) { window.GabyData.toast('No hay otro barbero disponible para recibir la cita.', 'warning'); return; }
+        box.innerHTML = `
+            <form class="ap-transfer-form" id="ap-transfer-form">
+                <div class="form-group full">
+                    <label class="form-label" for="ap-transfer-barber">Barbero que recibirá la cita</label>
+                    <select class="form-input" id="ap-transfer-barber" required>
+                        <option value="">Escoge un barbero</option>
+                        ${targets.map(b => `<option value="${esc(b.id)}">${esc(ctx.barberLabel(b))}</option>`).join('')}
+                    </select>
+                    <p class="item-meta">La cita pasa a la lista del barbero nuevo a la misma fecha y hora. Se le avisa a él y al cliente.</p>
+                </div>
+                <div class="form-group full"><div class="form-actions"><button class="btn btn-primary" type="submit">Transferir cita</button><button class="btn btn-ghost" type="button" data-transfer-cancel>Cancelar</button></div></div>
+            </form>
+        `;
+        box.querySelector('[data-transfer-cancel]').addEventListener('click', () => { box.innerHTML = ''; });
+        box.querySelector('#ap-transfer-form').addEventListener('submit', async event => {
+            event.preventDefault();
+            const toBarberId = box.querySelector('#ap-transfer-barber').value;
+            const submit = box.querySelector('[type="submit"]');
+            submit.disabled = true;
+            const ok = await transferAppointmentHandler(ctx, appointment.code, toBarberId);
+            submit.disabled = false;
+            if (ok) modal.close();
+        });
+    }
+
+    // Elimina una cita y sus avisos (con confirmación). Solo aparece cuando la
+    // cita ya no está activa: una cita activa se cancela primero, para que el
+    // cliente reciba el aviso de cancelación.
+    async function deleteAppointment(ctx, code) {
+        const db = ctx.getDb();
+        const a = db.appointments.find(item => item.code === code);
+        if (!a) return false;
+        if (!window.confirm(`¿Eliminar la cita ${code} de ${a.client} (${fmtDateTime(a)})? Se borrará la cita y sus avisos. Esta acción no se puede deshacer.`)) return false;
+        try {
+            if (window.GabyCloud?.enabled) {
+                const ok = await window.GabyCloud.deleteAppointment(code);
+                if (!ok) return false;
+                window.GabyData.toast(`Cita ${code} eliminada.`, 'success');
+            } else {
+                const saved = await ctx.commit(state => {
+                    state.appointments = (state.appointments || []).filter(item => item.code !== code);
+                    state.notifications = (state.notifications || []).filter(item => item.appointmentCode !== code);
+                }, { success: `Cita ${code} eliminada.`, error: 'No se pudo eliminar la cita.' });
+                if (!saved) return false;
+            }
+        } catch (error) {
+            window.GabyData.toast(error.userMessage || 'No se pudo eliminar la cita.', 'error');
+            return false;
+        }
+        ctx.rerender();
+        return true;
+    }
+
+    // Abre el compositor de avisos con UNA cita ya elegida (desde Citas o el detalle).
+    function openNotifyFor(ctx, code) {
+        ui.notifyMode = 'one';
+        ui.notifyCode = code;
+        ui.notifySelect = code;
+        ctx.go('notifications');
     }
 
     // Boton de tres puntos con el resto de las opciones de una cita.
@@ -169,11 +298,15 @@
             active ? '<button type="button" data-m="COMPLETADA"><i class="fas fa-circle-check"></i>Marcar completada</button>' : '',
             active ? '<button type="button" data-m="NO_SHOW"><i class="fas fa-user-slash"></i>Marcar no-show</button>' : '',
             active ? '<button type="button" data-m="edit"><i class="fas fa-pen"></i>Editar / reprogramar</button>' : '',
-            '<button type="button" data-m="notify"><i class="fas fa-paper-plane"></i>Avisar al cliente</button>',
+            active ? '<button type="button" data-m="transfer"><i class="fas fa-arrow-right-arrow-left"></i>Transferir cita</button>' : '',
+            active ? '<button type="button" data-m="notify-app"><i class="fas fa-bell"></i>Avisar en la app</button>' : '',
+            a.status === 'APROBADA' ? `<a href="${esc(B().googleCalendarUrl(a, db))}" target="_blank" rel="noopener"><i class="fas fa-calendar-plus"></i>Añadir a Google Calendar</a>` : '',
+            '<button type="button" data-m="notify"><i class="fas fa-paper-plane"></i>Avisar por WhatsApp</button>',
             client ? '<button type="button" data-m="client"><i class="fas fa-user"></i>Ver cliente</button>' : '',
             intl ? `<a href="tel:+${intl}"><i class="fas fa-phone"></i>Llamar</a><a href="https://wa.me/${intl}" target="_blank" rel="noopener"><i class="fab fa-whatsapp"></i>WhatsApp</a>` : '',
             email ? `<a href="mailto:${esc(email)}"><i class="fas fa-envelope"></i>Correo</a>` : '',
-            active ? '<hr><button type="button" class="danger" data-m="CANCELADA"><i class="fas fa-ban"></i>Cancelar cita</button>' : ''
+            active ? '<hr><button type="button" class="danger" data-m="CANCELADA"><i class="fas fa-ban"></i>Cancelar cita</button>' : '',
+            !active ? '<hr><button type="button" class="danger" data-m="delete"><i class="fas fa-trash"></i>Eliminar cita</button>' : ''
         ].join('');
         const menu = document.createElement('div');
         menu.className = 'ap-more-menu';
@@ -200,6 +333,13 @@
                 if (options.onEdit) options.onEdit();
                 else openAppointment(ctx, code, { edit: true });
             } else if (action === 'notify') ctx.notifyAppointmentClient(code);
+            else if (action === 'notify-app') openNotifyFor(ctx, code);
+            else if (action === 'transfer') {
+                if (options.modal) renderTransferForm(ctx, a, options.modal);
+                else openAppointment(ctx, code, { transfer: true });
+            } else if (action === 'delete') {
+                if (await deleteAppointment(ctx, code) && options.modal) options.modal.close();
+            }
             else if (action === 'client') { if (options.modal) options.modal.close(); ui.clientId = client.id; ctx.go('clients'); }
             else if (await changeStatus(ctx, code, action) && options.modal) options.modal.close();
         });
@@ -438,6 +578,7 @@
     function bindCommon(ctx) {
         content().querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openAppointment(ctx, b.dataset.open)));
         content().querySelectorAll('[data-decide-code]').forEach(b => b.addEventListener('click', () => changeStatus(ctx, b.dataset.decideCode, b.dataset.decide)));
+        content().querySelectorAll('[data-notify-code]').forEach(b => b.addEventListener('click', () => openNotifyFor(ctx, b.dataset.notifyCode)));
         bindMoreButtons(ctx, content());
         content().querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => ctx.go(b.dataset.go)));
         content().querySelector('[data-new]')?.addEventListener('click', () => openNewAppointment(ctx));
@@ -449,7 +590,7 @@
     function renderCalendar(ctx) {
         const db = ctx.getDb();
         if (!ui.calDate) ui.calDate = today();
-        const barberFilter = ctx.isAdmin() ? ui.calBarber : ctx.config.role;
+        const barberFilter = isBarberRole(ctx) ? ctx.config.role : ui.calBarber;
         const list = scopedAppointments(ctx).filter(a => barberFilter === 'all' || a.barber === barberFilter);
         const base = B().parseKey(ui.calDate);
         let title = '';
@@ -492,7 +633,7 @@
                     </div>
                 </div>
                 <div class="ap-toolbar">
-                    ${ctx.isAdmin() ? `<select class="form-input" id="ap-cal-barber">${barberOptions(ctx, ui.calBarber, true)}</select>` : ''}
+                    ${!isBarberRole(ctx) ? `<select class="form-input" id="ap-cal-barber">${barberOptions(ctx, ui.calBarber, true)}</select>` : ''}
                     <button class="btn btn-primary" type="button" data-new>+ Nueva cita</button>
                 </div>
                 ${body}
@@ -549,13 +690,13 @@
                 </div>
                 <div class="ap-toolbar">
                     <input class="form-input" id="ap-appt-search" placeholder="Buscar: nombre, teléfono, correo o código" value="${esc(ui.apptSearch)}">
-                    ${ctx.isAdmin() ? `<select class="form-input" id="ap-appt-barber">${barberOptions(ctx, ui.apptBarber, true)}</select>` : ''}
+                    ${!isBarberRole(ctx) ? `<select class="form-input" id="ap-appt-barber">${barberOptions(ctx, ui.apptBarber, true)}</select>` : ''}
                     <select class="form-input" id="ap-appt-service"><option value="all">Todos los servicios</option>${db.services.map(s => `<option ${ui.apptService === s.name ? 'selected' : ''}>${esc(s.name)}</option>`).join('')}</select>
                     <select class="form-input" id="ap-appt-status"><option value="all">Todos los estados</option>${Object.keys(B().STATUS_LABELS).map(s => `<option value="${s}" ${ui.apptStatus === s ? 'selected' : ''}>${B().statusLabel(s)}</option>`).join('')}</select>
                 </div>
                 <div class="table-wrap"><table>
                     <thead><tr><th>Fecha y hora</th><th>Cliente</th><th>Servicio</th><th>Barbero</th><th>Estado</th><th>Código</th><th></th></tr></thead>
-                    <tbody>${list.map(a => `<tr><td style="text-transform:capitalize;">${esc(fmtDateTime(a))}</td><td>${esc(a.client)}</td><td>${esc(a.service)}</td><td>${esc(ctx.barberName(a.barber))}</td><td>${statusBadge(a.status)}</td><td>${esc(a.code)}</td><td><div class="ap-row-actions">${a.status === 'PENDIENTE' ? `<button class="action-btn approve" type="button" data-decide-code="${esc(a.code)}" data-decide="APROBADA">Aprobar</button><button class="action-btn reject" type="button" data-decide-code="${esc(a.code)}" data-decide="RECHAZADA">Rechazar</button>` : `<button class="action-btn notify" type="button" data-open="${esc(a.code)}">Ver</button>`}${moreButton(a.code)}</div></td></tr>`).join('') || '<tr><td colspan="7" class="empty">No hay citas con estos filtros.</td></tr>'}</tbody>
+                    <tbody>${list.map(a => `<tr><td style="text-transform:capitalize;">${esc(fmtDateTime(a))}</td><td>${esc(a.client)}</td><td>${esc(a.service)}</td><td>${esc(ctx.barberName(a.barber))}</td><td>${statusBadge(a.status)}</td><td>${esc(a.code)}</td><td><div class="ap-row-actions">${a.status === 'PENDIENTE' ? `<button class="action-btn approve" type="button" data-decide-code="${esc(a.code)}" data-decide="APROBADA">Aprobar</button><button class="action-btn reject" type="button" data-decide-code="${esc(a.code)}" data-decide="RECHAZADA">Rechazar</button>` : `<button class="action-btn notify" type="button" data-open="${esc(a.code)}">Ver</button>`}${B().ACTIVE.includes(a.status) ? `<button class="action-btn notify" type="button" data-notify-code="${esc(a.code)}">Avisar</button>` : ''}${moreButton(a.code)}</div></td></tr>`).join('') || '<tr><td colspan="7" class="empty">No hay citas con estos filtros.</td></tr>'}</tbody>
                 </table></div>
                 <div class="item-meta" style="margin-top:10px;">${list.length} cita(s)</div>
             </section>
@@ -1194,6 +1335,31 @@
         return `${a.code} · ${a.client || 'Cliente'} · ${a.service || ''} · ${fmtDateTime(a)}`;
     }
 
+    // Plantillas profesionales para avisar a un cliente. Se rellenan con la
+    // cita elegida; sin cita elegida se usa la versión genérica (para "todas
+    // las citas próximas"). La de cancelación es para avisar de una cita que ya
+    // se canceló: no cambia el estado (el cambio de estado ya avisa solo).
+    const NOTIFY_TEMPLATES = {
+        tardanza: {
+            title: 'Tu cita va con un poco de retraso',
+            body: (a, ctx) => a
+                ? `Hola ${a.client}, tu cita de ${a.service} con ${ctx.barberName(a.barber)} (${fmtDateTime(a)}) va con unos minutos de retraso. Te avisamos en cuanto estemos listos para atenderte. Gracias por tu paciencia. — GOAT Style Salon`
+                : 'Hola, tu cita de hoy va con unos minutos de retraso. Te avisamos en cuanto estemos listos para atenderte. Gracias por tu paciencia. — GOAT Style Salon'
+        },
+        recordatorio: {
+            title: 'Recordatorio de tu cita',
+            body: (a, ctx) => a
+                ? `Hola ${a.client}, te recordamos tu cita de ${a.service} con ${ctx.barberName(a.barber)} el ${fmtDateTime(a)}. Si necesitas cambiarla, escríbenos. ¡Te esperamos! — GOAT Style Salon`
+                : 'Hola, te recordamos tu cita en GOAT Style Salon. Si necesitas cambiarla, escríbenos. ¡Te esperamos! — GOAT Style Salon'
+        },
+        cancelacion: {
+            title: 'Tu cita fue cancelada',
+            body: (a, ctx) => a
+                ? `Hola ${a.client}, lamentamos informarte que tu cita de ${a.service} con ${ctx.barberName(a.barber)} del ${fmtDateTime(a)} fue cancelada. Escríbenos para buscar otro horario que te convenga. — GOAT Style Salon`
+                : 'Hola, lamentamos informarte que tu cita fue cancelada. Escríbenos para buscar otro horario que te convenga. — GOAT Style Salon'
+        }
+    };
+
     // Nota: el push al teléfono de los avisos al cliente que crea una acción
     // del panel (aprobar, rechazar, cancelar, reprogramar) lo envía el propio
     // guardado (supabase-sync.js, al insertar el aviso). El panel NO lo invoca
@@ -1276,6 +1442,10 @@
                 <div class="section-title">Enviar aviso a clientes</div>
                 <p class="item-meta">El aviso aparece en la app del cliente y, si tiene las notificaciones activadas, también le llega al teléfono.</p>
                 <form id="notify-form" class="form-grid" style="margin-top:12px;">
+                    <div class="form-group full">
+                        <span class="form-label">Plantillas</span>
+                        <div class="ap-notify-templates">${[['tardanza', 'Tardanza'], ['recordatorio', 'Recordatorio'], ['cancelacion', 'Cancelación']].map(([id, label]) => `<button type="button" class="ap-chip" data-template="${id}">${label}</button>`).join('')}</div>
+                    </div>
                     <div class="form-group"><label class="form-label" for="nt-title">Título</label><input class="form-input" id="nt-title" maxlength="80" required value="${esc(ui.notifyTitle)}"></div>
                     <div class="form-group full"><label class="form-label" for="nt-body">Mensaje</label><textarea class="form-input" id="nt-body" rows="3" required>${esc(ui.notifyBody)}</textarea></div>
                     <div class="form-group full">
@@ -1311,6 +1481,16 @@
         `;
         bindCommon(ctx);
         const form = content().querySelector('#notify-form');
+        form.querySelectorAll('[data-template]').forEach(b => b.addEventListener('click', () => {
+            const tpl = NOTIFY_TEMPLATES[b.dataset.template];
+            if (!tpl) return;
+            const code = String(ui.notifyCode || ui.notifySelect || '').trim().toUpperCase();
+            const appt = /^GS-\d{6}$/.test(code) ? db.appointments.find(a => a.code === code) : null;
+            ui.notifyTitle = tpl.title;
+            ui.notifyBody = tpl.body(appt, ctx);
+            form.querySelector('#nt-title').value = ui.notifyTitle;
+            form.querySelector('#nt-body').value = ui.notifyBody;
+        }));
         form.querySelector('#nt-title').addEventListener('input', e => { ui.notifyTitle = e.target.value; });
         form.querySelector('#nt-body').addEventListener('input', e => { ui.notifyBody = e.target.value; });
         form.querySelector('#nt-code').addEventListener('input', e => { ui.notifyCode = e.target.value; });

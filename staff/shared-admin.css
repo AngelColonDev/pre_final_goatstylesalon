@@ -936,8 +936,14 @@ select.form-input:focus {
 .ap-kv { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px 16px; }
 .ap-kv div { font-size: .9rem; overflow-wrap: anywhere; }
 .ap-kv small { display: block; color: var(--muted); font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
-.ap-history { display: grid; gap: 6px; font-size: .8rem; color: var(--muted); border-left: 2px solid var(--line); padding-left: 12px; }
-.ap-history b { color: var(--text); }
+/* Historial de cambios del detalle de una cita: línea de tiempo dorada. */
+.ap-history { display: grid; gap: 0; font-size: .85rem; color: var(--muted); line-height: 1.5; }
+.ap-history > div { position: relative; padding: 10px 0 10px 26px; border-left: 2px solid rgba(212, 175, 55, .35); }
+.ap-history > div::before { content: ''; position: absolute; left: -6px; top: 16px; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 3px rgba(212, 175, 55, .18); }
+.ap-history > div:first-child { padding-top: 2px; }
+.ap-history > div:first-child::before { top: 8px; }
+.ap-history > div:last-child { padding-bottom: 2px; }
+.ap-history b { color: var(--text); font-family: 'Cinzel', serif; letter-spacing: .02em; }
 .ap-warning { border: 1px solid rgba(241,190,93,.5); background: rgba(241,190,93,.08); border-radius: 14px; padding: 12px 14px; font-size: .85rem; line-height: 1.55; }
 .ap-danger { border: 1px solid rgba(255,107,107,.45); background: rgba(255,107,107,.07); border-radius: 14px; padding: 12px 14px; font-size: .85rem; }
 .ap-slots { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1062,3 +1068,35 @@ body.light-mode .ap-kv-boxes > div { background: rgba(0,0,0,.03); }
 .ap-business-section { margin-top: 18px; }
 .ap-business-section > summary { cursor: pointer; margin-bottom: 0; }
 .ap-business-section[open] > summary { margin-bottom: 16px; }
+
+/* ---------- Mejoras del panel (2026-11-24) ---------- */
+/* Interruptor "Tu disponibilidad" / "Estado público de la barbería". */
+.ap-availability { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.ap-switch { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: var(--panel-soft); color: var(--text); border-radius: 999px; padding: 8px 14px 8px 8px; cursor: pointer; font: inherit; }
+.ap-switch-track { width: 52px; height: 28px; border-radius: 999px; background: rgba(255, 255, 255, .14); position: relative; flex-shrink: 0; transition: background .2s ease; }
+.ap-switch-thumb { position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #f7f3e9; transition: transform .2s ease; box-shadow: 0 2px 6px rgba(0, 0, 0, .4); }
+.ap-switch.on .ap-switch-track { background: linear-gradient(90deg, #87640f, #d4af37); }
+.ap-switch.on .ap-switch-thumb { transform: translateX(24px); }
+.ap-switch-label { font-weight: 700; font-size: .85rem; }
+.ap-switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+body.light-mode .ap-switch-track { background: rgba(0, 0, 0, .18); }
+body.light-mode .ap-switch-thumb { background: #fff; }
+
+/* Acciones del detalle de una cita: dos filas separadas (estado + herramientas). */
+.ap-modal-actions { display: grid; gap: 10px; margin-top: 4px; }
+
+/* Formulario de transferencia dentro del detalle de la cita. */
+.ap-transfer-form { margin-top: 4px; padding: 14px; border: 1px solid rgba(212, 175, 55, .3); border-radius: 16px; background: rgba(212, 175, 55, .05); display: grid; gap: 10px; }
+
+/* Plantillas del compositor de avisos. */
+.ap-notify-templates { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Grupo "Todos los paneles" en el pie del menú. */
+.ap-panels { display: grid; gap: 4px; padding-top: 4px; }
+.ap-panels .nav-btn { padding: 11px 14px; }
+
+@media (max-width: 640px) {
+    .ap-availability { align-items: flex-start; flex-direction: column; }
+    .ap-switch { width: 100%; justify-content: space-between; }
+    .ap-modal-actions .form-actions .action-btn { flex: 1 1 auto; }
+}
