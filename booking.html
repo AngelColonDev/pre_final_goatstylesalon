@@ -265,6 +265,9 @@
         const capitalize = text => String(text).charAt(0).toUpperCase() + String(text).slice(1);
         let showingNewBooking = false;
         function renderMyAppointments(list) {
+            // Recién reservada, se deja ver la confirmación (paso 5 del widget):
+            // no se cambia a la vista "Tu cita" mientras se muestra.
+            if (bookingWidget.step === 5) return;
             const panel = document.getElementById('my-appointments');
             const card = document.getElementById('booking-card');
             const items = list || B.myUpcomingAppointments();
