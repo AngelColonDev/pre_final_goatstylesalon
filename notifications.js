@@ -222,22 +222,38 @@
         });
     }
 
+    // Carga un script con un reintento: si la primera carga falla (red
+    // intermitente), se intenta una vez más con un elemento nuevo, sin
+    // reutilizar la carga fallida. Si el segundo intento falla, el error sube.
+    async function loadScriptRetry(src) {
+        try { await loadScript(src); }
+        catch (_) { await loadScript(src); }
+    }
+
     async function loadFirebaseConfig() {
         if (firebaseConfig()) return firebaseConfig();
         try { await loadScript(`${SCRIPT_BASE}firebase-config.js`); } catch (_) { /* sin config: no hay push */ }
         return firebaseConfig();
     }
 
+    // Por qué falló el último intento de getMessaging(): 'no-config' (no se
+    // pudo cargar la configuración de Firebase), 'sdk' (no se pudieron cargar
+    // los scripts del SDK o no se pudo iniciar) o 'unsupported' (el navegador
+    // no tiene notificaciones o service worker). enablePush() lo usa para
+    // decirle al usuario en qué paso falló, en vez de un error genérico.
+    let messagingFailure = null;
+
     async function getMessaging() {
         if (messagingPromise) return messagingPromise;
+        messagingFailure = null;
         messagingPromise = (async () => {
             const config = await loadFirebaseConfig();
-            if (!config || !config.apiKey) return null;
-            if (!('Notification' in window) || !('serviceWorker' in navigator)) return null;
+            if (!config || !config.apiKey) { messagingFailure = 'no-config'; messagingPromise = null; return null; }
+            if (!('Notification' in window) || !('serviceWorker' in navigator)) { messagingFailure = 'unsupported'; messagingPromise = null; return null; }
             try {
                 if (!window.firebase || !window.firebase.messaging) {
-                    await loadScript(FIREBASE_APP);
-                    await loadScript(FIREBASE_MSG);
+                    await loadScriptRetry(FIREBASE_APP);
+                    await loadScriptRetry(FIREBASE_MSG);
                 }
                 if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
                     window.firebase.initializeApp(config);
@@ -261,7 +277,14 @@
                     updateBell();
                 });
                 return messaging;
-            } catch (_) { return null; }
+            } catch (_) {
+                // La carga fallida no se guarda: el próximo intento empieza de
+                // cero y puede reintentar (reintentar no serviría si quedara
+                // guardada la promesa que devolvió null).
+                messagingFailure = 'sdk';
+                messagingPromise = null;
+                return null;
+            }
         })();
         return messagingPromise;
     }
@@ -284,13 +307,22 @@
     // el envío lo hace la Edge Function con la clave de servicio (nunca aquí).
     async function enablePush() {
         const messaging = await getMessaging();
-        if (!messaging) return { ok: false, reason: 'no-config' };
+        if (!messaging) return { ok: false, reason: messagingFailure || 'no-config' };
         if (!('Notification' in window)) return { ok: false, reason: 'unsupported' };
+        if (!('serviceWorker' in navigator)) return { ok: false, reason: 'unsupported' };
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') return { ok: false, reason: 'denied' };
         const config = firebaseConfig();
+        // El token se genera contra el service worker de la app (sw.js): si el
+        // navegador no tiene ningún registro, se registra explícitamente para
+        // no depender del registro por defecto que usa el SDK.
+        let registration = null;
+        try { registration = await navigator.serviceWorker.getRegistration(); } catch (_) { /* sin registro */ }
+        if (!registration) {
+            try { registration = await navigator.serviceWorker.register(`${SCRIPT_BASE}sw.js`); } catch (_) { return { ok: false, reason: 'token' }; }
+        }
         let token = null;
-        try { token = await messaging.getToken({ vapidKey: config.vapidKey }); } catch (_) { return { ok: false, reason: 'token' }; }
+        try { token = await messaging.getToken({ vapidKey: config.vapidKey, serviceWorkerRegistration: registration }); } catch (_) { return { ok: false, reason: 'token' }; }
         if (!token) return { ok: false, reason: 'token' };
         let id = null;
         try { id = localStorage.getItem(TOKEN_KEY); } catch (_) { /* almacenamiento bloqueado */ }
