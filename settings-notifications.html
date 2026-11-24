@@ -119,6 +119,9 @@
                 pushEnabled: 'Push activado en este dispositivo.',
                 pushDenied: 'No diste permiso para las notificaciones. Puedes activarlo en los ajustes del navegador.',
                 pushFailed: 'No se pudo activar el push. Inténtalo de nuevo.',
+                pushNoConfig: 'No se pudo cargar la configuración de Firebase. Revisa tu conexión e inténtalo de nuevo.',
+                pushSdk: 'No se pudo cargar el servicio de notificaciones. Revisa tu conexión e inténtalo de nuevo.',
+                pushToken: 'El teléfono no pudo generar el código de las notificaciones. Inténtalo de nuevo.',
                 pushUnsupported: 'Este navegador no soporta notificaciones push.',
                 installTitle: 'Instalar la app', installDesc: 'Pon GOAT Style Salon en tu pantalla de inicio para no perder la página. Se abre como app, sin la barra del navegador.',
                 installBtn: 'Instalar app', installBtnIOS: 'Cómo instalar en iPhone', installNote: 'El navegador siempre pide tu confirmación; la app no se instala sola.',
@@ -148,6 +151,9 @@
                 pushEnabled: 'Push is on for this device.',
                 pushDenied: 'You did not grant notification permission. You can turn it on in the browser settings.',
                 pushFailed: 'Push could not be turned on. Try again.',
+                pushNoConfig: 'The Firebase configuration could not be loaded. Check your connection and try again.',
+                pushSdk: 'The notification service could not be loaded. Check your connection and try again.',
+                pushToken: 'Your phone could not generate the notification token. Try again.',
                 pushUnsupported: 'This browser does not support push notifications.',
                 installTitle: 'Install the app', installDesc: 'Add GOAT Style Salon to your home screen so you never lose the site. It opens as an app, without the browser bar.',
                 installBtn: 'Install app', installBtnIOS: 'How to install on iPhone', installNote: 'The browser always asks for your confirmation; the app never installs by itself.',
@@ -260,7 +266,17 @@
                     pushStatus.innerHTML = '<strong>' + t('pushEnabled') + '</strong>';
                 } else {
                     pushToggle.checked = false;
-                    pushStatus.textContent = t(result.reason === 'denied' ? 'pushDenied' : 'pushFailed');
+                    // Cada paso que falla tiene su propio mensaje, para que se
+                    // sepa si falló la configuración, la carga del servicio o
+                    // la generación del código en el teléfono.
+                    const pushErrorKey = {
+                        denied: 'pushDenied',
+                        'no-config': 'pushNoConfig',
+                        sdk: 'pushSdk',
+                        token: 'pushToken',
+                        unsupported: 'pushUnsupported'
+                    }[result.reason] || 'pushFailed';
+                    pushStatus.textContent = t(pushErrorKey);
                 }
             } else if (!wantPush && wasEnabled) {
                 await N().disablePush();
