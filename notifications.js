@@ -155,6 +155,17 @@
     function showBrowserNotification(title, body) {
         try {
             if (!('Notification' in window) || Notification.permission !== 'granted') return;
+            // En iPhone (PWA) `new Notification()` no muestra nada con la app
+            // abierta: la notificación debe salir por el service worker.
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.ready.then(registration => {
+                    try { registration.showNotification(title, { body, icon: LOGO }); }
+                    catch (_) { try { new Notification(title, { body, icon: LOGO }); } catch (_) { /* la campana sigue funcionando */ } }
+                }).catch(() => {
+                    try { new Notification(title, { body, icon: LOGO }); } catch (_) { /* la campana sigue funcionando */ }
+                });
+                return;
+            }
             new Notification(title, { body, icon: LOGO });
         } catch (_) { /* la campana de la página sigue funcionando */ }
     }
@@ -342,22 +353,44 @@
         if (!token) return { ok: false, reason: 'token' };
         let id = null;
         try { id = localStorage.getItem(TOKEN_KEY); } catch (_) { /* almacenamiento bloqueado */ }
-        window.GabyData.updateState(state => {
-            state.pushTokens = state.pushTokens || [];
-            const existing = (id && state.pushTokens.find(t => t.id === id)) || state.pushTokens.find(t => t.endpoint === token);
-            const row = {
-                id: existing ? existing.id : window.GabyData.makeId('tok'),
-                endpoint: token,
-                keys: { p256dh: '', auth: '' },
-                appointmentCodes: myCodes(),
-                barberId: isStaff() ? myBarberId() : null,
-                userAgent: navigator.userAgent || '',
-                createdAt: new Date().toISOString()
-            };
-            if (existing) Object.assign(existing, row);
-            else state.pushTokens.push(row);
-            id = row.id;
-        });
+        const storedId = id;
+        // El token se guarda en el servidor con la RPC register_push_token: une
+        // los códigos de cita por endpoint y borra duplicados. El sync normal
+        // no sirve aquí: pull() vacía pushTokens para el visitante y el
+        // UPDATE directo no actualiza la fila.
+        let rpcId = null;
+        if (window.GabyCloud && typeof window.GabyCloud.registerPushToken === 'function') {
+            rpcId = await window.GabyCloud.registerPushToken(token, myCodes(), navigator.userAgent || '');
+        }
+        if (rpcId) {
+            id = rpcId;
+        } else if (!storedId) {
+            // Primera activación sin RPC (la migración aún no está aplicada o no
+            // hay Supabase): el insert directo es la vía que funcionaba antes.
+            // Solo se usa sin id guardado: con un id guardado, insertar otra
+            // fila con el mismo endpoint duplicaría el envío.
+            window.GabyData.updateState(state => {
+                state.pushTokens = state.pushTokens || [];
+                const existing = state.pushTokens.find(t => t.endpoint === token);
+                const row = {
+                    id: existing ? existing.id : window.GabyData.makeId('tok'),
+                    endpoint: token,
+                    keys: { p256dh: '', auth: '' },
+                    appointmentCodes: myCodes(),
+                    barberId: isStaff() ? myBarberId() : null,
+                    userAgent: navigator.userAgent || '',
+                    createdAt: new Date().toISOString()
+                };
+                if (existing) Object.assign(existing, row);
+                else state.pushTokens.push(row);
+                id = row.id;
+            });
+        } else {
+            // Ya había un token registrado y la RPC no pudo renovarlo: no se
+            // inventa otra fila (duplicaría el push) y se dice que falló, para
+            // que Ajustes lo muestre y el usuario pueda reintentarlo.
+            return { ok: false, reason: 'token' };
+        }
         try { if (id) localStorage.setItem(TOKEN_KEY, id); } catch (_) { /* almacenamiento bloqueado */ }
         return { ok: true };
     }
@@ -373,6 +406,46 @@
             state.pushTokens = (state.pushTokens || []).filter(t => t.id !== id);
         });
         return { ok: true };
+    }
+
+    // Renueva el token push de este dispositivo y sus códigos de cita en el
+    // servidor (RPC register_push_token). Se llama al abrir la app y después
+    // de reservar: así una cita nueva entra en el token sin esperar a que el
+    // usuario vuelva a activar el push. Nunca lanza ni bloquea la carga.
+    async function refreshPushToken() {
+        try {
+            if (!prefs().push) return false;
+            let tokenId = null;
+            try { tokenId = localStorage.getItem(TOKEN_KEY); } catch (_) { /* almacenamiento bloqueado */ }
+            if (!tokenId) return false;
+            const messaging = await getMessaging();
+            if (!messaging) return false;
+            const config = firebaseConfig();
+            let registration = null;
+            try { registration = await navigator.serviceWorker.getRegistration(); } catch (_) { /* sin registro */ }
+            if (!registration) return false;
+            let token = null;
+            try { token = await messaging.getToken({ vapidKey: config.vapidKey, serviceWorkerRegistration: registration }); } catch (_) { token = null; }
+            if (!token) {
+                // El teléfono ya no puede generar un token válido: se borra el
+                // id local para que Ajustes muestre el push apagado y el
+                // usuario pueda volver a activarlo.
+                try { localStorage.removeItem(TOKEN_KEY); } catch (_) { /* almacenamiento bloqueado */ }
+                return false;
+            }
+            let id = null;
+            if (window.GabyCloud && typeof window.GabyCloud.registerPushToken === 'function') {
+                id = await window.GabyCloud.registerPushToken(token, myCodes(), navigator.userAgent || '');
+            }
+            if (!id) {
+                // La RPC no pudo guardar el token: se borra el id local para
+                // que Ajustes muestre el push apagado y se pueda reintentar.
+                try { localStorage.removeItem(TOKEN_KEY); } catch (_) { /* almacenamiento bloqueado */ }
+                return false;
+            }
+            try { localStorage.setItem(TOKEN_KEY, id); } catch (_) { /* almacenamiento bloqueado */ }
+            return true;
+        } catch (_) { return false; }
     }
 
     // -------------------------------------------------------------------------
@@ -431,7 +504,9 @@
         window.addEventListener('gabydatachange', updateBell);
         window.addEventListener('load', updateBell);
         window.addEventListener('gabycloudready', () => { updateBell(); checkReminders(); });
-        if (prefs().push) getMessaging().catch(() => {});
+        // getMessaging() registra el manejador de mensajes en primer plano;
+        // refreshPushToken() renueva el token y sus códigos en el servidor.
+        if (prefs().push) { getMessaging().catch(() => {}); refreshPushToken(); }
     }
 
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
@@ -439,7 +514,7 @@
 
     window.GabyNotifications = {
         myCodes, visibleNotifications, unreadCount, updateBell, markRead, markAllRead,
-        checkReminders, pushStatus, enablePush, disablePush,
+        checkReminders, pushStatus, enablePush, disablePush, refreshPushToken,
         installApp, canInstall, isIOS, isIOSSafari, isStandalone, prefs
     };
 })();

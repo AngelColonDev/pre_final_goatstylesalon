@@ -4,7 +4,7 @@
 //   cerrada y abre notificaciones.html al tocar el aviso.
 // - Las páginas HTML se piden siempre a la red primero (para no servir una versión
 //   vieja después de publicar cambios); los archivos estáticos salen de la caché.
-const CACHE = 'goat-style-v2';
+const CACHE = 'goat-style-v3';
 const CORE = ['index.html', 'booking.html', 'services.html', 'barbers.html', 'news.html', 'settings.html', 'notificaciones.html', 'manifest.webmanifest', 'shared-theme.css', 'shared-data.js', 'site-chrome.js'];
 const LOGO = 'https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png';
 
@@ -72,14 +72,19 @@ try {
         firebase.initializeApp(self.GABY_FIREBASE);
         const messaging = firebase.messaging();
         messaging.onBackgroundMessage(payload => {
-            const data = payload.notification || {};
+            // Firebase ya muestra el aviso cuando el mensaje trae `notification`
+            // (el propio SDK lo muestra antes de llamar a este manejador);
+            // mostrarlo aquí también lo duplicaría. Solo se muestra algo para
+            // mensajes de solo datos, que el SDK no muestra por sí mismo.
+            if (payload && payload.notification) return;
+            const data = (payload && payload.data) || {};
             const title = data.title || 'GOAT Style Salon';
             const options = {
                 body: data.body || '',
                 icon: LOGO,
                 badge: LOGO,
-                tag: (payload.data && payload.data.tag) || 'goat-style',
-                data: { url: (payload.data && payload.data.url) || 'notificaciones.html' }
+                tag: data.tag || 'goat-style',
+                data: { url: data.url || 'notificaciones.html' }
             };
             return self.registration.showNotification(title, options);
         });
