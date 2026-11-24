@@ -164,6 +164,7 @@ alter table public.appointments add column if not exists canceled_by text not nu
 alter table public.appointments add column if not exists cancel_reason text not null default '';
 alter table public.appointments add column if not exists late_cancellation boolean not null default false;
 alter table public.appointments add column if not exists reminder_sent_at timestamptz;
+alter table public.appointments add column if not exists reminder_1h_sent_at timestamptz;
 alter table public.appointments add column if not exists attendance text;
 -- Foto de referencia opcional (JPEG reducido en el navegador) y opción "No sé cómo se llama el recorte".
 alter table public.appointments add column if not exists reference_photo text not null default '' check (length(reference_photo) <= 400000);

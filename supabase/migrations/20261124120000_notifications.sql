@@ -110,4 +110,5 @@ $$;
 revoke all on function public.my_notifications(text[]) from public;
 grant execute on function public.my_notifications(text[]) to anon, authenticated;
 
+alter table public.appointments add column if not exists reminder_1h_sent_at timestamptz;
 commit;
