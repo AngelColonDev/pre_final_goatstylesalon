@@ -306,12 +306,25 @@
         const client = await getClient();
         if (!client) return;
         const failures = [];
+        // Avisos de cliente recién insertados en este push: cuando el guardado
+        // termina bien se les envía el push al teléfono (ver abajo).
+        const newClientNotices = [];
         for (const [collection, map] of Object.entries(tables)) {
             const { inserts, updates, deletes } = diff(map, previous[collection], next[collection]);
             // insert para lo nuevo (algunas tablas solo permiten crear) y update fila por fila para lo cambiado.
             if (inserts.length) {
                 const { error } = await client.from(map.table).insert(inserts);
                 if (error) failures.push(error);
+                else if (collection === 'notifications') {
+                    // Solo avisos de cliente (los del personal no van al teléfono
+                    // del cliente) y nunca los manuales: el compositor del panel
+                    // ya les envía el push él mismo después de guardar
+                    // (staff/admin-pro.js), y si lo hiciéramos aquí también el
+                    // cliente recibiría el aviso dos veces.
+                    inserts
+                        .filter(row => row.audience === 'client' && row.type !== 'manual')
+                        .forEach(row => newClientNotices.push(row.id));
+                }
             }
             for (const row of updates) {
                 const { error } = await client.from(map.table).update(row).eq(map.key, row[map.key]);
@@ -335,6 +348,19 @@
         if (failures.length) {
             console.error('[GabyCloud] Error al guardar en Supabase:', failures);
             raise(failures[0]);
+        }
+        // Push al teléfono (best-effort): el aviso ya está guardado y visible
+        // en la app aunque el push falle o no haya dispositivo registrado.
+        // No se espera la respuesta: no debe retrasar ni romper el guardado.
+        // Solo se invoca cuando todo el guardado terminó bien, para no avisar
+        // de un aviso que se deshizo por un error en otra tabla.
+        if (newClientNotices.length && client.functions && typeof client.functions.invoke === 'function') {
+            for (const id of newClientNotices) {
+                try {
+                    const sent = client.functions.invoke('send-push', { body: { mode: 'send', notificationId: id } });
+                    if (sent && typeof sent.catch === 'function') sent.catch(() => { /* el aviso en la app ya se envió */ });
+                } catch (_) { /* el aviso en la app ya se envió */ }
+            }
         }
     }
 

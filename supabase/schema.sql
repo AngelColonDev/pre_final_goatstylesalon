@@ -843,15 +843,20 @@ $$;
 revoke all on function public.appointment_status(text) from public;
 grant execute on function public.appointment_status(text) to anon, authenticated;
 
--- Sin sesión del personal, un aviso solo se puede marcar como leído (read_at).
+-- Sin sesión del personal, un aviso solo puede cambiar su contenido (título,
+-- cuerpo, tipo, leído): los datos que lo identifican no se pueden tocar.
 create or replace function public.guard_notification_update() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
     if public.is_staff() then
         return new;
     end if;
-    if (to_jsonb(new) - 'read_at') is distinct from (to_jsonb(old) - 'read_at') then
-        raise exception 'Solo puedes marcar tus avisos como leídos.';
+    if new.id is distinct from old.id
+        or new.audience is distinct from old.audience
+        or new.appointment_code is distinct from old.appointment_code
+        or new.barber_id is distinct from old.barber_id
+        or new.client_id is distinct from old.client_id then
+        raise exception 'No puedes cambiar a quién pertenece este aviso.';
     end if;
     return new;
 end;
