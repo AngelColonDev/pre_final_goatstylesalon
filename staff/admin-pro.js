@@ -15,7 +15,8 @@
         calView: 'week', calDate: null, calBarber: 'all',
         apptQuick: 'today', apptBarber: 'all', apptService: 'all', apptStatus: 'all', apptSearch: '',
         clientSearch: '', clientId: null, scheduleBarber: null, reportRange: '30', reportBarber: 'all', reportFrom: '', reportTo: '',
-        reviewFilter: 'all', search: ''
+        reviewFilter: 'all', search: '',
+        notifyTitle: '', notifyBody: '', notifyMode: 'one', notifyCode: '', notifySelect: ''
     };
 
     // ---------------------------------------------------------------------
@@ -1171,11 +1172,130 @@
         return db.notifications.filter(n => n.audience === 'staff' && (ctx.isAdmin() || !n.barberId || n.barberId === ctx.config.role));
     }
 
+    // Citas próximas que el remitente puede avisar: el admin ve todas; cada
+    // barbero solo las suyas. Activas (PENDIENTE/APROBADA) y aún no pasadas.
+    function upcomingAppointments(ctx) {
+        const now = Date.now();
+        return scopedAppointments(ctx)
+            .filter(a => B().ACTIVE.includes(a.status) && a.dateTime && (B().parseLocal(a.dateTime) || new Date(0)).getTime() >= now - 5 * 60000)
+            .sort((x, y) => String(x.dateTime).localeCompare(String(y.dateTime)));
+    }
+
+    // Avisos enviados a clientes (audience 'client'), los más recientes primero.
+    function sentClientNotifications(ctx) {
+        const db = ctx.getDb();
+        return (db.notifications || [])
+            .filter(n => n.audience === 'client' && (ctx.isAdmin() || !n.barberId || n.barberId === ctx.config.role))
+            .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    }
+
+    function appointmentLabel(ctx, a) {
+        return `${a.code} · ${a.client || 'Cliente'} · ${a.service || ''} · ${fmtDateTime(a)}`;
+    }
+
+    // Envía el aviso del compositor: una fila por cita destinataria (audience
+    // 'client', con su código de cita). Se guarda por el flujo normal de commit,
+    // así la inserción pasa la política RLS del personal (is_staff()).
+    async function sendManualNotification(ctx) {
+        const title = String(ui.notifyTitle || '').trim();
+        const body = String(ui.notifyBody || '').trim();
+        if (!title || !body) {
+            window.GabyData.toast('Escribe el título y el mensaje del aviso.', 'error');
+            return;
+        }
+        let targets = [];
+        if (ui.notifyMode === 'all') {
+            targets = upcomingAppointments(ctx);
+        } else {
+            const typed = String(ui.notifyCode || '').trim().toUpperCase();
+            const code = typed || String(ui.notifySelect || '').trim().toUpperCase();
+            if (!/^GS-\d{6}$/.test(code)) {
+                window.GabyData.toast('Elige una cita o escribe un código válido (GS-123456).', 'error');
+                return;
+            }
+            const found = ctx.getDb().appointments.find(a => a.code === code);
+            if (!found) {
+                window.GabyData.toast('No hay ninguna cita con ese código.', 'error');
+                return;
+            }
+            if (!ctx.isAdmin() && found.barber !== ctx.config.role) {
+                window.GabyData.toast('Esa cita no es tuya.', 'error');
+                return;
+            }
+            const when = found.dateTime ? (B().parseLocal(found.dateTime) || new Date(0)).getTime() : 0;
+            if (!B().ACTIVE.includes(found.status) || when < Date.now() - 5 * 60000) {
+                window.GabyData.toast('Esa cita ya pasó o no está activa.', 'error');
+                return;
+            }
+            targets = [found];
+        }
+        if (!targets.length) {
+            window.GabyData.toast('No hay citas próximas para avisar.', 'error');
+            return;
+        }
+        const now = new Date().toISOString();
+        const rows = targets.map(a => ({
+            id: window.GabyData.makeId('ntf'), audience: 'client', barberId: a.barber || null,
+            clientId: a.clientId || null, type: 'manual', title, body,
+            appointmentCode: a.code, createdAt: now, readAt: null
+        }));
+        const saved = await ctx.commit(state => {
+            state.notifications = state.notifications || [];
+            rows.forEach(row => state.notifications.unshift(row));
+        }, { success: `Aviso enviado a ${rows.length} cliente${rows.length === 1 ? '' : 's'}.`, error: 'No se pudo enviar el aviso. Intenta de nuevo.' });
+        if (!saved) return;
+        ui.notifyTitle = ''; ui.notifyBody = ''; ui.notifyCode = ''; ui.notifySelect = '';
+        // Push al teléfono (best-effort): el aviso ya está guardado y visible en
+        // la app del cliente aunque el push falle o no tenga dispositivo registrado.
+        try {
+            const client = await window.GabyCloud?.getClient?.();
+            if (client) {
+                for (const row of rows) {
+                    try { await client.functions.invoke('send-push', { body: { mode: 'send', notificationId: row.id } }); } catch (_) { /* el aviso en la app ya se envió */ }
+                }
+            }
+        } catch (_) { /* el aviso en la app ya se envió */ }
+        ctx.rerender();
+    }
+
     function renderNotifications(ctx) {
         const list = staffNotifications(ctx);
         const key = `staff:${ctx.config.role}`;
+        const upcoming = upcomingAppointments(ctx);
+        const sent = sentClientNotifications(ctx);
+        const db = ctx.getDb();
+        const allLabel = ctx.isAdmin() ? 'Todas las citas próximas' : 'Todas mis citas próximas';
         content().innerHTML = `
             <section class="card">
+                <div class="section-title">Enviar aviso a clientes</div>
+                <p class="item-meta">El aviso aparece en la app del cliente y, si tiene las notificaciones activadas, también le llega al teléfono.</p>
+                <form id="notify-form" class="form-grid" style="margin-top:12px;">
+                    <div class="form-group"><label class="form-label" for="nt-title">Título</label><input class="form-input" id="nt-title" maxlength="80" required value="${esc(ui.notifyTitle)}"></div>
+                    <div class="form-group full"><label class="form-label" for="nt-body">Mensaje</label><textarea class="form-input" id="nt-body" rows="3" required>${esc(ui.notifyBody)}</textarea></div>
+                    <div class="form-group full">
+                        <span class="form-label">Destinatarios</span>
+                        <label class="policy-check"><input type="radio" name="nt-mode" value="one" ${ui.notifyMode !== 'all' ? 'checked' : ''}> Una cita</label>
+                        <label class="policy-check"><input type="radio" name="nt-mode" value="all" ${ui.notifyMode === 'all' ? 'checked' : ''}> ${esc(allLabel)} (${upcoming.length})</label>
+                    </div>
+                    <div class="form-group full" id="nt-one-fields" ${ui.notifyMode === 'all' ? 'hidden' : ''}>
+                        <label class="form-label" for="nt-select">Cita</label>
+                        <select class="form-input" id="nt-select">
+                            ${upcoming.length ? upcoming.map(a => `<option value="${esc(a.code)}" ${ui.notifySelect === a.code ? 'selected' : ''}>${esc(appointmentLabel(ctx, a))}</option>`).join('') : '<option value="" disabled>Sin citas próximas</option>'}
+                        </select>
+                        <label class="form-label" for="nt-code" style="margin-top:8px;">O escribe el código de la cita (si lo escribes, se usa este)</label>
+                        <input class="form-input" id="nt-code" placeholder="GS-123456" maxlength="9" value="${esc(ui.notifyCode)}">
+                    </div>
+                    <div class="form-group full"><button class="btn btn-primary" type="submit">Enviar aviso</button></div>
+                </form>
+            </section>
+            <section class="card" style="margin-top:18px;">
+                <div class="section-title">Avisos enviados a clientes</div>
+                <div class="list-grid">${sent.slice(0, 50).map(n => {
+                    const appt = n.appointmentCode ? db.appointments.find(a => a.code === n.appointmentCode) : null;
+                    return `<div class="ap-notif ${n.readAt ? '' : 'unread'}"><strong>${esc(n.title)}</strong><span>${esc(n.body)}</span><span class="item-meta">${fmtStamp(n.createdAt)}${n.appointmentCode ? ` · ${esc(n.appointmentCode)}${appt ? ` · ${esc(appt.client || '')}` : ''} · <button class="action-btn approve" data-open="${esc(n.appointmentCode)}">Ver cita</button>` : ''} · ${n.readAt ? 'Leído' : 'Sin leer'}</span></div>`;
+                }).join('') || '<div class="empty">Todavía no has enviado avisos a clientes.</div>'}</div>
+            </section>
+            <section class="card" style="margin-top:18px;">
                 <div class="section-title-row"><div class="section-title">Notificaciones</div><button class="btn btn-ghost" type="button" data-read-all>Marcar todas como leídas</button></div>
                 <div class="list-grid">${list.slice(0, 100).map(n => {
                     const read = (n.readBy || []).includes(key);
@@ -1184,6 +1304,23 @@
             </section>
         `;
         bindCommon(ctx);
+        const form = content().querySelector('#notify-form');
+        form.querySelector('#nt-title').addEventListener('input', e => { ui.notifyTitle = e.target.value; });
+        form.querySelector('#nt-body').addEventListener('input', e => { ui.notifyBody = e.target.value; });
+        form.querySelector('#nt-code').addEventListener('input', e => { ui.notifyCode = e.target.value; });
+        form.querySelector('#nt-select').addEventListener('change', e => { ui.notifySelect = e.target.value; });
+        form.querySelectorAll('[name="nt-mode"]').forEach(radio => radio.addEventListener('change', () => {
+            ui.notifyMode = form.querySelector('[name="nt-mode"]:checked').value;
+            form.querySelector('#nt-one-fields').hidden = ui.notifyMode === 'all';
+        }));
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            ui.notifyTitle = form.querySelector('#nt-title').value;
+            ui.notifyBody = form.querySelector('#nt-body').value;
+            ui.notifyCode = form.querySelector('#nt-code').value;
+            ui.notifySelect = form.querySelector('#nt-select').value;
+            sendManualNotification(ctx);
+        });
         content().querySelector('[data-read-all]').addEventListener('click', () => ctx.commit(s => {
             s.notifications.forEach(n => { if (n.audience === 'staff') { n.readBy = n.readBy || []; if (!n.readBy.includes(key)) n.readBy.push(key); } });
         }, { success: 'Notificaciones marcadas como leídas.', error: 'No se pudo actualizar.' }));

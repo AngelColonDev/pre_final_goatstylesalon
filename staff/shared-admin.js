@@ -706,13 +706,13 @@
 
     // Redibuja todo (por ejemplo, al guardar o al llegar datos nuevos) sin mover la pagina ni el menu.
     function refreshPanel() {
-        const navScroll = app.querySelector('.sidebar')?.scrollTop || 0;
+        const navScroll = app.querySelector('.side-nav')?.scrollTop || 0;
         const pageScroll = window.scrollY;
         const navOpen = document.body.classList.contains('nav-open');
         renderShell();
         renderSection();
-        const sidebar = app.querySelector('.sidebar');
-        if (sidebar) sidebar.scrollTop = navScroll;
+        const sideNav = app.querySelector('.side-nav');
+        if (sideNav) sideNav.scrollTop = navScroll;
         if (navOpen) setNavOpen(true);
         window.scrollTo(0, pageScroll);
     }
