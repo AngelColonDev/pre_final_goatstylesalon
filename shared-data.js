@@ -52,6 +52,14 @@
                 frequentClientVisits: 5,
                 noShowRules: { enabled: true, warnAt: 1, alertAt: 2, blockAt: 3 }
             },
+            // Preferencias de avisos del cliente (notificaciones.html y settings-notifications.html).
+            notifications: {
+                reminders: true,       // recordatorios 24 h y 1 h antes de la cita
+                bookings: true,        // confirmación, aprobación y cambios de mis citas
+                cancellations: true,   // cancelaciones de mis citas
+                messages: true,        // mensajes de la barbería
+                push: false            // notificaciones push (requiere Firebase configurado)
+            },
             serviceCategories: ['Cortes', 'Barba', 'Combos', 'Diseños', 'Tratamientos', 'Faciales', 'Color', 'VIP'],
             // Modo mantenimiento: lo controla Angel desde su panel privado (ops/).
             maintenance: {
@@ -237,6 +245,7 @@
         // Sistema de citas (booking-engine.js)
         timeBlocks: [],
         notifications: [],
+        pushTokens: [],
         inventory: [],
         clientNotes: [],
         clientBlocks: [],
@@ -260,14 +269,15 @@
             RETIRED_CLIENT_FIELDS.forEach(field => { delete copy[field]; });
             return copy;
         });
-        state.notifications = (state.notifications || []).filter(item => item.audience === 'staff');
+        // Los avisos de clientes se conservan: van por código de cita, no por cuenta
+        // (las cuentas de cliente ya no existen).
         state.security.locks = (state.security.locks || []).filter(lock => lock.accountType !== 'client');
         Object.keys(state.security.attempts || {}).forEach(email => {
             if (state.security.attempts[email]?.type !== 'staff') delete state.security.attempts[email];
         });
         if (state.settings.maintenance?.sections) delete state.settings.maintenance.sections.cuentas;
-        // Por ahora la página no usa notificaciones ni permisos del dispositivo.
-        delete state.settings.notifications;
+        // Los ajustes de notificaciones del cliente se conservan (settings-notifications.html).
+        // Los permisos del dispositivo siguen sin usarse.
         delete state.settings.permissions;
         return state;
     }
@@ -420,6 +430,10 @@
             ...defaultState.settings.booking,
             ...(state?.settings?.booking || {}),
             noShowRules: { ...defaultState.settings.booking.noShowRules, ...(state?.settings?.booking?.noShowRules || {}) }
+        };
+        merged.settings.notifications = {
+            ...defaultState.settings.notifications,
+            ...(state?.settings?.notifications || {})
         };
         // Migracion: las barberias que tenian confirmacion automatica pasan a aprobacion del barbero (una sola vez).
         if (!state?.settings?.booking?.approvalFlowVersion) {

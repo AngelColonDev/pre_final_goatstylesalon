@@ -30,6 +30,47 @@ Quién puede ver y hacer qué (lo controla la RLS, no el navegador):
 5. **Llena `supabase-config.js`** con Project Settings → API: `url` = Project URL y `anonKey` = la anon/publishable key. **Nunca** pongas la `service_role` key en el sitio.
 6. **Prueba:** reserva como visitante escribiendo un nombre, entra al panel de Darialex con su cuenta, aprueba la cita, y comprueba desde **otro teléfono** que el código de la cita aparece como APROBADA. Este es justo el problema que resuelve Supabase: hoy cada dispositivo tiene sus propios datos.
 
+## Avisos y notificaciones (Firebase + Supabase)
+
+El centro de avisos (`notificaciones.html`, campana en el header) funciona **sin
+configurar nada**: los avisos se guardan en el navegador. Con Supabase se
+sincronizan, y con Firebase llega el push con la página cerrada.
+
+| Pieza | Para qué sirve |
+|---|---|
+| `notifications.js` | Campana con contador, recordatorios 24 h y 1 h (barrido al abrir la página y cada 15 minutos), y registro del push. |
+| `notificaciones.html` | Centro de avisos del cliente (filtros Todas/Sin leer, marcar leídas). |
+| `settings-notifications.html` | Interruptores de avisos, push y botón **Instalar app**. |
+| `firebase-config.js` | Configuración web de Firebase (vacía por ahora). **Nunca** la clave del servidor de FCM. |
+| `sw.js` | Service worker: caché + receptor del push con la página cerrada. |
+| `manifest.webmanifest` | Nombre, colores negro/dorado e iconos para instalar la app. |
+| `supabase/migrations/20261124120000_notifications.sql` | Tablas `notifications` y `push_tokens`, RLS y la función `my_notifications()`. |
+| `supabase/functions/send-push/index.ts` | Edge Function que envía el push con FCM (también hace el barrido de recordatorios con la página cerrada). |
+
+### Pasos para el push (Firebase)
+
+1. **Crea el proyecto** en https://console.firebase.google.com → Add project.
+2. **Registra la app web:** Project settings → Your apps → Web app (`</>`). Copia la configuración en `firebase-config.js` (`apiKey`, `authDomain`, `projectId`, `messagingSenderId`, `appId`).
+3. **Clave VAPID:** Project settings → Cloud Messaging → Web Push certificates → Generate key pair. Pégala en `vapidKey` de `firebase-config.js`.
+4. **Cuenta de servicio para el envío:** Project settings → Service accounts → Generate new private key. Guarda ese JSON como secreto `FCM_SERVICE_ACCOUNT_JSON` de la Edge Function (abajo). **Nunca** va en la página.
+5. **Prueba:** abre `settings-notifications.html`, activa el push, acepta el permiso, reserva una cita y comprueba que el aviso llega a la campana. El push con la página cerrada solo llega cuando la Edge Function está desplegada.
+
+### Pasos para la Edge Function (recordatorios con la página cerrada)
+
+1. Ejecuta la migración `20261124120000_notifications.sql` en SQL Editor (o vuelve a ejecutar `schema.sql`, que ya trae las mismas tablas).
+2. Despliega la función (con Supabase CLI, desde la raíz del repo):
+   `supabase functions deploy send-push --no-verify-jwt`
+3. Pon los secretos:
+   `supabase secrets set FCM_SERVICE_ACCOUNT_JSON='<contenido del JSON de la cuenta de servicio>'`
+   `supabase secrets set SUPABASE_URL='https://<proyecto>.supabase.co' SUPABASE_SERVICE_ROLE_KEY='<service_role key>'`
+4. **Barrido cada 15 minutos** (pg_cron, Dashboard → Database → Cron Jobs):
+   `select net.http_post(url := 'https://<proyecto>.supabase.co/functions/v1/send-push', headers := '{"Content-Type": "application/json", "Authorization": "Bearer <service_role key>"}'::jsonb, body := '{"mode": "reminders"}'::jsonb);`
+5. El personal también puede probar el envío directo con `{"mode": "send", "notificationId": "ntf-..."}`.
+
+### Instalar la app
+
+El botón **Instalar app** (en `settings-notifications.html`) usa el aviso del sistema en Android/Chrome y enseña los pasos (Compartir → Añadir a pantalla de inicio) en iPhone. Ningún navegador permite instalar en silencio: siempre pide la confirmación del usuario.
+
 ## Después de conectar
 
 - Fotos de referencia de las citas: hoy se guardan como texto base64 dentro de la cita. Para producción conviene subirlas a Supabase Storage y guardar solo la URL.

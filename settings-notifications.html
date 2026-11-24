@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avisos y notificaciones | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        :root { --bg: var(--theme-bg); --panel: var(--theme-panel); --text: var(--theme-text); --muted: var(--theme-muted); --gold: var(--theme-gold); --border: var(--theme-line); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Inter',sans-serif; background:radial-gradient(circle at top right, rgba(212,175,55,.12), transparent 22%), linear-gradient(180deg,#090909 0%,#040404 100%); color:var(--text); padding:0 0 92px; min-height:100vh; }
+        body.light-mode { background:var(--bg); }
+        a { color:inherit; text-decoration:none; }
+        h1,h2 { font-family:'Cinzel',serif; }
+        .eyebrow { display:block; color:var(--gold); font-size:.78rem; letter-spacing:.2em; text-transform:uppercase; margin:1rem 0 .6rem; }
+        .wrap h1 { font-size:clamp(2rem,5vw,2.8rem); line-height:1.1; }
+        .intro { color:var(--muted); line-height:1.7; margin-top:.7rem; }
+        .wrap { max-width:820px; margin:0 auto; padding:1.2rem 1rem 3rem; }
+        .card { background:linear-gradient(180deg, rgba(18,18,18,.98), rgba(11,11,11,.98)); border:1px solid var(--border); border-radius:20px; padding:1.2rem; box-shadow:0 12px 28px rgba(0,0,0,.24); margin-top:1rem; }
+        body.light-mode .card { background:var(--panel); box-shadow:0 10px 24px rgba(16,24,40,.08); }
+        .card h2 { font-size:1.1rem; margin-bottom:.4rem; }
+        .card > p { color:var(--muted); font-size:.9rem; line-height:1.6; }
+        .row { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.95rem 0; }
+        .row + .row { border-top:1px solid var(--border); }
+        label { font-weight:700; display:block; }
+        small { display:block; color:var(--muted); margin-top:.25rem; line-height:1.5; font-weight:400; }
+        .switch { position:relative; width:52px; height:30px; flex-shrink:0; appearance:none; -webkit-appearance:none; background:rgba(255,255,255,.14); border-radius:999px; cursor:pointer; border:1px solid var(--border); transition:background .2s; margin:0; }
+        .switch:checked { background:linear-gradient(135deg,#f6dfa0 0%,#d4af37 62%,#87640f 100%); }
+        .switch::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition:transform .2s; }
+        .switch:checked::after { transform:translateX(22px); }
+        .switch:disabled { opacity:.45; cursor:not-allowed; }
+        .btn { width:100%; margin-top:1rem; border:none; border-radius:16px; padding:1rem; background:linear-gradient(135deg,#f6dfa0 0%,#d4af37 62%,#87640f 100%); color:#111; font:inherit; font-weight:800; cursor:pointer; }
+        .btn:disabled { opacity:.5; cursor:default; }
+        .btn-ghost { width:100%; margin-top:.7rem; border:1px solid var(--border); border-radius:16px; padding:1rem; background:transparent; color:var(--text); font:inherit; font-weight:700; cursor:pointer; }
+        .status { color:var(--muted); font-size:.88rem; line-height:1.6; margin-top:.8rem; }
+        .status strong { color:var(--gold); }
+        .guide { margin:.9rem 0 0 1.2rem; color:var(--muted); font-size:.9rem; line-height:1.8; }
+        .guide li { margin-bottom:.3rem; }
+        .link-row { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.95rem 0; color:var(--text); font-weight:700; }
+        .link-row i { color:#9ca3af; }
+        .mobile-bottom-nav{display:none}.mobile-bottom-nav a,.mobile-bottom-nav button{background:transparent;border:none;color:#d8d2c3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;font-size:.68rem;font-weight:600;letter-spacing:.02em;min-width:0;cursor:pointer}.mobile-bottom-nav i{font-size:1.05rem;color:#d4af37}.mobile-bottom-nav .active{color:#d4af37}
+        body.light-mode .mobile-bottom-nav{background:rgba(255,255,255,.96);border-top-color:rgba(0,0,0,.08);box-shadow:0 -12px 30px rgba(0,0,0,.12)}body.light-mode .mobile-bottom-nav a{color:#6b7280}
+        @media (max-width: 968px){body{padding-bottom:92px}.mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:2500;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.25rem;padding:.8rem .7rem calc(.8rem + env(safe-area-inset-bottom));background:rgba(8,8,8,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(212,175,55,.15);box-shadow:0 -12px 30px rgba(0,0,0,.3)}}@media(min-width:969px){body{padding-bottom:0}.mobile-bottom-nav{display:none}}
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <span class="eyebrow">Goat Style Salon</span>
+        <h1 data-i18n="title">Avisos y notificaciones</h1>
+        <p class="intro" data-i18n="intro">Escoge qué avisos quieres recibir y pon la página como app en tu teléfono para no perderla.</p>
+
+        <div class="card">
+            <h2 data-i18n="alertsTitle">Avisos en la página</h2>
+            <p data-i18n="alertsDesc">Siempre se guardan en la campana, aunque apagues todo lo demás.</p>
+            <div class="row"><div><label for="reminders" data-i18n="remindersTitle">Recordatorios de cita</label><small data-i18n="remindersDesc">Un aviso 24 horas antes y otro 1 hora antes de tu cita.</small></div><input class="switch" type="checkbox" id="reminders" role="switch"></div>
+            <div class="row"><div><label for="bookings" data-i18n="bookingsTitle">Avisos de reserva</label><small data-i18n="bookingsDesc">Cuando se confirma tu cita, se aprueba o cambia.</small></div><input class="switch" type="checkbox" id="bookings" role="switch"></div>
+            <div class="row"><div><label for="cancellations" data-i18n="cancellationsTitle">Cancelaciones</label><small data-i18n="cancellationsDesc">Si la barbería cancela o reprograma tu cita.</small></div><input class="switch" type="checkbox" id="cancellations" role="switch"></div>
+            <div class="row"><div><label for="messages" data-i18n="messagesTitle">Mensajes de la barbería</label><small data-i18n="messagesDesc">Avisos y mensajes que te envíe tu barbero.</small></div><input class="switch" type="checkbox" id="messages" role="switch"></div>
+            <a class="link-row" href="notificaciones.html"><span data-i18n="viewCenter">Ver mis avisos</span><i class="fas fa-chevron-right"></i></a>
+        </div>
+
+        <div class="card">
+            <h2 data-i18n="pushTitle">Notificaciones push</h2>
+            <p data-i18n="pushDesc">Avisos en tu teléfono aunque la página esté cerrada. Requiere Firebase configurado.</p>
+            <div class="row"><div><label for="push" data-i18n="pushLabel">Recibir notificaciones push</label><small id="push-note" data-i18n="pushNote">Al activarlas, el navegador te pedirá permiso.</small></div><input class="switch" type="checkbox" id="push" role="switch"></div>
+            <p class="status" id="push-status"></p>
+        </div>
+
+        <div class="card">
+            <h2 data-i18n="installTitle">Instalar la app</h2>
+            <p data-i18n="installDesc">Pon GOAT Style Salon en tu pantalla de inicio para no perder la página. Se abre como app, sin la barra del navegador.</p>
+            <button class="btn" type="button" id="install-btn" data-i18n="installBtn">Instalar app</button>
+            <p class="status" id="install-status"></p>
+            <ol class="guide" id="ios-guide" hidden>
+                <li data-i18n="iosStep1">Toca el botón Compartir (el cuadrado con la flecha hacia arriba) en la barra de Safari.</li>
+                <li data-i18n="iosStep2">Baja y toca «Añadir a pantalla de inicio».</li>
+                <li data-i18n="iosStep3">Toca «Añadir» arriba a la derecha. La app quedará en tu pantalla de inicio con el logo de GOAT Style Salon.</li>
+            </ol>
+            <ol class="guide" id="generic-guide" hidden>
+                <li data-i18n="genericStep1">Abre el menú del navegador (⋮) y toca «Instalar app» o «Añadir a pantalla de inicio».</li>
+            </ol>
+            <p class="status" data-i18n="installNote">El navegador siempre pide tu confirmación; la app no se instala sola.</p>
+        </div>
+
+        <button class="btn" type="button" id="save-btn" data-i18n="save">Guardar</button>
+    </main>
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav"><a href="index.html"><i class="fas fa-house"></i><span data-i18n="homeTab">Inicio</span></a><a href="services.html"><i class="fas fa-scissors"></i><span data-i18n="servicesTab">Servicios</span></a><a href="booking.html"><i class="fas fa-calendar-check"></i><span data-i18n="bookingTab">Cita</span></a><a href="news.html"><i class="fas fa-newspaper"></i><span data-i18n="newsTab">Noticias</span></a><a class="active" href="settings.html"><i class="fas fa-gear"></i><span data-i18n="configTab">Config</span></a></div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="notifications.js" data-gaby-notifications="1"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        const translations = {
+            es: {
+                title: 'Avisos y notificaciones', intro: 'Escoge qué avisos quieres recibir y pon la página como app en tu teléfono para no perderla.',
+                alertsTitle: 'Avisos en la página', alertsDesc: 'Siempre se guardan en la campana, aunque apagues todo lo demás.',
+                remindersTitle: 'Recordatorios de cita', remindersDesc: 'Un aviso 24 horas antes y otro 1 hora antes de tu cita.',
+                bookingsTitle: 'Avisos de reserva', bookingsDesc: 'Cuando se confirma tu cita, se aprueba o cambia.',
+                cancellationsTitle: 'Cancelaciones', cancellationsDesc: 'Si la barbería cancela o reprograma tu cita.',
+                messagesTitle: 'Mensajes de la barbería', messagesDesc: 'Avisos y mensajes que te envíe tu barbero.',
+                viewCenter: 'Ver mis avisos',
+                pushTitle: 'Notificaciones push', pushDesc: 'Avisos en tu teléfono aunque la página esté cerrada. Requiere Firebase configurado.',
+                pushLabel: 'Recibir notificaciones push', pushNote: 'Al activarlas, el navegador te pedirá permiso.',
+                pushNotConfigured: 'El push se activa cuando se configure Firebase (firebase-config.js). Mientras tanto, los avisos llegan a la campana de la página.',
+                pushEnabled: 'Push activado en este dispositivo.',
+                pushDenied: 'No diste permiso para las notificaciones. Puedes activarlo en los ajustes del navegador.',
+                pushFailed: 'No se pudo activar el push. Inténtalo de nuevo.',
+                pushUnsupported: 'Este navegador no soporta notificaciones push.',
+                installTitle: 'Instalar la app', installDesc: 'Pon GOAT Style Salon en tu pantalla de inicio para no perder la página. Se abre como app, sin la barra del navegador.',
+                installBtn: 'Instalar app', installNote: 'El navegador siempre pide tu confirmación; la app no se instala sola.',
+                iosStep1: 'Toca el botón Compartir (el cuadrado con la flecha hacia arriba) en la barra de Safari.',
+                iosStep2: 'Baja y toca «Añadir a pantalla de inicio».',
+                iosStep3: 'Toca «Añadir» arriba a la derecha. La app quedará en tu pantalla de inicio con el logo de GOAT Style Salon.',
+                genericStep1: 'Abre el menú del navegador (⋮) y toca «Instalar app» o «Añadir a pantalla de inicio».',
+                installInstalled: 'La app ya está instalada en este dispositivo.',
+                installAccepted: '¡Listo! La app quedó en tu pantalla de inicio.',
+                installDismissed: 'No se instaló. Puedes intentarlo de nuevo cuando quieras.',
+                save: 'Guardar',
+                saved: 'Configuración guardada.', saveError: 'No se pudo guardar la configuración.',
+                homeTab: 'Inicio', servicesTab: 'Servicios', bookingTab: 'Cita', newsTab: 'Noticias', configTab: 'Config'
+            },
+            en: {
+                title: 'Alerts and notifications', intro: 'Choose which alerts you want to receive, and add the site as an app on your phone so you never lose it.',
+                alertsTitle: 'On-page alerts', alertsDesc: 'They are always saved in the bell, even if you turn everything else off.',
+                remindersTitle: 'Appointment reminders', remindersDesc: 'One alert 24 hours before and another 1 hour before your appointment.',
+                bookingsTitle: 'Booking alerts', bookingsDesc: 'When your appointment is confirmed, approved, or changed.',
+                cancellationsTitle: 'Cancellations', cancellationsDesc: 'If the barbershop cancels or reschedules your appointment.',
+                messagesTitle: 'Messages from the barbershop', messagesDesc: 'Alerts and messages your barber sends you.',
+                viewCenter: 'View my alerts',
+                pushTitle: 'Push notifications', pushDesc: 'Alerts on your phone even when the site is closed. Requires Firebase configured.',
+                pushLabel: 'Receive push notifications', pushNote: 'When you turn them on, the browser will ask for permission.',
+                pushNotConfigured: 'Push turns on once Firebase is configured (firebase-config.js). Until then, alerts arrive in the page bell.',
+                pushEnabled: 'Push is on for this device.',
+                pushDenied: 'You did not grant notification permission. You can turn it on in the browser settings.',
+                pushFailed: 'Push could not be turned on. Try again.',
+                pushUnsupported: 'This browser does not support push notifications.',
+                installTitle: 'Install the app', installDesc: 'Add GOAT Style Salon to your home screen so you never lose the site. It opens as an app, without the browser bar.',
+                installBtn: 'Install app', installNote: 'The browser always asks for your confirmation; the app never installs by itself.',
+                iosStep1: 'Tap the Share button (the square with the arrow pointing up) in the Safari bar.',
+                iosStep2: 'Scroll down and tap “Add to Home Screen”.',
+                iosStep3: 'Tap “Add” at the top right. The app will stay on your home screen with the GOAT Style Salon logo.',
+                genericStep1: 'Open the browser menu (⋮) and tap “Install app” or “Add to Home screen”.',
+                installInstalled: 'The app is already installed on this device.',
+                installAccepted: 'Done! The app is now on your home screen.',
+                installDismissed: 'It was not installed. You can try again whenever you want.',
+                save: 'Save',
+                saved: 'Settings saved.', saveError: 'Could not save your settings.',
+                homeTab: 'Home', servicesTab: 'Services', bookingTab: 'Booking', newsTab: 'News', configTab: 'Settings'
+            }
+        };
+
+        function lang() {
+            try { return window.GabyData.getState().settings.defaultLanguage === 'en' ? 'en' : 'es'; } catch (_) { return 'es'; }
+        }
+
+        function t(key) {
+            const l = lang();
+            return (translations[l] && translations[l][key]) || translations.es[key] || key;
+        }
+
+        const N = () => window.GabyNotifications;
+        const pushToggle = document.getElementById('push');
+        const pushStatus = document.getElementById('push-status');
+        const installBtn = document.getElementById('install-btn');
+        const installStatus = document.getElementById('install-status');
+
+        function loadPrefs() {
+            const p = N().prefs();
+            document.getElementById('reminders').checked = p.reminders;
+            document.getElementById('bookings').checked = p.bookings;
+            document.getElementById('cancellations').checked = p.cancellations;
+            document.getElementById('messages').checked = p.messages;
+            const status = N().pushStatus();
+            pushToggle.checked = p.push && status.enabled;
+            if (!status.configured) {
+                pushToggle.disabled = true;
+                pushStatus.textContent = t('pushNotConfigured');
+            } else if (status.enabled) {
+                pushStatus.innerHTML = '<strong>' + t('pushEnabled') + '</strong>';
+            } else if (!status.supported) {
+                pushToggle.disabled = true;
+                pushStatus.textContent = t('pushUnsupported');
+            }
+        }
+
+        function loadInstall() {
+            if (N().isStandalone()) {
+                installBtn.disabled = true;
+                installStatus.innerHTML = '<strong>' + t('installInstalled') + '</strong>';
+                return;
+            }
+            if (N().isIOS()) document.getElementById('ios-guide').hidden = false;
+        }
+
+        installBtn.addEventListener('click', async () => {
+            const result = await N().installApp();
+            if (result.reason === 'installed') {
+                installBtn.disabled = true;
+                installStatus.innerHTML = '<strong>' + t('installInstalled') + '</strong>';
+            } else if (result.reason === 'accepted') {
+                installStatus.innerHTML = '<strong>' + t('installAccepted') + '</strong>';
+            } else if (result.reason === 'ios-manual') {
+                document.getElementById('ios-guide').hidden = false;
+            } else if (result.reason === 'dismissed') {
+                installStatus.textContent = t('installDismissed');
+            } else {
+                document.getElementById('generic-guide').hidden = false;
+            }
+        });
+
+        document.getElementById('save-btn').addEventListener('click', async () => {
+            const en = lang() === 'en';
+            const wantPush = pushToggle.checked;
+            const wasEnabled = N().pushStatus().enabled;
+            const ok = await window.GabyData.commit(state => {
+                state.settings.notifications = {
+                    reminders: document.getElementById('reminders').checked,
+                    bookings: document.getElementById('bookings').checked,
+                    cancellations: document.getElementById('cancellations').checked,
+                    messages: document.getElementById('messages').checked,
+                    push: wantPush && wasEnabled
+                };
+            }, { success: en ? 'Settings saved.' : 'Configuración guardada.', error: en ? 'Could not save your settings.' : 'No se pudo guardar la configuración.' });
+            if (!ok) return;
+            if (wantPush && !wasEnabled) {
+                const result = await N().enablePush();
+                if (result.ok) {
+                    await window.GabyData.commit(state => { state.settings.notifications.push = true; }, { success: null });
+                    pushStatus.innerHTML = '<strong>' + t('pushEnabled') + '</strong>';
+                } else {
+                    pushToggle.checked = false;
+                    pushStatus.textContent = t(result.reason === 'denied' ? 'pushDenied' : 'pushFailed');
+                }
+            } else if (!wantPush && wasEnabled) {
+                await N().disablePush();
+                await window.GabyData.commit(state => { state.settings.notifications.push = false; }, { success: null });
+                pushStatus.textContent = '';
+            }
+            window.GabyPreferences.applyLanguage(translations);
+        });
+
+        loadPrefs();
+        loadInstall();
+        window.GabyPreferences.initPreferences({ translations });
+    </script>
+</body>
+</html>

@@ -139,6 +139,20 @@
             table: 'discounts', key: 'id', staffOnly: true,
             toRow: d => ({ id: d.id, client_id: d.clientId || null, data: d, created_at: toDate(d.appliedAt || d.createdAt) || new Date().toISOString() }),
             fromRow: r => ({ ...(r.data || {}), id: r.id })
+        },
+        notifications: {
+            // Avisos del centro de notificaciones. El personal los ve todos por sync;
+            // el cliente solo los suyos, por código de cita, con myNotifications() (RPC).
+            table: 'notifications', key: 'id', staffOnly: true,
+            toRow: n => ({ id: n.id, audience: n.audience || 'staff', barber_id: n.barberId || null, client_id: n.clientId || null, type: n.type || '', title: n.title || '', body: n.body || '', appointment_code: n.appointmentCode || null, read_at: toDate(n.readAt), created_at: toDate(n.createdAt) || new Date().toISOString() }),
+            fromRow: r => ({ id: r.id, audience: r.audience, barberId: r.barber_id, clientId: r.client_id, type: r.type, title: r.title, body: r.body, appointmentCode: r.appointment_code, readAt: r.read_at, createdAt: r.created_at })
+        },
+        pushTokens: {
+            // Suscripciones push de cada dispositivo (FCM). Sin borrado por sync:
+            // un token viejo se limpia en el servidor cuando FCM lo rechaza.
+            table: 'push_tokens', key: 'id', staffOnly: true, noDelete: true,
+            toRow: t => ({ id: t.id, endpoint: t.endpoint || '', keys_p256dh: (t.keys && t.keys.p256dh) || '', keys_auth: (t.keys && t.keys.auth) || '', appointment_codes: t.appointmentCodes || [], barber_id: t.barberId || null, user_agent: t.userAgent || '', created_at: toDate(t.createdAt) || new Date().toISOString() }),
+            fromRow: r => ({ id: r.id, endpoint: r.endpoint, keys: { p256dh: r.keys_p256dh || '', auth: r.keys_auth || '' }, appointmentCodes: r.appointment_codes || [], barberId: r.barber_id, userAgent: r.user_agent || '', createdAt: r.created_at })
         }
     };
 
@@ -169,6 +183,7 @@
         ['notes', 'notes', ''], ['completedAt', 'completed_at', null], ['noShowAt', 'no_show_at', null],
         ['canceledBy', 'canceled_by', ''], ['cancelReason', 'cancel_reason', ''],
         ['lateCancellation', 'late_cancellation', false], ['reminderSentAt', 'reminder_sent_at', null],
+        ['reminder1hSentAt', 'reminder_1h_sent_at', null],
         ['attendance', 'attendance', null], ['referencePhoto', 'reference_photo', ''], ['unknownCut', 'unknown_cut', false]
     ]);
 
@@ -225,6 +240,14 @@
             state.busySlots = (busySlots || []).map(row => ({ barber: row.barber_id, dateTime: toLocalDateTime(row.date_time), duration: row.duration, code: row.own_code }));
             Object.entries(results).forEach(([collection, rows]) => { state[collection] = rows; });
             if (!staffRole) Object.entries(tables).forEach(([collection, map]) => { if (map.staffOnly) state[collection] = []; });
+            // Avisos del cliente: no puede leer la tabla; los pide por sus códigos de cita (RPC my_notifications).
+            if (!staffRole) {
+                const codes = myAppointmentCodes();
+                if (codes.length) {
+                    try { state.notifications = await myNotifications(codes); }
+                    catch (error) { console.warn('[GabyCloud] No se pudieron leer tus avisos:', error.message); }
+                }
+            }
             if (!staffRole && !results.appointments) state.appointments = [];
             if (settingsRow) {
                 state.settings.shopMode = settingsRow.shop_mode;
@@ -367,6 +390,24 @@
         }
     }
 
+    // Códigos de las citas reservadas desde este navegador (sin cuenta).
+    function myAppointmentCodes() {
+        try {
+            const list = JSON.parse(localStorage.getItem('gs_my_appointments') || '[]');
+            return Array.isArray(list) ? list.map(item => item && item.code).filter(Boolean) : [];
+        } catch (_) { return []; }
+    }
+
+    // Avisos del cliente por sus códigos de cita (sin cuenta). El servidor solo
+    // devuelve avisos de cliente de esos códigos (RPC my_notifications).
+    async function myNotifications(codes) {
+        const client = await getClient();
+        if (!client || !codes || !codes.length) return [];
+        const { data, error } = await client.rpc('my_notifications', { p_codes: codes });
+        if (error) raise(error);
+        return (data || []).map(tables.notifications.fromRow);
+    }
+
     async function appointmentStatus(code) {
         const client = await getClient();
         const { data, error } = await client.rpc('appointment_status', { p_code: code });
@@ -399,6 +440,8 @@
         staffSignIn,
         requireStaff,
         appointmentStatus,
+        myNotifications,
+        myAppointmentCodes,
         transferClient,
         friendly
     };
