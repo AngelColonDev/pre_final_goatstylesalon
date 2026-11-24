@@ -30,7 +30,8 @@
 
     function scopedAppointments(ctx) {
         const db = ctx.getDb();
-        return ctx.isAdmin() ? db.appointments : db.appointments.filter(item => item.barber === ctx.config.role);
+        const list = db.appointments || [];
+        return ctx.isAdmin() ? list : list.filter(item => item.barber === ctx.config.role);
     }
 
     function scopedClients(ctx) {
@@ -129,8 +130,12 @@
         }
         if (status === 'NO_SHOW' && !window.confirm('¿Marcar esta cita como no-show? Se sumará al contador del cliente.')) return false;
         const labels = { APROBADA: 'aprobada. Se avisó al cliente', RECHAZADA: 'rechazada. El horario quedó libre', COMPLETADA: 'completada', NO_SHOW: 'marcada como no-show', CANCELADA: 'cancelada' };
-        return ctx.commit(state => { B().setStatus(state, code, status, { actor: ctx.actorName, reason: String(reason || '').trim() }); },
+        // Los avisos al cliente que crea el cambio se mandan también al teléfono.
+        const beforeIds = clientNotificationIds(ctx, code);
+        const ok = await ctx.commit(state => { B().setStatus(state, code, status, { actor: ctx.actorName, reason: String(reason || '').trim() }); },
             { success: `Cita ${code} ${labels[status] || B().statusLabel(status)}.`, error: 'No se pudo actualizar la cita.' });
+        if (ok) await pushNewClientNotices(ctx, code, beforeIds);
+        return ok;
     }
 
     // Boton de tres puntos con el resto de las opciones de una cita.
@@ -264,10 +269,14 @@
             const names = [...box.querySelectorAll('[data-svc]:checked')].map(c => c.dataset.svc);
             if (!names.length) return window.GabyData.toast('Escoge al menos un servicio.', 'warning');
             if (!state.time) return window.GabyData.toast('Escoge una hora disponible.', 'warning');
+            const beforeIds = clientNotificationIds(ctx, appointment.code);
             const ok = await ctx.commit(s => {
                 B().rescheduleAppointment(s, appointment.code, { date: state.date, time: state.time, barberId: state.barber, services: B().findServices(names, s), by: 'barbería', actor: ctx.actorName });
             }, { success: 'Cita actualizada. Se avisó al cliente.', error: 'No se pudo actualizar la cita.' });
-            if (ok) modal.close();
+            if (ok) {
+                await pushNewClientNotices(ctx, appointment.code, beforeIds);
+                modal.close();
+            }
         });
     }
 
@@ -1169,7 +1178,7 @@
     // ---------------------------------------------------------------------
     function staffNotifications(ctx) {
         const db = ctx.getDb();
-        return db.notifications.filter(n => n.audience === 'staff' && (ctx.isAdmin() || !n.barberId || n.barberId === ctx.config.role));
+        return (db.notifications || []).filter(n => n.audience === 'staff' && (ctx.isAdmin() || !n.barberId || n.barberId === ctx.config.role));
     }
 
     // Citas próximas que el remitente puede avisar: el admin ve todas; cada
@@ -1191,6 +1200,30 @@
 
     function appointmentLabel(ctx, a) {
         return `${a.code} · ${a.client || 'Cliente'} · ${a.service || ''} · ${fmtDateTime(a)}`;
+    }
+
+    // Push al teléfono de los avisos al cliente creados por una acción del
+    // panel (aprobar, rechazar, cancelar, reprogramar): se manda solo por los
+    // avisos nuevos de esa cita (los que no estaban antes del cambio).
+    // Best-effort, como el compositor: el aviso ya está guardado y visible en
+    // la app del cliente aunque el push falle o no tenga dispositivo registrado.
+    async function pushNewClientNotices(ctx, code, beforeIds) {
+        try {
+            const fresh = (ctx.getDb().notifications || [])
+                .filter(n => n.audience === 'client' && n.appointmentCode === code && !beforeIds.has(n.id));
+            if (!fresh.length) return;
+            const client = await window.GabyCloud?.getClient?.();
+            if (!client) return;
+            for (const row of fresh) {
+                try { await client.functions.invoke('send-push', { body: { mode: 'send', notificationId: row.id } }); } catch (_) { /* el aviso en la app ya se envió */ }
+            }
+        } catch (_) { /* el aviso en la app ya se envió */ }
+    }
+
+    function clientNotificationIds(ctx, code) {
+        return new Set((ctx.getDb().notifications || [])
+            .filter(n => n.audience === 'client' && n.appointmentCode === code)
+            .map(n => n.id));
     }
 
     // Envía el aviso del compositor: una fila por cita destinataria (audience
@@ -1291,7 +1324,7 @@
             <section class="card" style="margin-top:18px;">
                 <div class="section-title">Avisos enviados a clientes</div>
                 <div class="list-grid">${sent.slice(0, 50).map(n => {
-                    const appt = n.appointmentCode ? db.appointments.find(a => a.code === n.appointmentCode) : null;
+                    const appt = n.appointmentCode ? (db.appointments || []).find(a => a.code === n.appointmentCode) : null;
                     return `<div class="ap-notif ${n.readAt ? '' : 'unread'}"><strong>${esc(n.title)}</strong><span>${esc(n.body)}</span><span class="item-meta">${fmtStamp(n.createdAt)}${n.appointmentCode ? ` · ${esc(n.appointmentCode)}${appt ? ` · ${esc(appt.client || '')}` : ''} · <button class="action-btn approve" data-open="${esc(n.appointmentCode)}">Ver cita</button>` : ''} · ${n.readAt ? 'Leído' : 'Sin leer'}</span></div>`;
                 }).join('') || '<div class="empty">Todavía no has enviado avisos a clientes.</div>'}</div>
             </section>

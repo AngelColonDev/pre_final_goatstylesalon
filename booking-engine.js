@@ -611,7 +611,7 @@
         if (status === 'APROBADA' && previous !== 'APROBADA') {
             notify(state, {
                 audience: 'client', clientId: appointment.clientId, code, type: 'aprobada',
-                title: clientText(state, 'Cita aprobada', 'Appointment approved'),
+                title: clientText(state, 'Cita confirmada', 'Appointment confirmed'),
                 body: `${describe(appointment)} con ${appointment.barberName}.`
             });
         }
