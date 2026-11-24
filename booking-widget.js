@@ -449,10 +449,26 @@
             // APROBADA cuando la confirmación automática está activa en la base de
             // datos): se consulta el estado real para no mostrar PENDIENTE cuando
             // la cita ya está confirmada.
+            const localStatus = created.status;
             try {
                 const server = await B().lookupByCode(created.code);
                 if (server && server.status) created.status = server.status;
             } catch (_) { /* sin conexión: se muestra lo último que se sabía */ }
+            // El aviso al cliente se creó con el estado local (PENDIENTE): si el
+            // servidor ya aprobó la cita, se corrige a la redacción de confirmada
+            // (las mismas palabras que createAppointment usa para APROBADA).
+            if (localStatus === 'PENDIENTE' && created.status === 'APROBADA') {
+                await Data().commit(state => {
+                    const notice = (state.notifications || []).find(n => n.audience === 'client' && n.appointmentCode === created.code);
+                    if (!notice) return;
+                    const lang = notice.title === 'Cita recibida' ? 'es' : (notice.title === 'Appointment received' ? 'en' : null);
+                    if (!lang) return;
+                    notice.title = lang === 'es' ? 'Cita confirmada' : 'Appointment confirmed';
+                    notice.type = 'aprobada';
+                    const suffix = lang === 'es' ? ' Te avisaremos cuando el barbero la confirme.' : ' We will let you know when the barber confirms it.';
+                    if (notice.body && notice.body.endsWith(suffix)) notice.body = notice.body.slice(0, -suffix.length);
+                }, { success: null, error: 'No se pudo actualizar el aviso.' });
+            }
             // Primero se muestra la confirmación (paso 5) y después se guarda la
             // cita en este dispositivo: guardar dispara 'gabymyappointments' y
             // booking.html no debe cambiar a la vista "Tu cita" mientras se ve
