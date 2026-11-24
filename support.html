@@ -1,0 +1,390 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soporte | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        :root { --bg: var(--theme-bg); --panel: var(--theme-panel); --panel-2: var(--theme-panel-2); --text: var(--theme-text); --muted: var(--theme-muted); --gold: var(--theme-gold); --border: var(--theme-line); --accent: var(--theme-accent); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Inter',sans-serif; background:radial-gradient(circle at top right, rgba(212,175,55,.12), transparent 22%), linear-gradient(180deg,#090909 0%,#040404 100%); color:var(--text); min-height:100vh; padding:0 0 92px; }
+        body.light-mode { background:var(--bg); }
+        a { color:inherit; text-decoration:none; }
+        button, input, textarea { font:inherit; }
+        h1, h2, h3 { font-family:'Cinzel',serif; }
+        .top { position:sticky; top:0; z-index:20; background:rgba(8,8,8,.88); backdrop-filter:blur(18px); padding:1rem; border-bottom:1px solid rgba(212,175,55,.10); }
+        body.light-mode .top { background:rgba(245,245,247,.92); border-bottom-color:rgba(0,0,0,.06); }
+        .top-bar { max-width:960px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; gap:1rem; }
+        .top-link { display:inline-flex; align-items:center; gap:.5rem; font-weight:700; }
+        .wrap { max-width:960px; margin:0 auto; padding:1.4rem 1rem 3rem; }
+        .hero { margin-bottom:1.2rem; }
+        .hero p { color:var(--muted); margin-top:.5rem; line-height:1.7; max-width:680px; }
+        .menu-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem; margin-top:1.25rem; }
+        .menu-card { width:100%; border:1px solid var(--border); border-radius:22px; background:linear-gradient(180deg, rgba(18,18,18,.98), rgba(11,11,11,.98)); color:var(--text); padding:1.15rem; text-align:left; cursor:pointer; transition:transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+        .menu-card:hover, .menu-card.active { transform:translateY(-2px); border-color:rgba(212,175,55,.45); box-shadow:0 14px 30px rgba(0,0,0,.22); }
+        body.light-mode .menu-card { background:var(--panel); }
+        .menu-card i { color:var(--gold); font-size:1.2rem; margin-bottom:.8rem; }
+        .menu-card strong { display:block; font-size:1rem; margin-bottom:.35rem; }
+        .menu-card small { display:block; color:var(--muted); line-height:1.55; }
+        .panel { display:none; margin-top:1rem; border:1px solid var(--border); border-radius:24px; background:linear-gradient(180deg, rgba(18,18,18,.98), rgba(11,11,11,.98)); padding:1.35rem; box-shadow:0 12px 28px rgba(0,0,0,.24); }
+        .panel.active { display:block; }
+        body.light-mode .panel { background:var(--panel); box-shadow:0 10px 24px rgba(16,24,40,.08); }
+        .panel-header { display:flex; justify-content:space-between; align-items:flex-start; gap:1rem; margin-bottom:1rem; }
+        .panel-header p { color:var(--muted); line-height:1.7; max-width:700px; }
+        .pill { display:inline-flex; align-items:center; gap:.5rem; padding:.55rem .9rem; border-radius:999px; border:1px solid rgba(212,175,55,.28); background:var(--accent); color:var(--gold); font-size:.85rem; font-weight:700; }
+        .guide-grid, .contact-grid, .faq-list { display:grid; gap:1rem; }
+        .guide-grid { grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+        .guide-card, .contact-card, .faq-item, .form-card { border:1px solid var(--border); border-radius:20px; padding:1rem; background:var(--panel-2); }
+        .guide-card h3, .contact-card h3, .form-card h3 { font-size:1rem; margin-bottom:.6rem; }
+        .guide-card p, .contact-card p, .faq-a, .form-note { color:var(--muted); line-height:1.7; }
+        .guide-card ol { padding-left:1.1rem; color:var(--muted); line-height:1.7; }
+        .guide-actions { margin-top:1rem; display:flex; flex-wrap:wrap; gap:.75rem; }
+        .btn { display:inline-flex; align-items:center; justify-content:center; gap:.55rem; padding:.9rem 1.15rem; border:none; border-radius:16px; background:linear-gradient(135deg,#f6dfa0 0%,#d4af37 62%,#87640f 100%); color:#111; font-weight:800; cursor:pointer; }
+        .btn.secondary { background:transparent; color:var(--text); border:1px solid var(--border); }
+        .faq-item { cursor:pointer; transition:border-color .25s ease, background .25s ease; }
+        .faq-item.active { border-color:rgba(212,175,55,.35); }
+        .faq-q { display:flex; justify-content:space-between; gap:1rem; align-items:center; font-weight:700; }
+        .faq-icon { color:var(--gold); font-size:1.2rem; transition:transform .25s ease; }
+        .faq-item.active .faq-icon { transform:rotate(45deg); }
+        .faq-a { max-height:0; overflow:hidden; transition:max-height .3s ease, margin-top .3s ease; }
+        .faq-item.active .faq-a { max-height:220px; margin-top:.75rem; }
+        .contact-grid { grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); }
+        .contact-card a { color:var(--gold); word-break:break-word; }
+        .form-grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+        .field { display:grid; gap:.45rem; }
+        .field label { font-weight:700; }
+        .field input, .field textarea, .field select { width:100%; border:1px solid var(--border); border-radius:16px; background:transparent; color:var(--text); padding:.9rem 1rem; }.field select { appearance:auto; background:var(--panel-2); }.field select option { background:var(--panel); color:var(--text); }
+        .field textarea { min-height:140px; resize:vertical; }
+        .field[hidden] { display:none; }
+        .field input::placeholder, .field textarea::placeholder { color:var(--muted); }
+        .form-actions { display:flex; flex-wrap:wrap; gap:.75rem; margin-top:1rem; }
+        .success { display:none; margin-top:1rem; border-radius:16px; padding:.9rem 1rem; background:rgba(34,197,94,.12); border:1px solid rgba(34,197,94,.25); color:#86efac; font-weight:600; }
+        body.light-mode .success { color:#166534; }
+        .mobile-bottom-nav{display:none}.mobile-bottom-nav a,.mobile-bottom-nav button{background:transparent;border:none;color:#d8d2c3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;font-size:.68rem;font-weight:600;letter-spacing:.02em;min-width:0;cursor:pointer}.mobile-bottom-nav i{font-size:1.05rem;color:#d4af37}.mobile-bottom-nav .active{color:#d4af37}
+        body.light-mode .mobile-bottom-nav{background:rgba(255,255,255,.96);border-top-color:rgba(0,0,0,.08);box-shadow:0 -12px 30px rgba(0,0,0,.12)}body.light-mode .mobile-bottom-nav a{color:#6b7280}body.light-mode .mobile-bottom-nav .active{color:var(--gold)}
+        @media (max-width: 968px){body{padding-bottom:92px}.mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:2500;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.25rem;padding:.8rem .7rem calc(.8rem + env(safe-area-inset-bottom));background:rgba(8,8,8,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(212,175,55,.15);box-shadow:0 -12px 30px rgba(0,0,0,.3)}.panel-header{flex-direction:column}.top-bar{font-size:.95rem}}
+        @media (min-width:969px){body{padding-bottom:0}.mobile-bottom-nav{display:none}}
+    </style>
+</head>
+<body>
+    <div class="top" data-mobile-topbar>
+        <div class="top-bar">
+            <a class="top-link" href="settings.html" data-i18n="back">← Volver</a>
+            <a class="top-link" href="index.html"><i class="fas fa-house"></i><span data-i18n="homeTab">Inicio</span></a>
+        </div>
+    </div>
+
+    <main class="wrap" data-maintenance-section="soporte">
+        <section class="hero">
+            <h1 data-i18n="title">Soporte</h1>
+            <p data-i18n="intro">Encuentra ayuda rápida, respuestas frecuentes y formularios para comunicarte con el equipo técnico cuando lo necesites.</p>
+        </section>
+
+        <section class="menu-grid" aria-label="Opciones de soporte">
+            <button class="menu-card active" type="button" data-panel="help-center">
+                <i class="fas fa-book-open"></i>
+                <strong data-i18n="helpCenter">Centro de ayuda</strong>
+                <small data-i18n="helpCenterDesc">Guias paso a paso para sacar, administrar o cancelar una cita.</small>
+            </button>
+            <button class="menu-card" type="button" data-panel="faq-panel">
+                <i class="fas fa-circle-question"></i>
+                <strong data-i18n="faq">Preguntas frecuentes</strong>
+                <small data-i18n="faqDesc">Respuestas sobre citas, productos, ubicación, pagos y servicio.</small>
+            </button>
+            <button class="menu-card" type="button" data-panel="contact-panel">
+                <i class="fas fa-headset"></i>
+                <strong data-i18n="contact">Contactar soporte</strong>
+                <small data-i18n="contactDesc">Angel Tech Solutions, correo técnico, página web y canales oficiales.</small>
+            </button>
+            <button class="menu-card" type="button" data-panel="report-panel">
+                <i class="fas fa-bug"></i>
+                <strong data-i18n="report">Reportar un problema</strong>
+                <small data-i18n="reportDesc">Envia detalles de errores, fallos o comportamientos inesperados.</small>
+            </button>
+            <button class="menu-card" type="button" data-panel="suggestions-panel">
+                <i class="fas fa-lightbulb"></i>
+                <strong data-i18n="suggestions">Enviar sugerencias</strong>
+                <small data-i18n="suggestionsDesc">Comparte ideas para mejorar la experiencia de la barbería y la app.</small>
+            </button>
+        </section>
+
+        <section class="panel active" id="help-center">
+            <div class="panel-header">
+                <div>
+                    <h2 data-i18n="helpCenter">Centro de ayuda</h2>
+                    <p data-i18n="helpCenterText">Este espacio reune guias practicas para que cualquier cliente pueda completar sus acciones más comunes sin complicaciones.</p>
+                </div>
+                <span class="pill"><i class="fas fa-bolt"></i><span data-i18n="quickAccess">Acceso rápido</span></span>
+            </div>
+            <div class="guide-actions">
+                <button class="btn" type="button" onclick="document.getElementById('guides').scrollIntoView({behavior:'smooth'})" data-i18n="seeGuides">Ver guias</button>
+                <a class="btn secondary" href="booking.html" data-i18n="bookNow">Sacar una cita</a>
+            </div>
+            <div class="guide-grid" id="guides" style="margin-top:1.1rem;">
+                <article class="guide-card">
+                    <h3 data-i18n="guideBookTitle">Cómo sacar una cita</h3>
+                    <ol>
+                        <li data-i18n="guideBook1">Entra a la sección de cita desde el menú principal.</li>
+                        <li data-i18n="guideBook2">Selecciona el servicio, el barbero y la fecha que prefieras.</li>
+                        <li data-i18n="guideBook3">Completa tus datos y confirma para guardar la reserva.</li>
+                    </ol>
+                </article>
+                <article class="guide-card">
+                    <h3 data-i18n="guideCancelTitle">Cómo cancelar una cita</h3>
+                    <ol>
+                        <li data-i18n="guideCancel1">Ten a mano tu nombre completo y el código de tu cita.</li>
+                        <li data-i18n="guideCancel2">Llama o escribe por WhatsApp a la barbería o a tu barbero.</li>
+                        <li data-i18n="guideCancel3">Pide la cancelación y revisa la Política de Reservaciones.</li>
+                    </ol>
+                </article>
+                <article class="guide-card">
+                    <h3 data-i18n="guideMoveTitle">Cómo reprogramar</h3>
+                    <ol>
+                        <li data-i18n="guideMove1">Comunícate con la barbería con el código de tu cita.</li>
+                        <li data-i18n="guideMove2">Escoge con el personal una nueva fecha u horario disponible.</li>
+                        <li data-i18n="guideMove3">Consulta el estado con tu código para verificar el cambio.</li>
+                    </ol>
+                </article>
+                <article class="guide-card">
+                    <h3 data-i18n="guideNewsTitle">Como ver avisos importantes</h3>
+                    <ol>
+                        <li data-i18n="guideNews1">Toca la sección de noticias en la navegación inferior.</li>
+                        <li data-i18n="guideNews2">Revisa cierres, horarios especiales y anuncios del equipo.</li>
+                        <li data-i18n="guideNews3">Consulta esa area antes de tu visita si hubo cambios recientes.</li>
+                    </ol>
+                </article>
+            </div>
+        </section>
+
+        <section class="panel" id="faq-panel">
+            <div class="panel-header">
+                <div>
+                    <h2 data-i18n="faq">Preguntas frecuentes</h2>
+                    <p data-i18n="faqIntro">Incluye las respuestas visibles en la página principal y otras dudas comunes para ayudar al cliente más rápido.</p>
+                </div>
+            </div>
+            <div class="faq-list">
+                <div class="faq-item active" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ1">¿Necesito cita previa?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA1">Sí, trabajamos exclusivamente con citas para garantizar la experiencia VIP de cada cliente.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ2">¿Manejan productos premium?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA2">Vendemos productos seleccionados de la más alta calidad para el cuidado de tu cabello y barba.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ3">¿Dónde están ubicados?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA3">Nos encontramos en Barranquitas, Puerto Rico.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ4">¿Puedo cancelar mi cita?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA4">Sí. Comunícate con la barbería por teléfono o WhatsApp y te ayudamos a cancelarla o cambiarla.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ5">¿Cuánto tiempo dura un servicio VIP?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA5">Depende de la opción elegida, pero los servicios VIP pueden durar desde 30 minutos hasta 2 horas y 45 minutos.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ6">¿Puedo elegir mi barbero favorito?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA6">Claro, escoges tu barbero al reservar tu cita.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ7">¿Publican avisos importantes?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA7">Sí, contamos con una página de noticias para cierres, horarios especiales y anuncios del equipo.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ8">¿Qué hago si el horario que quiero no aparece?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA8">Prueba con otro barbero o revisa una fecha distinta. La disponibilidad cambia según las citas ya reservadas.</div>
+                </div>
+                <div class="faq-item" onclick="toggleFaq(this)">
+                    <div class="faq-q"><span data-i18n="faqQ9">¿Puedo consultar precios antes de reservar?</span><span class="faq-icon">+</span></div>
+                    <div class="faq-a" data-i18n="faqA9">Sí, en la sección de servicios puedes ver el menu completo antes de sacar tu cita.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" id="contact-panel">
+            <div class="panel-header">
+                <div>
+                    <h2 data-i18n="contact">Contactar soporte</h2>
+                    <p data-i18n="contactIntro">El soporte técnico es manejado por Angel Tech Solutions. Puedes escribir por correo o usar el formulario disponible en su página oficial.</p>
+                </div>
+            </div>
+            <div class="contact-grid">
+                <article class="contact-card">
+                    <h3>Barbería (citas, servicios, privacidad)</h3>
+                    <p>Goat Style Salon · Barranquitas, Puerto Rico</p>
+                    <p><a href="tel:+17872181068">787-218-1068</a> · <a href="https://wa.me/17872181068" target="_blank" rel="noopener noreferrer">WhatsApp</a></p>
+                    <p>Correo: <a data-legal-mail="email" href="#"><span data-legal="email"></span></a></p>
+                </article>
+                <article class="contact-card">
+                    <h3 data-i18n="contactCompany">Empresa</h3>
+                    <p data-i18n="contactCompanyText">Angel Tech Solutions ofrece soporte técnico y seguimiento para la plataforma de la barbería.</p>
+                </article>
+                <article class="contact-card">
+                    <h3 data-i18n="contactWebsite">Página web</h3>
+                    <p><a href="https://angeltechsolutions.dev/" target="_blank" rel="noreferrer">https://angeltechsolutions.dev/</a></p>
+                </article>
+                <article class="contact-card">
+                    <h3 data-i18n="contactEmail">Correo de soporte</h3>
+                    <p><a href="mailto:soporte-tecnico@angeltechsolutions.dev">soporte-tecnico@angeltechsolutions.dev</a></p>
+                </article>
+                <article class="contact-card">
+                    <h3 data-i18n="contactHow">Cómo contactarlo</h3>
+                    <p data-i18n="contactHowText">Puedes contactar a Angel Tech Solutions desde el formulario de su página web o escribiendo directamente al correo de soporte técnico.</p>
+                </article>
+            </div>
+            <div class="guide-actions" style="margin-top:1rem;">
+                <a class="btn" href="https://angeltechsolutions.dev/" target="_blank" rel="noreferrer" data-i18n="visitWebsite">Ir a la página web</a>
+                <a class="btn secondary" href="mailto:soporte-tecnico@angeltechsolutions.dev" data-i18n="sendEmail">Enviar correo</a>
+            </div>
+        </section>
+
+        <section class="panel" id="report-panel">
+            <div class="panel-header">
+                <div>
+                    <h2 data-i18n="report">Reportar un problema</h2>
+                    <p data-i18n="reportIntro">Comparte lo que ocurrio, en que sección paso y que esperabas que sucediera. Mientras más detalles, mejor.</p>
+                </div>
+            </div>
+            <div class="form-card">
+                <h3 data-i18n="reportFormTitle">Formulario de problema</h3>
+                <p class="form-note" data-i18n="reportFormNote">Este formulario ayuda a preparar la información antes de contactar al equipo técnico.</p>
+                <form id="reportForm">
+                    <div class="form-grid">
+                        <div class="field"><label for="reportName" data-i18n="fullNameLabel">Nombre completo</label><input id="reportName" name="name" type="text" placeholder="Tu nombre y apellido" autocomplete="name" minlength="3" maxlength="80" required></div>
+                        <div class="field"><label for="reportPhone" data-i18n="phoneLabel">Número de teléfono</label><input id="reportPhone" name="phone" type="tel" placeholder="(787) 000-0000" autocomplete="tel" required></div>
+                        <div class="field"><label for="reportEmail" data-i18n="emailOptionalLabel">Correo electrónico (opcional)</label><input id="reportEmail" name="email" type="email" placeholder="tu@email.com" autocomplete="email"></div>
+                        <div class="field"><label for="reportArea" data-i18n="areaLabel">Área afectada</label><select id="reportArea" name="area" required><option value="" data-i18n="areaPick">Escoge el área</option><option value="booking" data-i18n="areaBooking">Citas</option><option value="services" data-i18n="areaServices">Servicios</option><option value="news" data-i18n="areaNews">Noticias</option><option value="reviews" data-i18n="areaProfile">Reseñas</option><option value="other" data-i18n="areaOther">Otra</option></select></div>
+                        <div class="field" id="reportOtherWrap" hidden><label for="reportOther" data-i18n="areaOtherLabel">¿Cuál otra área?</label><input id="reportOther" name="areaOther" type="text" maxlength="80" placeholder="Escribe qué parte de la página"></div>
+                        <div class="field"><label for="reportDevice" data-i18n="deviceLabel">Dispositivo</label><input id="reportDevice" name="device" type="text" placeholder="iPhone, Android, laptop..." required></div>
+                    </div>
+                    <div class="field" style="margin-top:1rem;"><label for="reportMessage" data-i18n="detailsLabel">Detalles</label><textarea id="reportMessage" name="message" placeholder="Describe el problema paso a paso" minlength="10" required></textarea></div>
+                    <p class="form-note" data-i18n="reportRequired">Todos los campos son obligatorios, menos el correo electrónico.</p>
+                    <div class="form-actions"><button class="btn" type="submit" data-i18n="sendReport">Guardar reporte</button></div>
+                    <div class="success" id="reportSuccess" data-i18n="reportSuccess">Tu reporte fue preparado. Ahora puedes enviarlo al equipo técnico con toda la información.</div>
+                </form>
+            </div>
+        </section>
+
+        <section class="panel" id="suggestions-panel">
+            <div class="panel-header">
+                <div>
+                    <h2 data-i18n="suggestions">Enviar sugerencias</h2>
+                    <p data-i18n="suggestionsIntro">Si tienes ideas para mejorar reservas, perfiles, noticias o soporte, este espacio es para eso.</p>
+                </div>
+            </div>
+            <div class="form-card">
+                <h3 data-i18n="suggestionsFormTitle">Formulario de sugerencias</h3>
+                <p class="form-note" data-i18n="suggestionsFormNote">Comparte una mejora concreta y explica como ayudaria a los clientes o al equipo.</p>
+                <form id="suggestionsForm">
+                    <div class="form-grid">
+                        <div class="field"><label for="suggestionName" data-i18n="nameLabel">Nombre</label><input id="suggestionName" name="name" type="text" placeholder="Tu nombre"></div>
+                        <div class="field"><label for="suggestionEmail" data-i18n="emailLabel">Correo electrónico</label><input id="suggestionEmail" name="email" type="email" placeholder="tu@email.com"></div>
+                        <div class="field"><label for="suggestionTopic" data-i18n="topicLabel">Tema</label><input id="suggestionTopic" name="topic" type="text" placeholder="Ej. mejoras para citas o perfil"></div>
+                    </div>
+                    <div class="field" style="margin-top:1rem;"><label for="suggestionMessage" data-i18n="ideaLabel">Tu idea</label><textarea id="suggestionMessage" name="message" placeholder="Cuentanos tu sugerencia"></textarea></div>
+                    <div class="form-actions"><button class="btn" type="submit" data-i18n="sendSuggestion">Guardar sugerencia</button></div>
+                    <div class="success" id="suggestionSuccess" data-i18n="suggestionSuccess">Tu sugerencia fue guardada. Puedes copiarla o enviarla luego al equipo técnico.</div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer data-site-footer></footer>
+
+
+    <div class="mobile-bottom-nav"><a href="index.html"><i class="fas fa-house"></i><span data-i18n="homeTab">Inicio</span></a><a href="services.html"><i class="fas fa-scissors"></i><span data-i18n="servicesTab">Servicios</span></a><a href="booking.html"><i class="fas fa-calendar-check"></i><span data-i18n="bookingTab">Cita</span></a><a href="news.html"><i class="fas fa-newspaper"></i><span data-i18n="newsTab">Noticias</span></a><a class="active" href="settings.html"><i class="fas fa-gear"></i><span data-i18n="configTab">Config</span></a></div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        const translations = {
+            es: {
+                back:'← Volver', homeTab:'Inicio', servicesTab:'Servicios', bookingTab:'Cita', newsTab:'Noticias', configTab:'Config',
+                title:'Soporte', intro:'Encuentra ayuda rápida, respuestas frecuentes y formularios para comunicarte con el equipo técnico cuando lo necesites.',
+                helpCenter:'Centro de ayuda', helpCenterDesc:'Guias paso a paso para sacar, administrar o cancelar una cita.', helpCenterText:'Este espacio reune guias practicas para que cualquier cliente pueda completar sus acciones más comunes sin complicaciones.', quickAccess:'Acceso rápido', seeGuides:'Ver guias', bookNow:'Sacar una cita',
+                guideBookTitle:'Cómo sacar una cita', guideBook1:'Entra a la sección de cita desde el menú principal.', guideBook2:'Selecciona el servicio, el barbero y la fecha que prefieras.', guideBook3:'Completa tus datos y confirma para guardar la reserva.',
+                guideCancelTitle:'Cómo cancelar una cita', guideCancel1:'Ten a mano tu nombre completo y el código de tu cita.', guideCancel2:'Llama o escribe por WhatsApp a la barbería o a tu barbero.', guideCancel3:'Pide la cancelación y revisa la Política de Reservaciones.',
+                guideMoveTitle:'Cómo reprogramar', guideMove1:'Comunícate con la barbería con el código de tu cita.', guideMove2:'Escoge con el personal una nueva fecha u horario disponible.', guideMove3:'Consulta el estado con tu código para verificar el cambio.',
+                guideNewsTitle:'Como ver avisos importantes', guideNews1:'Toca la sección de noticias en la navegación inferior.', guideNews2:'Revisa cierres, horarios especiales y anuncios del equipo.', guideNews3:'Consulta esa area antes de tu visita si hubo cambios recientes.',
+                faq:'Preguntas frecuentes', faqDesc:'Respuestas sobre citas, productos, ubicación, pagos y servicio.', faqIntro:'Incluye las respuestas visibles en la página principal y otras dudas comunes para ayudar al cliente más rápido.',
+                faqQ1:'¿Necesito cita previa?', faqA1:'Sí, trabajamos exclusivamente con citas para garantizar la experiencia VIP de cada cliente.', faqQ2:'¿Manejan productos premium?', faqA2:'Vendemos productos seleccionados de la más alta calidad para el cuidado de tu cabello y barba.', faqQ3:'¿Dónde están ubicados?', faqA3:'Nos encontramos en Barranquitas, Puerto Rico.', faqQ4:'¿Puedo cancelar mi cita?', faqA4:'Sí. Comunícate con la barbería por teléfono o WhatsApp y te ayudamos a cancelarla o cambiarla.', faqQ5:'¿Cuánto tiempo dura un servicio VIP?', faqA5:'Depende de la opción elegida, pero los servicios VIP pueden durar desde 30 minutos hasta 2 horas y 45 minutos.', faqQ6:'¿Puedo elegir mi barbero favorito?', faqA6:'Claro, escoges tu barbero al reservar tu cita.', faqQ7:'¿Publican avisos importantes?', faqA7:'Sí, contamos con una página de noticias para cierres, horarios especiales y anuncios del equipo.', faqQ8:'¿Qué hago si el horario que quiero no aparece?', faqA8:'Prueba con otro barbero o revisa una fecha distinta. La disponibilidad cambia según las citas ya reservadas.', faqQ9:'¿Puedo consultar precios antes de reservar?', faqA9:'Sí, en la sección de servicios puedes ver el menu completo antes de sacar tu cita.',
+                contact:'Contactar soporte', contactDesc:'Angel Tech Solutions, correo técnico, página web y canales oficiales.', contactIntro:'El soporte técnico es manejado por Angel Tech Solutions. Puedes escribir por correo o usar el formulario disponible en su página oficial.', contactCompany:'Empresa', contactCompanyText:'Angel Tech Solutions ofrece soporte técnico y seguimiento para la plataforma de la barbería.', contactWebsite:'Página web', contactEmail:'Correo de soporte', contactHow:'Cómo contactarlo', contactHowText:'Puedes contactar a Angel Tech Solutions desde el formulario de su página web o escribiendo directamente al correo de soporte técnico.', visitWebsite:'Ir a la página web', sendEmail:'Enviar correo',
+                report:'Reportar un problema', reportDesc:'Envia detalles de errores, fallos o comportamientos inesperados.', reportIntro:'Comparte lo que ocurrio, en que sección paso y que esperabas que sucediera. Mientras más detalles, mejor.', reportFormTitle:'Formulario de problema', reportFormNote:'Este formulario ayuda a preparar la información antes de contactar al equipo técnico.', reportSuccess:'Tu reporte fue preparado. Ahora puedes enviarlo al equipo técnico con toda la información.', sendReport:'Guardar reporte',
+                suggestions:'Enviar sugerencias', suggestionsDesc:'Comparte ideas para mejorar la experiencia de la barbería y la app.', suggestionsIntro:'Si tienes ideas para mejorar reservas, perfiles, noticias o soporte, este espacio es para eso.', suggestionsFormTitle:'Formulario de sugerencias', suggestionsFormNote:'Comparte una mejora concreta y explica como ayudaria a los clientes o al equipo.', suggestionSuccess:'Tu sugerencia fue guardada. Puedes copiarla o enviarla luego al equipo técnico.', sendSuggestion:'Guardar sugerencia',
+                nameLabel:'Nombre', fullNameLabel:'Nombre completo', phoneLabel:'Número de teléfono', emailOptionalLabel:'Correo electrónico (opcional)', areaPick:'Escoge el área', areaOtherLabel:'¿Cuál otra área?', reportRequired:'Todos los campos son obligatorios, menos el correo electrónico.', emailLabel:'Correo electrónico', areaLabel:'Área afectada', areaBooking:'Citas', areaServices:'Servicios', areaNews:'Noticias', areaProfile:'Reseñas', areaOther:'Otra', deviceLabel:'Dispositivo', detailsLabel:'Detalles', topicLabel:'Tema', ideaLabel:'Tu idea'
+            },
+            en: {
+                back:'← Back', homeTab:'Home', servicesTab:'Services', bookingTab:'Booking', newsTab:'News', configTab:'Settings',
+                title:'Support', intro:'Find quick help, common answers, and forms to communicate with the technical team whenever you need it.',
+                helpCenter:'Help center', helpCenterDesc:'Step-by-step guides to book, manage, or cancel an appointment.', helpCenterText:'This section gathers practical guides so any client can complete the most common actions without confusion.', quickAccess:'Quick access', seeGuides:'See guides', bookNow:'Book an appointment',
+                guideBookTitle:'How to book an appointment', guideBook1:'Open the booking section from the main menu.', guideBook2:'Choose the service, barber, and date you prefer.', guideBook3:'Fill in your details and confirm to save the reservation.',
+                guideCancelTitle:'How to cancel an appointment', guideCancel1:'Have your full name and appointment code ready.', guideCancel2:'Call or WhatsApp the barbershop or your barber.', guideCancel3:'Ask for the cancellation and review the Booking Policy.',
+                guideMoveTitle:'How to reschedule', guideMove1:'Contact the barbershop with your appointment code.', guideMove2:'Choose a new available date or time with the staff.', guideMove3:'Check the status with your code to confirm the change.',
+                guideNewsTitle:'How to view important notices', guideNews1:'Tap the news section in the bottom navigation.', guideNews2:'Review closures, special hours, and team announcements.', guideNews3:'Check that area before your visit if there were recent changes.',
+                faq:'Frequently asked questions', faqDesc:'Answers about appointments, products, location, payments, and service.', faqIntro:'It includes the answers visible on the main page plus more common questions to help clients faster.',
+                faqQ1:'Do I need an appointment?', faqA1:'Yes, we work exclusively by appointment to guarantee the VIP experience for every client.', faqQ2:'Do you carry premium products?', faqA2:'We sell carefully selected top-quality products for hair and beard care.', faqQ3:'Where are you located?', faqA3:'We are located in Barranquitas, Puerto Rico.', faqQ4:'Can I cancel my appointment?', faqA4:'Yes. Contact the barbershop by phone or WhatsApp and we will help you cancel or change it.', faqQ5:'How long does a VIP service last?', faqA5:'It depends on the option selected, but VIP services can last from 30 minutes to 2 hours and 45 minutes.', faqQ6:'Can I choose my favorite barber?', faqA6:'Of course, you choose your barber when you book.', faqQ7:'Do you post important notices?', faqA7:'Yes, we have a news page for closures, special hours, and team announcements.', faqQ8:'What if the time I want does not appear?', faqA8:'Try a different barber or another date. Availability changes depending on already booked appointments.', faqQ9:'Can I check prices before booking?', faqA9:'Yes, in the services section you can see the full menu before booking your appointment.',
+                contact:'Contact support', contactDesc:'Angel Tech Solutions, technical email, website, and official channels.', contactIntro:'Technical support is handled by Angel Tech Solutions. You can write by email or use the form available on their official website.', contactCompany:'Company', contactCompanyText:'Angel Tech Solutions provides technical support and follow-up for the barbershop platform.', contactWebsite:'Website', contactEmail:'Support email', contactHow:'How to contact them', contactHowText:'You can contact Angel Tech Solutions through the form on their website or by writing directly to the technical support email.', visitWebsite:'Go to website', sendEmail:'Send email',
+                report:'Report a problem', reportDesc:'Send details about bugs, issues, or unexpected behavior.', reportIntro:'Share what happened, where it happened, and what you expected. The more detail, the better.', reportFormTitle:'Issue form', reportFormNote:'This form helps prepare the information before contacting the technical team.', reportSuccess:'Your report was prepared. You can now send it to the technical team with all the details.', sendReport:'Save report',
+                suggestions:'Send suggestions', suggestionsDesc:'Share ideas to improve the barbershop and app experience.', suggestionsIntro:'If you have ideas to improve booking, profiles, news, or support, this is the place.', suggestionsFormTitle:'Suggestion form', suggestionsFormNote:'Share one concrete improvement and explain how it would help clients or the team.', suggestionSuccess:'Your suggestion was saved. You can copy it or send it to the technical team later.', sendSuggestion:'Save suggestion',
+                nameLabel:'Name', fullNameLabel:'Full name', phoneLabel:'Phone number', emailOptionalLabel:'Email (optional)', areaPick:'Choose the area', areaOtherLabel:'Which other area?', reportRequired:'All fields are required except email.', emailLabel:'Email', areaLabel:'Affected area', areaBooking:'Appointments', areaServices:'Services', areaNews:'News', areaProfile:'Reviews', areaOther:'Other', deviceLabel:'Device', detailsLabel:'Details', topicLabel:'Topic', ideaLabel:'Your idea'
+            }
+        };
+
+        function toggleFaq(el) { el.classList.toggle('active'); }
+        function activatePanel(panelId) {
+            document.querySelectorAll('.menu-card').forEach(card => card.classList.toggle('active', card.dataset.panel === panelId));
+            document.querySelectorAll('.panel').forEach(panel => panel.classList.toggle('active', panel.id === panelId));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        document.querySelectorAll('.menu-card').forEach(card => {
+            card.addEventListener('click', () => activatePanel(card.dataset.panel));
+        });
+        function wireForm(formId, successId) {
+            const form = document.getElementById(formId);
+            const success = document.getElementById(successId);
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                success.style.display = 'block';
+                window.GabyData.toast('Mensaje enviado. Gracias por escribirnos.', 'success');
+                form.reset();
+            });
+        }
+        const reportArea = document.getElementById('reportArea');
+        const reportOtherWrap = document.getElementById('reportOtherWrap');
+        const reportOther = document.getElementById('reportOther');
+        function syncReportOther() {
+            const isOther = reportArea.value === 'other';
+            reportOtherWrap.hidden = !isOther;
+            reportOther.required = isOther;
+            if (!isOther) reportOther.value = '';
+        }
+        reportArea.addEventListener('change', syncReportOther);
+        document.getElementById('reportForm').addEventListener('reset', () => setTimeout(syncReportOther));
+        syncReportOther();
+        // El teléfono debe tener 10 dígitos (se aceptan espacios, guiones y paréntesis).
+        const reportPhone = document.getElementById('reportPhone');
+        reportPhone.addEventListener('input', () => {
+            const digits = reportPhone.value.replace(/\D/g, '').length;
+            reportPhone.setCustomValidity(reportPhone.value && (digits < 10 || digits > 11) ? 'Escribe un número de teléfono de 10 dígitos.' : '');
+        });
+        if (window.location.hash === '#contacto') activatePanel('contact-panel');
+        wireForm('reportForm', 'reportSuccess');
+        wireForm('suggestionsForm', 'suggestionSuccess');
+        window.GabyPreferences.initPreferences({ translations });
+    </script>
+</body>
+</html>
+

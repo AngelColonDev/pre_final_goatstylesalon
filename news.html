@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        :root {
+            --gold: var(--theme-gold);
+            --gold-soft: var(--theme-gold-soft);
+            --bg: var(--theme-bg);
+            --panel: var(--theme-panel);
+            --text: var(--theme-text);
+            --muted: var(--theme-muted);
+            --border: var(--theme-line);
+        }
+
+        body.light-mode .top { background: transparent; border-bottom: none; }
+        body.light-mode .card { background: #fff; }
+        body.light-mode .field input, body.light-mode .field select { background: rgba(0,0,0,.03); }
+        body.light-mode .barber-chip { background: rgba(0,0,0,.05); }
+        body.light-mode .news-body { color: #333; }
+        body.light-mode .footer-pro { background: #fff; border-top-color: rgba(0,0,0,.06); }
+        body.light-mode .footer-col a, body.light-mode .footer-col p { color: #555; }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(212,175,55,.16), transparent 22%),
+                linear-gradient(180deg, #090909 0%, #050505 100%);
+            min-height: 100vh;
+            padding-bottom: 92px;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
+
+        .wrap {
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 28px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3.2rem);
+            margin-bottom: 10px;
+        }
+
+        .sub {
+            color: var(--muted);
+            max-width: 720px;
+            line-height: 1.7;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            border-radius: 999px;
+            padding: 12px 18px;
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 62%, #87640f 100%);
+            color: #111;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid rgba(212,175,55,.35);
+        }
+
+        .card {
+            background: linear-gradient(180deg, rgba(18,18,18,.98), rgba(10,10,10,.98));
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 22px;
+        }
+
+        .filters {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+            align-items: end;
+        }
+
+        .field {
+            display: grid;
+            gap: 8px;
+        }
+
+        .field label {
+            color: var(--gold-soft);
+            font-size: .82rem;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            height: 52px;
+            border-radius: 16px;
+            border: 1px solid rgba(212,175,55,.22);
+            background-color: #121212;
+            color: var(--text);
+            padding: 0 16px;
+            font: inherit;
+            color-scheme: dark;
+            transition: border-color .18s ease, box-shadow .18s ease;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 4px rgba(212,175,55,.15);
+        }
+
+        /* Select con flecha propia: la lista desplegable usa colores legibles en ambos temas */
+        .field select {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 44px;
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23d4af37' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+        }
+
+        .field select option {
+            background-color: #161616;
+            color: #f5f1e8;
+        }
+
+        .field input::-webkit-calendar-picker-indicator {
+            filter: invert(78%) sepia(42%) saturate(600%) hue-rotate(4deg);
+            cursor: pointer;
+        }
+
+        body.light-mode .field input,
+        body.light-mode .field select {
+            background-color: #fff;
+            color: #111;
+            border-color: rgba(0,0,0,.12);
+            color-scheme: light;
+        }
+
+        body.light-mode .field select option {
+            background-color: #fff;
+            color: #111;
+        }
+
+        body.light-mode .field input::-webkit-calendar-picker-indicator { filter: none; }
+
+        .filter-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .filter-actions .btn {
+            height: 52px;
+            width: 100%;
+        }
+
+        .btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+        .btn-primary:hover { filter: brightness(1.06); }
+        .btn-ghost:hover { background: rgba(212,175,55,.08); border-color: rgba(212,175,55,.6); }
+        body.light-mode .btn-ghost { color: #111; }
+
+        .results-meta {
+            color: var(--muted);
+        }
+
+        .grid {
+            display: grid;
+            gap: 18px;
+            margin-top: 18px;
+        }
+
+        .news-card {
+            overflow: hidden;
+        }
+
+        .news-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            margin-bottom: 14px;
+        }
+
+        .badge {
+            display: inline-flex;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(212,175,55,.14);
+            color: var(--gold);
+            font-size: .74rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+
+        .barber-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.05);
+            color: var(--text);
+            font-size: .78rem;
+        }
+
+        .meta {
+            color: var(--muted);
+            margin: 10px 0 14px;
+            line-height: 1.7;
+        }
+
+        .news-img {
+            width: 100%;
+            max-height: 360px;
+            object-fit: cover;
+            border-radius: 18px;
+            margin-bottom: 14px;
+        }
+
+        .news-body {
+            line-height: 1.85;
+            color: #ece6d8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 24px;
+            color: var(--muted);
+        }
+
+        .footer-pro {
+            background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(212,175,55,0.12);
+            margin-top: 3rem;
+        }
+
+        .footer-pro-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        .footer-brand img {
+            width: 88px;
+            height: auto;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 18px rgba(212,175,55,0.28));
+        }
+
+        .footer-brand h3 {
+            font-size: 1.4rem;
+            margin-bottom: .75rem;
+        }
+
+        .footer-col h4 {
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .footer-col a,
+        .footer-col p {
+            color: #b6b6b6;
+            line-height: 1.8;
+        }
+        .footer-payments { max-width: 1180px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(212,175,55,0.12); display: flex; align-items: center; justify-content: center; gap: 1.3rem; flex-wrap: wrap; color: #999; font-size: 0.85rem; }
+        .footer-payments i { font-size: 1.8rem; }
+        .footer-payments .fa-cc-visa { color: #2566AF; }
+        .footer-payments .fa-cc-mastercard { color: #EB5424; }
+        .footer-payments .fa-apple-pay { color: #e8e8e8; }
+        .footer-payments .fa-paypal { color: #3B8FE0; }
+        .footer-payments .ath-badge { font-weight: 700; letter-spacing: 0.03em; padding: 0.3rem 0.7rem; border: 1px solid rgba(76,196,99,0.4); border-radius: 8px; color: #4CC463; font-size: 0.78rem; }
+        body.light-mode .footer-payments { color: #666; border-top-color: rgba(0,0,0,0.06); }
+        body.light-mode .footer-payments .fa-apple-pay { color: #1d1d1f; }
+
+        .footer-credit {
+            display: inline-flex;
+            align-items: center;
+            gap: .45rem;
+            color: var(--gold-soft);
+            font-weight: 600;
+        }
+
+        
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        .mobile-bottom-nav a,
+        .mobile-bottom-nav button {
+            background: transparent;
+            border: none;
+            color: #d8d2c3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .mobile-bottom-nav i {
+            font-size: 1.05rem;
+            color: var(--gold);
+        }
+
+        .mobile-bottom-nav .active {
+            color: var(--gold-soft);
+        }
+
+        @media (max-width: 900px) {
+            .top { flex-direction: column; }
+            .filters { grid-template-columns: 1fr 1fr; }
+            .footer-pro-inner { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 968px) {
+            body { padding-bottom: 92px; }
+            .mobile-bottom-nav {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2500;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 0.25rem;
+                padding: 0.8rem 0.7rem calc(0.8rem + env(safe-area-inset-bottom));
+                background: rgba(8, 8, 8, 0.96);
+                backdrop-filter: blur(16px);
+                border-top: 1px solid rgba(212,175,55,0.15);
+                box-shadow: 0 -12px 30px rgba(0,0,0,0.3);
+            }
+        }
+
+        @media (min-width: 969px) {
+            body { padding-bottom: 0; }
+            .mobile-bottom-nav { display: none; }
+        }
+
+        @media (max-width: 640px) {
+            .wrap { padding: 28px 16px 40px; }
+            .filters { grid-template-columns: 1fr; }
+            .filter-spacer { display: none; }
+            .news-head { flex-direction: column; }
+            .filter-actions { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="top">
+            <div>
+                <h1>Noticias de la Barbería</h1>
+                <p class="sub">Avisos oficiales, horarios especiales, anuncios del equipo y actualizaciones importantes de Goat Style Salon.</p>
+            </div>
+            <a class="btn btn-primary" href="index.html"><i class="fas fa-arrow-left"></i> Volver al sitio</a>
+        </div>
+
+        <div class="card" data-maintenance-hide="noticias">
+            <div class="filters">
+                <div class="field">
+                    <label for="news-date">Buscar por fecha</label>
+                    <input id="news-date" type="date">
+                </div>
+                <div class="field">
+                    <label for="news-time">Buscar por hora</label>
+                    <input id="news-time" type="time">
+                </div>
+                <div class="field">
+                    <label for="news-barber">Buscar por barbero</label>
+                    <select id="news-barber">
+                        <option value="">Todos los barberos</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label class="filter-spacer" aria-hidden="true">&nbsp;</label>
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" type="button" onclick="applyNewsFilters()">Buscar</button>
+                        <button class="btn btn-ghost" type="button" onclick="resetNewsFilters()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="results-meta" id="news-results-meta"></div>
+        </div>
+
+        <div class="grid" id="news-list" data-maintenance-section="noticias"></div>
+    </div>
+
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav">
+        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
+        <a href="services.html"><i class="fas fa-scissors"></i><span>Servicios</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
+        <a href="news.html" class="active"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        const list = document.getElementById('news-list');
+        const resultsMeta = document.getElementById('news-results-meta');
+        const newsDate = document.getElementById('news-date');
+        const newsTime = document.getElementById('news-time');
+        const newsBarber = document.getElementById('news-barber');
+        const db = window.GabyData.getState();
+        const allNews = [...db.news].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleString('es-PR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+        }
+
+        function formatDateValue(dateString) {
+            const date = new Date(dateString);
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatTimeValue(dateString) {
+            const date = new Date(dateString);
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        function barberLabel(barber) {
+            return barber.alias && barber.alias !== barber.name ? `${barber.name} (${barber.alias})` : barber.name;
+        }
+
+        // Lista todo el equipo (no solo quien ya público), con la cantidad de noticias de cada uno.
+        function populateBarberFilter() {
+            const options = (db.barbers || []).map(barber => {
+                const count = allNews.filter(item => item.authorId === barber.id).length;
+                return `<option value="${barber.id}">${barberLabel(barber)} (${count})</option>`;
+            });
+            newsBarber.innerHTML = `<option value="">Todos los barberos (${allNews.length})</option>${options.join('')}`;
+        }
+
+        function renderNews(newsItems) {
+            resultsMeta.textContent = `${newsItems.length} noticia(s) encontrada(s).`;
+
+            if (!newsItems.length) {
+                list.innerHTML = `
+                    <div class="card empty-state">
+                        <h3 style="margin-bottom: 0.8rem;">No encontramos noticias con esos filtros</h3>
+                        <p>Prueba otra fecha, hora o barbero para ver más publicaciones.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            list.innerHTML = newsItems.map(item => `
+                <article class="card news-card">
+                    <div class="news-head">
+                        <div>
+                            <div class="badge">${item.role}</div>
+                            <h2>${item.title}</h2>
+                        </div>
+                        <div class="barber-chip"><i class="fas fa-user"></i> ${item.authorName}</div>
+                    </div>
+                    <div class="meta">
+                        <div><strong>Fecha:</strong> ${formatDate(item.createdAt)}</div>
+                        <div><strong>Hora:</strong> ${formatTimeValue(item.createdAt)}</div>
+                    </div>
+                    ${item.image ? `<img class="news-img" src="${item.image}" alt="${item.title}">` : ''}
+                    <p class="news-body">${item.body}</p>
+                </article>
+            `).join('');
+        }
+
+        function applyNewsFilters() {
+            const selectedDate = newsDate.value;
+            const selectedTime = newsTime.value;
+            const selectedBarber = newsBarber.value;
+
+            const filteredNews = allNews.filter(item => {
+                const matchesDate = !selectedDate || formatDateValue(item.createdAt) === selectedDate;
+                const matchesTime = !selectedTime || formatTimeValue(item.createdAt) === selectedTime;
+                const matchesBarber = !selectedBarber || item.authorId === selectedBarber;
+                return matchesDate && matchesTime && matchesBarber;
+            });
+
+            renderNews(filteredNews);
+        }
+
+        function resetNewsFilters() {
+            newsDate.value = '';
+            newsTime.value = '';
+            newsBarber.value = '';
+            renderNews(allNews);
+        }
+
+        populateBarberFilter();
+        newsBarber.addEventListener('change', applyNewsFilters);
+        renderNews(allNews);
+        window.GabyPreferences.initPreferences({});
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+

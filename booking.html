@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservaciones | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        :root {
+            --gold: var(--theme-gold);
+            --gold-soft: var(--theme-gold-soft);
+            --text: var(--theme-text);
+            --muted: var(--theme-muted);
+            --border: var(--theme-line);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(212,175,55,.16), transparent 20%),
+                linear-gradient(180deg, #0a0a0a 0%, #040404 100%);
+            min-height: 100vh;
+            padding-bottom: 92px;
+        }
+        a { color: inherit; text-decoration: none; }
+        h1, h2, h3 { font-family: 'Cinzel', serif; }
+        body.light-mode .card { background: #fff; box-shadow: 0 10px 24px rgba(16,24,40,.08); }
+        body.light-mode .field input, body.light-mode .field select, body.light-mode .field textarea { background: rgba(0,0,0,.03); }
+        body.light-mode .alert-box, body.light-mode .consult-status, body.light-mode .tip, body.light-mode .policy-notice { background: rgba(0,0,0,.03); }
+        body.light-mode .footer-pro { background: #fff; border-top-color: rgba(0,0,0,.06); }
+        body.light-mode .footer-col a, body.light-mode .footer-col p { color: #555; }
+        .topbar {
+            position: sticky; top: 0; z-index: 20;
+            display: flex; justify-content: space-between; gap: 1rem; align-items: center;
+            padding: 1rem 1.3rem; background: rgba(8,8,8,.86); backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(212,175,55,.12);
+        }
+        .brand { color: var(--gold); font-weight: 800; letter-spacing: .12em; }
+        .wrap { max-width: 1180px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+        .hero { display: grid; gap: 1rem; margin-bottom: 2rem; }
+        .eyebrow { color: var(--gold-soft); font-size: .82rem; letter-spacing: .22em; text-transform: uppercase; }
+        h1 { font-size: clamp(2.1rem, 5vw, 3.8rem); }
+        .sub { color: var(--muted); max-width: 780px; line-height: 1.8; }
+        .layout { display: grid; grid-template-columns: 1.2fr .8fr; gap: 1.25rem; }
+        .card {
+            background: linear-gradient(180deg, rgba(18,18,18,.98), rgba(9,9,9,.98));
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            padding: 1.5rem;
+        }
+        .stack { display: grid; gap: 1rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .field { display: grid; gap: .5rem; }
+        .field label { color: var(--gold-soft); font-size: .85rem; }
+        .field input, .field select, .field textarea {
+            width: 100%;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,.03);
+            color: var(--text);
+            padding: .95rem 1rem;
+            font: inherit;
+        }
+        .field textarea { resize: vertical; min-height: 4rem; }
+        .vip-box { background: rgba(212,175,55,.06); border: 1px solid rgba(212,175,55,.3); border-radius: 20px; padding: 1.2rem; }
+        .vip-box h3 { margin-bottom: .35rem; font-size: 1.05rem; }
+        .vip-box > p { color: var(--muted); font-size: .85rem; margin-bottom: 1rem; line-height: 1.6; }
+        .policy-notice { border-radius: 16px; border: 1px solid var(--border); background: rgba(255,255,255,.03); padding: .9rem 1rem; color: var(--muted); font-size: .82rem; line-height: 1.6; }
+        .policy-notice strong { color: var(--text); }
+        .policy-notice a, .policy-check a { color: var(--gold); text-decoration: underline; }
+        .policy-check { display: flex; align-items: flex-start; gap: .65rem; font-size: .82rem; color: var(--muted); line-height: 1.5; cursor: pointer; }
+        .policy-check input { margin-top: .2rem; width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--gold); }
+        .btn {
+            display: inline-flex; align-items: center; justify-content: center; gap: .65rem;
+            border-radius: 999px; padding: .95rem 1.4rem; font-size: .78rem; letter-spacing: .08em;
+            text-transform: uppercase; font-weight: 700; border: none; cursor: pointer;
+        }
+        .btn-primary { background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 62%, #87640f 100%); color: #111; }
+        .btn-ghost { border: 1px solid rgba(212,175,55,.35); background: transparent; color: var(--text); }
+        .alert-box, .consult-status, .tip {
+            border-radius: 18px;
+            padding: 1rem 1.1rem;
+            background: rgba(255,255,255,.03);
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+        .alert-box { display: none; }
+        .alert-box.show { display: block; }
+        .alert-code { font-size: 1.5rem; color: var(--gold); font-weight: 800; margin: .65rem 0; }
+        .consult-group { display: flex; gap: .75rem; margin-top: 1rem; }
+        .tip-list { display: grid; gap: 1rem; margin-top: 1rem; }
+        .tip strong { display: block; margin-bottom: .45rem; color: var(--text); }
+        .footer-pro {
+            background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(212,175,55,0.12);
+        }
+        .footer-pro-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr;
+            gap: 2rem;
+        }
+        .footer-brand img { width: 88px; margin-bottom: 1rem; filter: drop-shadow(0 0 18px rgba(212,175,55,0.28)); }
+        .footer-col h4, .footer-brand h3 { font-family: 'Cinzel', serif; }
+        .footer-col h4 { color: var(--gold); margin-bottom: 1rem; }
+        .footer-col a, .footer-col p { color: #b6b6b6; line-height: 1.8; }
+        .footer-payments { max-width: 1180px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(212,175,55,0.12); display: flex; align-items: center; justify-content: center; gap: 1.3rem; flex-wrap: wrap; color: #999; font-size: 0.85rem; }
+        .footer-payments i { font-size: 1.8rem; }
+        .footer-payments .fa-cc-visa { color: #2566AF; }
+        .footer-payments .fa-cc-mastercard { color: #EB5424; }
+        .footer-payments .fa-apple-pay { color: #e8e8e8; }
+        .footer-payments .fa-paypal { color: #3B8FE0; }
+        .footer-payments .ath-badge { font-weight: 700; letter-spacing: 0.03em; padding: 0.3rem 0.7rem; border: 1px solid rgba(76,196,99,0.4); border-radius: 8px; color: #4CC463; font-size: 0.78rem; }
+        body.light-mode .footer-payments { color: #666; border-top-color: rgba(0,0,0,0.06); }
+        body.light-mode .footer-payments .fa-apple-pay { color: #1d1d1f; }
+        .footer-credit { display: inline-flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; color: var(--gold-soft); font-weight: 600; }
+        .footer-credit-logo { width: 30px; height: 30px; border-radius: 8px; display: block; box-shadow: 0 8px 18px rgba(0,0,0,0.22); }
+        .mobile-bottom-nav {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 30;
+            display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .25rem;
+            padding: .8rem .7rem calc(.8rem + env(safe-area-inset-bottom));
+            background: rgba(8,8,8,.96); backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(212,175,55,.15);
+        }
+        .mobile-bottom-nav a {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem;
+            color: #d8d2c3; font-size: .68rem; font-weight: 600;
+        }
+        .mobile-bottom-nav i { color: var(--gold); font-size: 1.05rem; }
+        .mobile-bottom-nav .active { color: var(--gold-soft); }
+        @media (max-width: 900px) {
+            .layout, .footer-pro-inner, .grid { grid-template-columns: 1fr; }
+            .consult-group { flex-direction: column; }
+        }
+        @media (min-width: 969px) {
+            body { padding-bottom: 0; }
+            .mobile-bottom-nav { display: none; }
+        }
+        .my-appointments { display: grid; gap: 1rem; }
+        .my-appointments[hidden], .booking-card[hidden] { display: none; }
+        .my-appointment { border: 1px solid rgba(212,175,55,.28); border-radius: 22px; padding: 1.25rem; display: grid; gap: .9rem; background: rgba(212,175,55,.05); }
+        .my-appointment-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+        .my-appointment-head h3 { font-size: 1.15rem; }
+        .my-appointment-code { color: var(--muted); font-size: .85rem; margin-top: .25rem; }
+        .status-pill { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 999px; font-size: .78rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+        .status-pill.pending { background: rgba(247,199,107,.15); color: #f3d68a; }
+        .status-pill.ok { background: rgba(63,185,80,.16); color: #53d67b; }
+        .status-pill.bad { background: rgba(220,53,69,.16); color: #f07171; }
+        body.light-mode .status-pill.pending { color: #8a6200; }
+        body.light-mode .status-pill.ok { color: #1f7a33; }
+        body.light-mode .status-pill.bad { color: #b42318; }
+        .my-appointment dl { display: grid; gap: .55rem; }
+        .my-appointment dl div { display: grid; grid-template-columns: 90px 1fr; gap: .75rem; font-size: .92rem; }
+        .my-appointment dt { color: var(--muted); }
+        .my-appointment dd { font-weight: 600; }
+        .my-appointment-note { color: var(--muted); font-size: .86rem; line-height: 1.6; }
+        .new-booking-btn { justify-self: start; }
+    </style>
+</head>
+<body>
+    <div class="topbar" data-mobile-topbar>
+        <a class="brand" href="index.html">GOAT STYLE SALON</a>
+        <a class="btn btn-ghost" href="settings.html">Configuración</a>
+    </div>
+
+    <main class="wrap">
+        <section class="hero">
+            <span class="eyebrow">Goat Style Salon</span>
+            <h1 id="booking-title">Reserva tu cita</h1>
+            <p class="sub" id="booking-sub">Escoge el servicio, tu barbero, la fecha y la hora. Solo necesitas tu nombre completo.</p>
+        </section>
+
+        <div class="layout" data-maintenance-section="reservas">
+            <div class="stack">
+                <!-- Mi cita: aparece si en este dispositivo se reservó una cita que todavía no ha pasado. -->
+                <section class="card my-appointments" id="my-appointments" hidden aria-labelledby="booking-title">
+                    <div id="my-appointments-list" class="my-appointments"></div>
+                    <p class="my-appointment-note">Para cambiar o cancelar tu cita, comunícate con la barbería.</p>
+                    <button class="btn btn-ghost new-booking-btn" type="button" id="new-booking-btn"><i class="fas fa-plus"></i> Sacar otra cita</button>
+                </section>
+                <section class="card booking-card" id="booking-card">
+                    <div id="booking-widget"></div>
+                </section>
+            </div>
+
+            <aside class="stack">
+                <div class="card">
+                    <h2 style="margin-bottom: 1rem;">Consultar estado</h2>
+                    <div class="field">
+                        <label for="consult-input">Código</label>
+                        <input id="consult-input" type="text" placeholder="GS-XXXXXX">
+                    </div>
+                    <div class="consult-group">
+                        <button class="btn btn-primary" type="button" onclick="checkStatus()">Buscar</button>
+                    </div>
+                    <div class="consult-status" id="consult-result" style="margin-top: 1rem;">Usa tu código para ver el estado de la solicitud.</div>
+                </div>
+
+                <div class="card">
+                    <h2 style="margin-bottom: 1rem;">Próximos espacios</h2>
+                    <div class="tip-list" id="next-slots"></div>
+                </div>
+
+                <div class="card">
+                    <h2 style="margin-bottom: 1rem;">Antes de reservar</h2>
+                    <div class="tip-list">
+                        <div class="tip"><strong>Pago presencial</strong>Los precios son informativos. Pagas en la barbería; esta página no cobra nada.</div>
+                        <div class="tip"><strong>Horarios reales</strong>Solo verás horas en que tu barbero realmente está libre.</div>
+                        <div class="tip"><strong>Sin cuenta</strong>Solo escribes tu nombre completo al final. Guarda el código de tu cita para consultar su estado.</div>
+                        <div class="tip"><strong>Cambios y cancelaciones</strong>Comunícate con la barbería para reprogramar o cancelar tu cita según la política.</div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </main>
+
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav">
+        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
+        <a href="services.html"><i class="fas fa-scissors"></i><span>Servicios</span></a>
+        <a href="booking.html" class="active"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="shared-forms.js"></script>
+    <script src="booking-engine.js"></script>
+    <script src="booking-widget.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        const B = window.GabyBooking;
+        function getDb() { return window.GabyData.getState(); }
+
+        // Reserva paso a paso (booking-widget.js). No hace falta cuenta: se pide el nombre completo al final.
+        const bookingWidget = window.GabyBookingWidget.mount(document.getElementById('booking-widget'));
+
+        // ---------------- Mi cita (citas reservadas desde este dispositivo)
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        const STATUS_NOTES = {
+            PENDIENTE: 'Tu barbero todavía no la ha confirmado.',
+            APROBADA: '¡Confirmada! Te esperamos.',
+            RECHAZADA: 'El barbero no pudo aceptarla. Puedes sacar otra cita.',
+            CANCELADA: 'Esta cita fue cancelada.'
+        };
+        function statusClass(status) {
+            if (status === 'APROBADA' || status === 'COMPLETADA') return 'ok';
+            if (['RECHAZADA', 'CANCELADA', 'NO_SHOW'].includes(status)) return 'bad';
+            return 'pending';
+        }
+        const capitalize = text => String(text).charAt(0).toUpperCase() + String(text).slice(1);
+        let showingNewBooking = false;
+        function renderMyAppointments(list) {
+            const panel = document.getElementById('my-appointments');
+            const card = document.getElementById('booking-card');
+            const items = list || B.myUpcomingAppointments();
+            const hasAny = items.length > 0;
+            panel.hidden = !hasAny || showingNewBooking;
+            card.hidden = hasAny && !showingNewBooking;
+            document.getElementById('booking-title').textContent = hasAny && !showingNewBooking ? (items.length > 1 ? 'Tus citas' : 'Tu cita') : 'Reserva tu cita';
+            document.getElementById('booking-sub').textContent = hasAny && !showingNewBooking
+                ? 'Aquí ves el estado de la cita que reservaste en este dispositivo.'
+                : 'Escoge el servicio, tu barbero, la fecha y la hora. Solo necesitas tu nombre completo.';
+            document.getElementById('my-appointments-list').innerHTML = items.map(item => {
+                const date = String(item.dateTime).slice(0, 10);
+                const time = String(item.dateTime).slice(11, 16);
+                return `
+                    <article class="my-appointment">
+                        <div class="my-appointment-head">
+                            <div>
+                                <h3>${escapeHtml(item.service)}</h3>
+                                <div class="my-appointment-code">Código ${escapeHtml(item.code)}</div>
+                            </div>
+                            <span class="status-pill ${statusClass(item.status)}">${escapeHtml(B.statusLabel(item.status))}</span>
+                        </div>
+                        <dl>
+                            <div><dt>Fecha</dt><dd>${escapeHtml(capitalize(B.formatDate(date, { weekday: 'long', day: 'numeric', month: 'long' })))}</dd></div>
+                            <div><dt>Hora</dt><dd>${escapeHtml(B.formatTime(time))}</dd></div>
+                            ${item.barberName ? `<div><dt>Barbero</dt><dd>${escapeHtml(item.barberName)}</dd></div>` : ''}
+                        </dl>
+                        <p class="my-appointment-note">${escapeHtml(STATUS_NOTES[item.status] || '')}</p>
+                    </article>`;
+            }).join('');
+        }
+        document.getElementById('new-booking-btn').addEventListener('click', () => {
+            showingNewBooking = true;
+            renderMyAppointments();
+            document.getElementById('booking-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        renderMyAppointments();
+        B.refreshMyAppointments().then(renderMyAppointments).catch(() => {});
+        // Recién reservada, se deja ver la confirmación; la próxima vez que abras Cita verás tu cita.
+        window.addEventListener('gabymyappointments', () => { if (!showingNewBooking && bookingWidget.step !== 5) renderMyAppointments(); });
+
+        function renderNextSlots() {
+            const box = document.getElementById('next-slots');
+            const db = getDb();
+            box.innerHTML = db.barbers.filter(barber => barber.active !== false).map(barber => {
+                const next = B.nextAvailable(barber.id, 40);
+                return `<div class="tip"><strong>${barber.alias || barber.name}</strong>${next ? `${B.relativeDay(next.date)} · ${B.formatTime(next.time)} <button class="btn btn-ghost" type="button" style="margin-top:.6rem; padding:.55rem .9rem;" data-book-barber="${barber.id}">Reservar con ${escapeHtml(barber.alias || barber.name)}</button>` : 'Sin espacios en los próximos días.'}</div>`;
+            }).join('');
+            // "Reservar": deja escogido ese barbero y lleva al paso de reservar (sin recargar la página).
+            box.querySelectorAll('[data-book-barber]').forEach(button => button.addEventListener('click', () => {
+                showingNewBooking = true;
+                renderMyAppointments();
+                bookingWidget.selectBarber(button.dataset.bookBarber);
+                document.getElementById('booking-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }));
+        }
+
+        async function checkStatus() {
+            const code = document.getElementById('consult-input').value;
+            const result = document.getElementById('consult-result');
+            let found = null;
+            try {
+                found = await B.lookupByCode(code);
+            } catch (error) {
+                result.style.color = '#f07171';
+                result.innerText = 'No se pudo consultar ahora. Intenta de nuevo.';
+                return;
+            }
+            if (found) {
+                result.style.color = ['APROBADA', 'COMPLETADA'].includes(found.status) ? '#53d67b' : ['RECHAZADA', 'CANCELADA', 'NO_SHOW'].includes(found.status) ? '#f07171' : '#f3d68a';
+                result.innerText = `Estado: ${B.statusLabel(found.status)} | ${found.service} | ${B.relativeDay(String(found.dateTime).slice(0, 10))} ${B.formatTime(String(found.dateTime).slice(11, 16))}`;
+                return;
+            }
+            result.style.color = '#f07171';
+            result.innerText = 'Código no encontrado.';
+        }
+
+        renderNextSlots();
+        window.GabyPreferences.initPreferences({});
+    </script>
+</body>
+</html>
+
+
+
+
+
+

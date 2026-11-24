@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GOAT STYLE SALON | Barbería Premium en Barranquitas, PR</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Donde las celebridades confían su imagen. Barbería premium en Barranquitas, Puerto Rico. Cortes VIP, fade, barba, diseño y tratamientos faciales.">
+    <meta name="keywords" content="Barbería en Barranquitas, Barber Shop Barranquitas, Cortes de cabello Barranquitas, Fade Barranquitas, Barbero en Barranquitas, Barbería premium Puerto Rico">
+    <meta property="og:title" content="GOAT Style Salón" />
+    <meta property="og:description" content="Classic Cut, Premium Fade, Signature Cut, tratamientos y GOAT VIP Experience." />
+    <meta property="og:type" content="website" />
+    
+    <!-- Structured Data SEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HairSalon",
+      "name": "GOAT Style Salón",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Barranquitas",
+        "addressRegion": "PR",
+        "addressCountry": "PR"
+      },
+      "priceRange": "$$$",
+      "telephone": "+17872181068"
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <link rel="stylesheet" href="public-reviews.css">
+    <style>
+        /* =========================================
+           1. DESIGN TOKENS & RESET
+           ========================================= */
+        :root {
+            --gold-1: #FBF5B7; --gold-2: #D4AF37; --gold-3: #AA771C;
+            --gold-gradient: linear-gradient(135deg, #BF953F, #FCF6BA, #B38728, #FBF5B7, #AA771C);
+            --black-1: #000000; --black-2: #050505; --black-3: #0A0A0A;
+            --black-glass: rgba(10, 10, 10, 0.7);
+            --white-glass: rgba(255, 255, 255, 0.8);
+            --font-display: 'Cinzel', serif; --font-body: 'Inter', sans-serif;
+            --shadow-gold: 0 0 30px rgba(212, 175, 55, 0.3);
+            --shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+        }
+        body.light-mode {
+            --black-1: #F4F4F4; --black-2: #FFFFFF; --black-3: #EAEAEA;
+            --black-glass: rgba(255, 255, 255, 0.7); --white-glass: rgba(0,0,0,0.05);
+            --shadow-card: 0 10px 30px rgba(0,0,0,0.1);
+            color: #111;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        html { scroll-behavior: smooth; }
+        body { font-family: var(--font-body); background: var(--black-1); color: #fff; overflow-x: hidden; transition: background 0.6s ease, color 0.6s ease; }
+        body.light-mode { color: #111; }
+        ::selection { background: var(--gold-2); color: #000; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--black-2); }
+        ::-webkit-scrollbar-thumb { background: var(--gold-gradient); border-radius: 10px; }
+
+        /* =========================================
+           2. UTILITIES & LAYOUT
+           ========================================= */
+        .container { max-width: 1240px; margin: 0 auto; width: 100%; }
+        section { padding: 6rem 1.5rem; position: relative; z-index: 1; }
+        .text-gold { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% auto; }
+        .glass { background: var(--black-glass); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(212,175,55,0.2); }
+        body.light-mode .glass { background: var(--white-glass); border-color: rgba(0,0,0,0.1); }
+        
+        .section-header { text-align: center; margin-bottom: 5rem; }
+        .section-header h2 { font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 4rem); margin-bottom: 1rem; letter-spacing: 2px; }
+        .section-header p { color: #888; font-size: 1.1rem; letter-spacing: 1px; text-transform: uppercase; }
+        body.light-mode .section-header p { color: #555; }
+        .section-shell { padding: 2.5rem; border-radius: 32px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(212,175,55,0.1); }
+        body.light-mode .section-shell { background: rgba(255,255,255,0.92); border-color: rgba(0,0,0,0.06); box-shadow: 0 18px 40px rgba(0,0,0,0.06); }
+        .quick-nav { padding: 2rem 1.5rem 0; }
+        .quick-nav-inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; }
+        .quick-link-card { display: flex; flex-direction: column; gap: 0.35rem; padding: 1.1rem 1rem; border-radius: 20px; text-decoration: none; background: rgba(255,255,255,0.03); border: 1px solid rgba(212,175,55,0.12); color: #fff; transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease; }
+        .quick-link-card:hover { transform: translateY(-4px); border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.08); }
+        .quick-link-card span { font-family: var(--font-display); font-size: 1rem; color: var(--gold-1); }
+        .quick-link-card small { color: #9d9d9d; line-height: 1.5; }
+        body.light-mode .quick-link-card { background: #fff; color: #111; box-shadow: 0 12px 28px rgba(0,0,0,0.05); }
+        body.light-mode .quick-link-card small { color: #555; }
+        .hero-content { max-width: 980px; margin: 0 auto; }
+        .hero-subtitle { max-width: 720px; margin: 0 auto; }
+        .hero-badges { gap: 1rem; max-width: 820px; margin: 0 auto; }
+        .badge { font-size: 0.85rem; color: #cfcfcf; display: flex; align-items: center; gap: 0.5rem; padding: 0.8rem 1rem; border-radius: 999px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); }
+        body.light-mode .badge { color: #333; background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.06); }
+        .section-header { max-width: 760px; margin: 0 auto 3.5rem; }
+        .section-header h2 { line-height: 1.1; }
+        .section-header p { line-height: 1.6; letter-spacing: 0.02em; text-transform: none; }
+        .services-grid, .barbers-layout, .products-grid, .section-split, .info-split { gap: 1.5rem; }
+        .barbers-layout { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+        .products-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+        .btn { padding: 1rem 2.5rem; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; border-radius: 50px; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: none; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: var(--gold-gradient); background-size: 200% auto; color: #000; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3); }
+        .btn-primary:hover { background-position: right center; transform: translateY(-3px); }
+        .btn-ghost { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        body.light-mode .btn-ghost { color: #111; border-color: rgba(0,0,0,0.2); }
+        .btn-ghost:hover { border-color: var(--gold-2); color: var(--gold-2); transform: translateY(-3px); }
+
+        /* =========================================
+           3. PROGRESS BAR & NAVBAR
+           ========================================= */
+        #progress-bar { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: var(--gold-gradient); z-index: 1000; box-shadow: 0 0 10px var(--gold-2); }
+        nav { position: fixed; top: 0; left: 0; width: 100%; z-index: 999; padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); background: var(--black-glass); border-bottom: 1px solid rgba(255,255,255,0.05); transition: padding 0.4s ease; }
+        body.light-mode nav { border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .nav-logo { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; letter-spacing: 3px; cursor: pointer; }
+        .nav-links { display: flex; gap: 2rem; align-items: center; list-style: none; }
+        .nav-links a { color: #fff; font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1.5px; transition: color 0.3s; cursor: pointer; }
+        body.light-mode .nav-links a { color: #111; }
+        .nav-links a:hover { color: var(--gold-2); }
+        .nav-actions { display: flex; gap: 1rem; align-items: center; }
+        .icon-btn { background: transparent; border: 1px solid rgba(212, 175, 55, 0.3); color: var(--gold-2); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; font-size: 0.9rem; }
+        .icon-btn:hover { background: var(--gold-2); color: #000; transform: rotate(180deg); }
+        .barber-view-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.65rem 1.3rem; border-radius: 50px; border: 1px solid rgba(212,175,55,0.4); color: var(--gold-2); background: transparent; font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; text-decoration: none; transition: all 0.3s ease; white-space: nowrap; }
+        .barber-view-btn:hover { background: var(--gold-2); color: #000; }
+        .flag-btn { padding: 0; overflow: hidden; }
+        .flag-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+        .brand-logo-mini { width: 86px; height: auto; margin: 0 auto 1rem; display: block; filter: drop-shadow(0 0 18px rgba(212,175,55,0.28)); }
+        .dash-brand { display: flex; align-items: center; gap: 1rem; flex: 1; min-width: 0; }
+        .dash-brand img { width: 72px; min-width: 72px; height: auto; display: block; object-fit: contain; filter: drop-shadow(0 0 18px rgba(212,175,55,0.25)); }
+        .dash-brand-copy p { color: #888; margin-top: 0.35rem; }
+        body.light-mode .dash-brand-copy p { color: #555; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+        #dashboard-view {
+            min-height: 100vh;
+            padding: 7rem 2rem 4rem;
+            background:
+                radial-gradient(circle at top right, rgba(212,175,55,0.12), transparent 22%),
+                linear-gradient(180deg, #090909 0%, #040404 100%);
+        }
+        body.light-mode #dashboard-view {
+            background: linear-gradient(180deg, #f7f7f7 0%, #ececec 100%);
+        }
+        #dashboard-view .container {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+        .dash-tabs {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .dash-tab {
+            padding: 0.9rem 1.2rem;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.04);
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        body.light-mode .dash-tab {
+            color: #111;
+            background: rgba(0,0,0,0.04);
+            border-color: rgba(0,0,0,0.08);
+        }
+        .dash-tab.active {
+            background: var(--gold-gradient);
+            color: #000;
+            border-color: transparent;
+            box-shadow: 0 12px 24px rgba(212,175,55,0.2);
+        }
+        .dash-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card,
+        .chart-container {
+            background: rgba(18,18,18,0.96);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 24px;
+            box-shadow: 0 18px 45px rgba(0,0,0,0.22);
+        }
+        body.light-mode .stat-card,
+        body.light-mode .chart-container {
+            background: #fff;
+            border-color: rgba(0,0,0,0.08);
+            box-shadow: 0 14px 34px rgba(16,24,40,0.08);
+        }
+        .stat-card {
+            padding: 1.4rem;
+        }
+        .stat-card h3 {
+            color: #a3a3a3;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 0.85rem;
+        }
+        body.light-mode .stat-card h3 {
+            color: #666;
+        }
+        .stat-card .number {
+            font-family: var(--font-display);
+            font-size: 2.1rem;
+            color: var(--gold-1);
+        }
+        body.light-mode .stat-card .number {
+            color: var(--gold-3);
+        }
+        .chart-container {
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+        .chart-bars {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(52px, 1fr));
+            align-items: end;
+            gap: 0.85rem;
+            height: 240px;
+        }
+        .chart-bars .bar {
+            position: relative;
+            border-radius: 18px 18px 10px 10px;
+            min-height: 48px;
+            background: var(--gold-gradient);
+            box-shadow: 0 10px 24px rgba(212,175,55,0.22);
+        }
+        .chart-bars .bar span {
+            position: absolute;
+            bottom: -1.8rem;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #999;
+            font-size: 0.78rem;
+        }
+        .dash-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 760px;
+        }
+        .dash-table th,
+        .dash-table td {
+            padding: 1rem 0.85rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        body.light-mode .dash-table th,
+        body.light-mode .dash-table td {
+            border-bottom-color: rgba(0,0,0,0.08);
+        }
+        .dash-table th {
+            color: #a3a3a3;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+        body.light-mode .dash-table th {
+            color: #666;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.4rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .status-pendiente { color: #f7c76b; background: rgba(247,199,107,0.14); }
+        .status-aprobada { color: #53d67b; background: rgba(83,214,123,0.14); }
+        .status-rechazada,
+        .status-cancelada { color: #f07171; background: rgba(240,113,113,0.14); }
+        @media (max-width: 980px) {
+            #dashboard-view { padding: 6rem 1rem 3rem; }
+            .dash-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 640px) {
+            .dash-grid,
+            .dash-product-item,
+            .dash-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .dash-actions .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* =========================================
+           4. HERO CINEMATOGRÁFICO (FIXED & PROFESSIONAL)
+           ========================================= */
+        #hero { 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+            overflow: hidden; 
+            position: relative; 
+            padding: 140px 2rem 80px; 
+        }
+        .hero-rays { 
+            position: absolute; 
+            top: 45%; /* Ajustado para centrar con el logo */
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            width: 1200px; 
+            height: 1200px; 
+            background: var(--gold-2); 
+            opacity: 0.04; 
+            filter: blur(120px); 
+            border-radius: 50%; 
+            animation: pulse-rays 8s infinite alternate ease-in-out; 
+            z-index: 0; 
+        }
+        @keyframes pulse-rays { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.04; } 100% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.09; } }
+        
+        .particles { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+        .particle { position: absolute; background: var(--gold-1); border-radius: 50%; box-shadow: 0 0 10px var(--gold-2); animation: float-up linear infinite; }
+        @keyframes float-up { 0% { transform: translateY(100vh) scale(0); opacity: 0; } 50% { opacity: 0.8; } 100% { transform: translateY(-10vh) scale(1.5); opacity: 0; } }
+        
+        .hero-content { 
+            z-index: 2; 
+            max-width: 900px; 
+            animation: fade-up 1.5s ease-out; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+        }
+        @keyframes fade-up { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Contenedor del Logo Imagen */
+        .hero-logo-wrapper {
+            margin-bottom: 2.5rem;
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+        }
+        .hero-logo-img {
+            width: clamp(180px, 30vw, 320px);
+            height: auto;
+            filter: drop-shadow(0 0 25px rgba(212, 175, 55, 0.5)) drop-shadow(0 10px 20px rgba(0,0,0,0.6));
+            object-fit: contain;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        
+        .hero-tagline { 
+            font-size: clamp(0.8rem, 2vw, 1rem); 
+            letter-spacing: 6px; 
+            text-transform: uppercase; 
+            margin-bottom: 2.5rem; 
+            color: #ccc; 
+            font-weight: 500;
+        }
+        body.light-mode .hero-tagline { color: #555; }
+        
+        .hero-title { 
+            font-size: clamp(1.8rem, 4.5vw, 3.5rem); 
+            line-height: 1.2; 
+            margin-bottom: 1.5rem; 
+            font-weight: 600; 
+            font-family: var(--font-display);
+            max-width: 800px;
+        }
+        
+        .hero-subtitle { 
+            font-size: clamp(1rem, 2vw, 1.2rem); 
+            color: #aaa; 
+            max-width: 600px; 
+            margin: 0 auto 3rem; 
+            line-height: 1.6; 
+        }
+        body.light-mode .hero-subtitle { color: #666; }
+        
+        .hero-btns { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 4rem; flex-wrap: wrap; }
+        .hero-badges { display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center; }
+        .badge { font-size: 0.85rem; color: #888; display: flex; align-items: center; gap: 0.5rem; }
+        .badge i { color: var(--gold-2); }
+
+        /* =========================================
+           5. GENERIC SECTIONS (Video, About, etc.)
+           ========================================= */
+        #video-section { height: 70vh; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 0; }
+        #video-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; filter: brightness(0.4) contrast(1.2); }
+        .video-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, var(--black-1), transparent 50%, var(--black-1)); }
+        .video-content { z-index: 2; text-align: center; padding: 2rem; }
+        .video-content h2 { font-size: clamp(2rem, 6vw, 5rem); font-family: var(--font-display); margin-bottom: 1rem; }
+
+        .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
+        .about-img { height: 600px; border-radius: 20px; background-image: url('https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=800&q=80'); background-size: cover; background-position: center; box-shadow: var(--shadow-card); border: 1px solid rgba(212,175,55,0.1); }
+        .about-text h2 { font-family: var(--font-display); font-size: 3rem; margin-bottom: 2rem; line-height: 1.2; }
+        .about-text p { color: #aaa; margin-bottom: 1.5rem; line-height: 1.8; font-size: 1.1rem; }
+        body.light-mode .about-text p { color: #444; }
+
+        /* =========================================
+           6. SERVICES & LIGHTBOX
+           ========================================= */
+        .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 2rem; }
+        .service-card { background: var(--black-2); border: 1px solid rgba(255,255,255,0.05); border-radius: 16px; overflow: hidden; transition: all 0.4s ease; cursor: pointer; position: relative; }
+        body.light-mode .service-card { background: #fff; box-shadow: var(--shadow-card); border: none; }
+        .service-card:hover { transform: translateY(-10px); border-color: var(--gold-2); box-shadow: var(--shadow-card); }
+        .service-info { padding: 2rem; }
+        .service-info h3 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 0.5rem; }
+        .service-details { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.05); }
+        body.light-mode .service-details { border-top: 1px solid rgba(0,0,0,0.05); }
+        .service-price { font-size: 1.8rem; color: var(--gold-2); font-weight: 700; }
+        .service-duration { font-size: 0.85rem; color: #888; text-transform: uppercase; letter-spacing: 1px; }
+        .service-reserve-btn { width: 100%; justify-content: center; margin-top: 1.25rem; padding: 0.85rem 1.5rem; font-size: 0.78rem; }
+
+        /* Payment Methods (footer) */
+        .footer-payments { max-width: 1180px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(212,175,55,0.12); display: flex; align-items: center; justify-content: center; gap: 1.3rem; flex-wrap: wrap; color: #999; font-size: 0.85rem; }
+        .footer-payments i { font-size: 1.8rem; }
+        .footer-payments .fa-cc-visa { color: #2566AF; }
+        .footer-payments .fa-cc-mastercard { color: #EB5424; }
+        .footer-payments .fa-apple-pay { color: #e8e8e8; }
+        .footer-payments .fa-paypal { color: #3B8FE0; }
+        .footer-payments .ath-badge { font-weight: 700; letter-spacing: 0.03em; padding: 0.3rem 0.7rem; border: 1px solid rgba(76,196,99,0.4); border-radius: 8px; color: #4CC463; font-size: 0.78rem; }
+        body.light-mode .footer-payments { color: #666; border-top-color: rgba(0,0,0,0.06); }
+        body.light-mode .footer-payments .fa-apple-pay { color: #1d1d1f; }
+
+        /* Lightbox */
+        .lightbox-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; display: none; justify-content: center; align-items: center; padding: 2rem; backdrop-filter: blur(10px); }
+        .lightbox-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        .lightbox-content { max-width: 800px; width: 100%; max-height: 90vh; overflow: hidden auto; background: var(--black-2); border: 1px solid var(--gold-2); border-radius: 20px; display: grid; align-content: start; }
+        .lightbox-info { padding: 3rem; position: relative; }
+        .vip-includes { margin: 1.5rem 0; padding: 1rem 1.15rem; border: 1px solid rgba(212,175,55,.22); border-radius: 18px; background: rgba(212,175,55,.08); }
+        .vip-includes h4 { margin-bottom: .75rem; color: var(--gold-2); text-transform: uppercase; letter-spacing: .05em; font-size: .9rem; }
+        .vip-includes ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .55rem; }
+        .vip-includes li { display: flex; align-items: center; gap: .65rem; }
+        .vip-includes li::before { content: '•'; color: var(--gold-2); font-size: 1.1rem; line-height: 1; }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; background: transparent; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
+        .lightbox-info h3 { font-family: var(--font-display); font-size: 2rem; margin-bottom: 1rem; color: var(--gold-2); }
+        .lightbox-info p { color: #ccc; margin-bottom: 2rem; line-height: 1.6; }
+
+        /* =========================================
+           7. BOOKING SYSTEM & CRM
+           ========================================= */
+        #reserva { background: var(--black-2); }
+        body.light-mode #reserva { background: var(--black-1); }
+        .booking-wrapper { max-width: 800px; margin: 0 auto; padding: 4rem; border-radius: 32px; }
+        .booking-service-group { margin-bottom: 3rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 0.75rem; margin-bottom: 1.5rem; }
+        .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+        .form-group.full { grid-column: 1 / -1; }
+        .review-publish { border: 1px solid rgba(212,175,55,0.22); border-radius: 16px; padding: 1rem 1.1rem; margin: 0; display: grid; gap: 0.65rem; }
+        .review-publish legend { padding: 0 0.4rem; }
+        .review-publish-option { display: flex; align-items: center; gap: 0.7rem; cursor: pointer; line-height: 1.5; }
+        .review-publish-option input { width: 18px; height: 18px; accent-color: var(--gold-2); flex-shrink: 0; margin: 0; }
+        .form-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: var(--gold-2); font-weight: 600; }
+        .form-input { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 1rem 1.5rem; border-radius: 8px; font-family: var(--font-body); font-size: 1rem; transition: all 0.3s ease; width: 100%; }
+        body.light-mode .form-input { background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); color: #111; }
+        .form-input:focus { outline: none; border-color: var(--gold-2); box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1); }
+        select.form-input { appearance: auto; background: rgba(12,12,12,0.92); color: #fff; border-color: rgba(212,175,55,0.22); }
+        body.light-mode select.form-input { background: #fff; color: #111; }
+        select.form-input option, select.form-input optgroup { background: #f5efe0; color: #111; }
+        textarea.form-input { resize: vertical; min-height: 4.5rem; font-family: var(--font-body); }
+        .vip-box { grid-column: 1 / -1; background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.28); border-radius: 20px; padding: 1.75rem; margin-bottom: 1.5rem; }
+        .vip-box h3 { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.4rem; }
+        .vip-box > p { color: #ccc; font-size: 0.9rem; margin-bottom: 1.25rem; line-height: 1.6; }
+        body.light-mode .vip-box > p { color: #555; }
+        .policy-notice { border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.2); padding: 1rem 1.25rem; color: #bbb; font-size: 0.85rem; line-height: 1.6; margin-bottom: 1.25rem; }
+        body.light-mode .policy-notice { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.08); color: #555; }
+        .policy-notice strong { color: #fff; }
+        body.light-mode .policy-notice strong { color: #111; }
+        .policy-notice a, .policy-check a { color: var(--gold-2); text-decoration: underline; }
+        .policy-check { display: flex; align-items: flex-start; gap: 0.65rem; font-size: 0.85rem; color: #bbb; line-height: 1.5; cursor: pointer; margin-bottom: 1.5rem; }
+        body.light-mode .policy-check { color: #555; }
+        .policy-check input { margin-top: 0.2rem; width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--gold-2); }
+        .alert-box { margin-top: 2rem; padding: 2rem; border-radius: 16px; text-align: center; background: rgba(212, 175, 55, 0.05); border: 1px solid var(--gold-2); display: none; }
+        .alert-box.show { display: block; animation: slideDown 0.5s ease; }
+        .alert-code { font-family: var(--font-display); font-size: 2.5rem; color: var(--gold-1); letter-spacing: 4px; margin: 1rem 0; }
+        .consultation-box { margin-top: 3rem; text-align: center; }
+        .consult-input-group { display: flex; gap: 1rem; max-width: 400px; margin: 1.5rem auto 0; }
+        .consult-status { margin-top: 1.5rem; font-weight: 600; font-size: 1.1rem; text-transform: uppercase; }
+
+        /* =========================================
+           8. BARBERS PROFILES
+           ========================================= */
+        .barbers-layout { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 3rem; }
+
+        /* Carrusel de barberos (gira como las resenas; se pausa al pasar el cursor o tocar) */
+        .barbers-marquee { overflow: hidden; padding: 1rem 0 2rem; -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent); }
+        .barbers-marquee-track { display: flex; gap: 2rem; width: max-content; animation: barbers-scroll var(--marquee-duration, 45s) linear infinite; }
+        .barbers-marquee:hover .barbers-marquee-track, .barbers-marquee:focus-within .barbers-marquee-track, .barbers-marquee.paused .barbers-marquee-track { animation-play-state: paused; }
+        @keyframes barbers-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .barbers-marquee .barber-card { width: 360px; min-height: 560px; flex-shrink: 0; cursor: pointer; }
+        .barbers-marquee .barber-content { padding: 2rem; }
+        .barbers-marquee .barber-name { font-size: 1.8rem; }
+        .barbers-marquee .barber-alias { margin-bottom: 1.25rem; }
+        .barbers-marquee .barber-specialties, .barbers-marquee .barber-stats { margin-bottom: 1.25rem; }
+        .barber-hours { margin-top: .75rem; padding: .6rem .85rem; border-radius: 14px; background: rgba(0,0,0,.35); border: 1px solid rgba(212,175,55,.18); }
+        .barber-hours-label { display: block; font-size: .72rem; text-transform: uppercase; letter-spacing: 1.5px; color: #cfc8b8; margin-bottom: .2rem; }
+        .barbers-marquee .barber-card:focus-visible { outline: 3px solid var(--gold-2); outline-offset: 4px; }
+        @media (max-width: 600px) { .barbers-marquee .barber-card { width: 290px; min-height: 520px; } .barbers-marquee-track { gap: 1.25rem; } }
+        @media (prefers-reduced-motion: reduce) {
+            .barbers-marquee { overflow-x: auto; -webkit-mask-image: none; mask-image: none; }
+            .barbers-marquee-track { animation: none; }
+            .barbers-marquee-track [aria-hidden="true"] { display: none; }
+        }
+        .barber-card { position: relative; border-radius: 32px; overflow: hidden; min-height: 650px; display: flex; flex-direction: column; justify-content: flex-end; transition: transform 0.5s ease; }
+        .barber-card:hover { transform: scale(1.02); }
+        .barber-bg { position: absolute; inset: 0; background-size: cover; background-position: center; transition: transform 0.8s ease; z-index: 0; }
+        .barber-card:hover .barber-bg { transform: scale(1.1); }
+        .barber-overlay { position: absolute; inset: 0; z-index: 1; background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 50%, transparent 100%); }
+        .barber-content { position: relative; z-index: 2; padding: 3rem; }
+        .barber-name { font-size: 2.2rem; margin-bottom: 0.2rem; font-family: var(--font-display); }
+        .barber-alias { color: var(--gold-2); text-transform: uppercase; letter-spacing: 4px; font-size: 0.9rem; margin-bottom: 2rem; display: block; }
+        .barber-specialties { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 2rem; }
+        .specialty-tag { background: rgba(212, 175, 55, 0.15); color: var(--gold-1); padding: 0.5rem 1rem; border-radius: 50px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(212, 175, 55, 0.3); }
+        .barber-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+        .stat-pill { background: rgba(255,255,255,0.05); padding: 1rem; border-radius: 12px; backdrop-filter: blur(10px); }
+        .stat-pill h4 { color: var(--gold-1); font-size: 1.5rem; margin-bottom: 0.2rem; font-family: var(--font-body); }
+        .stat-pill p { font-size: 0.7rem; color: #aaa; text-transform: uppercase; }
+
+        /* =========================================
+           9. PRODUCTS, TESTIMONIALS, FAQ, MAP
+           ========================================= */
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; }
+        .product-card { background: var(--black-2); border-radius: 16px; overflow: hidden; transition: all 0.3s ease; border: 1px solid rgba(255,255,255,0.05); }
+        body.light-mode .product-card { background: #fff; box-shadow: var(--shadow-card); border: none; }
+        .product-card:hover { transform: translateY(-5px); border-color: var(--gold-2); }
+        .product-img { height: 250px; background-size: cover; background-position: center; }
+        .product-info { padding: 1.5rem; }
+        .product-info h4 { font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .product-info p { font-size: 0.85rem; color: #888; margin-bottom: 1rem; }
+        .product-bottom { display: flex; justify-content: space-between; align-items: center; }
+        .product-price { color: var(--gold-2); font-weight: 700; font-size: 1.2rem; }
+        .stock-badge { font-size: 0.7rem; padding: 0.3rem 0.8rem; background: rgba(255,255,255,0.1); border-radius: 50px; color: #aaa; }
+        .product-seller { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.72rem; letter-spacing: 0.04em; color: var(--gold-2); margin-bottom: 0.5rem; text-decoration: none; }
+        .product-seller:hover { text-decoration: underline; }
+        .product-filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.6rem; margin-bottom: 2rem; }
+        .product-filter-btn { border-radius: 999px; padding: 0.6rem 1.2rem; border: 1px solid rgba(212,175,55,0.35); background: transparent; color: inherit; font: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; }
+        .product-filter-btn:hover { border-color: var(--gold-2); }
+        .product-filter-btn.active { background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 62%, #87640f 100%); color: #111; border-color: transparent; }
+        .product-empty { text-align: center; color: #888; grid-column: 1 / -1; }
+
+        .map-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.25rem; }
+        .map-actions a { display: inline-flex; align-items: center; justify-content: center; gap: 0.55rem; flex: 1 1 160px; border-radius: 999px; padding: 0.9rem 1.2rem; font-weight: 700; font-size: 0.85rem; text-decoration: none; border: 1px solid rgba(212,175,55,0.35); color: inherit; }
+        .map-actions a.primary { background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 62%, #87640f 100%); color: #111; border-color: transparent; }
+        .map-actions a:hover { filter: brightness(1.06); border-color: var(--gold-2); }
+        .map-address { margin-top: 0.9rem; color: #aaa; font-size: 0.9rem; display: flex; gap: 0.5rem; align-items: flex-start; }
+        body.light-mode .map-address { color: #555; }
+
+        #testimonios { overflow: hidden; padding: 6rem 0; background: var(--black-2); }
+        body.light-mode #testimonios { background: var(--black-1); }
+        #testimonios .marquee { display: flex; overflow: hidden; padding: 0 1.5rem; }
+        #testimonios .marquee-track { display: flex; flex: 0 0 auto; animation: review-scroll 40s linear infinite; }
+        #testimonios .marquee-track:empty { display: none; }
+        #testimonios .marquee:hover .marquee-track, #testimonios .marquee:focus-within .marquee-track { animation-play-state: paused; }
+        #testimonios .review-set { display: flex; gap: 2rem; padding-right: 2rem; }
+        #testimonios .review-card { width: 380px; flex: 0 0 auto; padding: 2.5rem; }
+        #testimonios .review-empty { animation: none; }
+        @keyframes review-scroll { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+        @media (max-width: 600px) {
+            #testimonios .review-card { width: min(320px, calc(100vw - 3rem)); padding: 1.5rem; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #testimonios .marquee { overflow-x: auto; }
+            #testimonios .marquee-track { animation: none; }
+            #testimonios [aria-hidden="true"].marquee-track, #testimonios [aria-hidden="true"].review-set { display: none; }
+        }
+        #testimonios .vip-review-link { margin-top: 1.25rem; }
+        .stars { color: var(--gold-2); margin-bottom: 1rem; }
+
+        .info-split { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; }
+        .faq-item { border-bottom: 1px solid rgba(255,255,255,0.1); padding: 1.5rem 0; cursor: pointer; }
+        body.light-mode .faq-item { border-bottom: 1px solid rgba(0,0,0,0.1); }
+        .faq-q { display: flex; justify-content: space-between; align-items: center; font-weight: 600; font-size: 1.1rem; }
+        .faq-icon { font-size: 1.5rem; color: var(--gold-2); transition: transform 0.3s ease; }
+        .faq-item.active .faq-icon { transform: rotate(45deg); }
+        .faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.4s ease; color: #888; }
+        .faq-item.active .faq-a { max-height: 200px; padding-top: 1rem; }
+        .map-wrapper { border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 3; max-height: 460px; border: 1px solid rgba(212,175,55,0.15); }
+        .map-wrapper iframe { filter: invert(0.9) hue-rotate(180deg) contrast(0.8) grayscale(0.2); }
+        body.light-mode .map-wrapper iframe { filter: none; }
+
+        footer { background: var(--black-2); padding: 4rem 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); }
+        body.light-mode footer { background: #fff; border-top: 1px solid rgba(0,0,0,0.05); }
+
+        .login-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 3000; display: flex; justify-content: center; align-items: center; padding: 1.5rem; }
+        .login-box { padding: 3rem; background: var(--black-2); border: 1px solid var(--gold-2); border-radius: 16px; width: min(100%, 420px); text-align: center; }
+        .login-box h2 { font-family: var(--font-display); margin-bottom: 1rem; color: var(--gold-2); }
+        .login-box p { color: #888; margin-bottom: 2rem; line-height: 1.6; }
+        .login-form { display: flex; flex-direction: column; gap: 1rem; text-align: left; }
+        .login-error { min-height: 1.25rem; color: #dc3545; font-size: 0.9rem; text-align: center; }
+        .panel-card { background: var(--black-2); border: 1px solid rgba(255,255,255,0.06); border-radius: 24px; padding: 2rem; }
+        body.light-mode .panel-card { background: #fff; box-shadow: var(--shadow-card); border: none; }
+        .stack { display: flex; flex-direction: column; gap: 1rem; }
+        .feed-meta, .news-card small, .review-form-note { color: #999; }
+        body.light-mode .feed-meta, body.light-mode .news-card small, body.light-mode .review-form-note { color: #555; }
+        .star-picker { display: flex; gap: 0.4rem; font-size: 1.7rem; }
+        .star-btn { background: none; border: none; cursor: pointer; padding: 0.15rem; color: rgba(212,175,55,0.28); transition: color 0.15s ease, transform 0.15s ease; }
+        .star-btn.active { color: var(--gold-2); }
+        .star-btn:hover { transform: scale(1.15); }
+        .feed-list { display: grid; gap: 1rem; }
+        .feed-card, .news-card { border-radius: 22px; padding: 1.5rem; background: var(--black-3); border: 1px solid rgba(255,255,255,0.05); }
+        body.light-mode .feed-card, body.light-mode .news-card { background: #fff; box-shadow: var(--shadow-card); border: none; }
+        .feed-top { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 0.85rem; align-items: center; }
+        .feed-role { font-size: 0.72rem; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold-2); }
+        .feed-actions { display: flex; gap: 1rem; margin-top: 1rem; color: #aaa; font-size: 0.85rem; }
+        .feed-actions span { display: inline-flex; align-items: center; gap: 0.4rem; }
+        .status-chip { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 0.9rem; border-radius: 999px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        .status-online { background: rgba(40,167,69,0.18); color: #53d67b; }
+        .status-pending { background: rgba(247,199,107,0.14); color: #f7c76b; }
+        .status-offline { background: rgba(220,53,69,0.18); color: #f07171; }
+        .editor-actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; }
+        .empty-state { color: #888; padding: 1rem 0; }
+        .section-split { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        .client-modal-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 2rem; }
+        .client-close { background: transparent; border: 1px solid rgba(212,175,55,0.35); color: var(--gold-2); width: 42px; height: 42px; border-radius: 50%; cursor: pointer; }
+        .barbers-preview-actions, .services-preview-actions { display: flex; justify-content: center; margin-top: 2rem; }
+        .barbers-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 2600; display: none; overflow-y: auto; padding: 120px 1.5rem 2rem; }
+        .barbers-overlay.active { display: block; }
+        .barbers-directory { max-width: 1320px; margin: 0 auto; }
+        .barber-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.08);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+        .barber-status .dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+        .barber-status.active { color: #09220f; background: #53d67b; font-weight: 700; }
+        .barber-status.offline { color: #fff; background: #f07171; font-weight: 700; }
+        .footer-pro { background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%); padding: 4rem 2rem; border-top: 1px solid rgba(212,175,55,0.12); }
+        .footer-pro-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 2rem; align-items: start; }
+        .footer-brand img { width: 88px; height: auto; margin-bottom: 1rem; filter: drop-shadow(0 0 18px rgba(212,175,55,0.28)); }
+        .footer-brand h3 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 0.75rem; }
+        .footer-col h4 { font-family: var(--font-display); color: var(--gold-2); margin-bottom: 1rem; }
+        .footer-col a, .footer-col p { color: #b6b6b6; line-height: 1.8; }
+        .footer-credit { display: inline-flex; align-items: center; gap: 0.7rem; color: var(--gold-1); font-weight: 600; flex-wrap: wrap; }
+        .footer-credit-logo { width: 30px; height: 30px; border-radius: 8px; display: block; box-shadow: 0 8px 18px rgba(0,0,0,0.22); }
+        .mobile-bottom-nav { display: none; }
+        .mobile-bottom-nav a, .mobile-bottom-nav button {
+            background: transparent;
+            border: none;
+            color: #d8d2c3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            font-size: 0.68rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            min-width: 0;
+            cursor: pointer;
+        }
+        .mobile-bottom-nav i {
+            font-size: 1.05rem;
+            color: var(--gold-2);
+        }
+
+        /* =========================================
+           11. ANIMATIONS & RESPONSIVE
+           ========================================= */
+        .reveal { opacity: 0; transform: translateY(40px); transition: opacity 1s ease, transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        @media (max-width: 968px) {
+            body { padding-bottom: 92px; }
+            section { padding: 4.5rem 1.25rem; }
+            nav { padding: 1rem 1.5rem; }
+            .nav-links { display: none; }
+            .nav-actions .btn.btn-primary { display: none; }
+            .form-grid { grid-template-columns: 1fr; }
+            .info-split, .about-grid { grid-template-columns: 1fr; }
+            .section-split { grid-template-columns: 1fr; }
+            .quick-nav { padding-top: 1rem; }
+            .quick-nav-inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .section-shell { padding: 1.5rem; border-radius: 24px; }
+            .hero-badges { justify-content: flex-start; }
+            .footer-pro-inner { grid-template-columns: 1fr; }
+            .booking-wrapper { padding: 2rem 1.5rem; }
+            .lightbox-overlay { padding: 1rem; align-items: flex-start; }
+            .lightbox-content { grid-template-columns: 1fr; max-height: calc(100vh - 2rem); margin-top: 0.5rem; }
+            .lightbox-info { padding: 1.5rem; }
+            #hero { padding: 120px 1.5rem 60px; }
+            .mobile-bottom-nav {
+                position: fixed;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2500;
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 0.25rem;
+                padding: 0.8rem 0.7rem calc(0.8rem + env(safe-area-inset-bottom));
+                background: rgba(8, 8, 8, 0.96);
+                backdrop-filter: blur(16px);
+                border-top: 1px solid rgba(212,175,55,0.15);
+                box-shadow: 0 -12px 30px rgba(0,0,0,0.3);
+            }
+        }
+    </style>
+</head>
+<body data-site-header="off">
+
+    <div id="progress-bar"></div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <div class="nav-logo text-gold" onclick="window.location.href='#hero'">GOAT STYLE SALON</div>
+        <ul class="nav-links">
+            <li><a onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth'})">Servicios</a></li>
+            <li><a onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">Reservar</a></li>
+            <li><a onclick="document.getElementById('barberos').scrollIntoView({behavior:'smooth'})">Barberos</a></li>
+            <li><a onclick="document.getElementById('quick-links').scrollIntoView({behavior:'smooth'})">Explorar</a></li>
+        </ul>
+        <div class="nav-actions">
+            <button class="icon-btn flag-btn" id="language-toggle" onclick="toggleLanguage()" title="Cambiar idioma" aria-label="Cambiar idioma"></button>
+            <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Cambiar tema"><i class="fas fa-moon"></i></button>
+            <button class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.75rem;" onclick="openDashboard()" data-i18n="staffPortal">Portal del personal</button>
+        </div>
+    </nav>
+
+    <div class="mobile-bottom-nav">
+        <a href="#hero">
+            <i class="fas fa-house"></i>
+            <span>Inicio</span>
+        </a>
+        <a href="services.html">
+            <i class="fas fa-scissors"></i>
+            <span>Servicios</span>
+        </a>
+        <a href="booking.html">
+            <i class="fas fa-calendar-check"></i>
+            <span>Cita</span>
+        </a>
+        <a href="news.html">
+            <i class="fas fa-newspaper"></i>
+            <span>Noticias</span>
+        </a>
+        <a href="settings.html">
+            <i class="fas fa-gear"></i>
+            <span>Config</span>
+        </a>
+    </div>
+
+    <!-- MAIN VIEW (PUBLIC) -->
+    <div id="main-view">
+        <!-- HERO -->
+        <header id="hero">
+            <div class="hero-rays"></div>
+            <div class="particles" id="particles-js"></div>
+            <div class="hero-content">
+                <!-- LOGO IMAGE IMPLEMENTADO -->
+                <div class="hero-logo-wrapper">
+                    <img src="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png" alt="Goat Style Salon Logo" class="hero-logo-img">
+                </div>
+                
+                <div class="hero-tagline" data-i18n="tagline">SALÓN & BARBERÍA</div>
+                
+                <h1 class="hero-title" data-i18n="heroTitle">Donde las celebridades confían su imagen</h1>
+                <p class="hero-subtitle" data-i18n="heroSubtitle">Classic Cut, Premium Fade, Signature Cut, color, tratamientos y una experiencia VIP completa.</p>
+                
+                <div class="hero-btns">
+                    <a class="btn btn-primary" onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})" data-i18n="bookNow">Reservar Cita</a>
+                    <a class="btn btn-ghost" onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth'})" data-i18n="viewServices">Ver Servicios</a>
+                </div>
+                
+                <div class="hero-badges">
+                    <div class="badge"><i class="fas fa-check"></i> <span data-i18n="badge1">Barbería Premium</span></div>
+                    <div class="badge"><i class="fas fa-check"></i> <span data-i18n="badge2">Atención VIP</span></div>
+                    <div class="badge"><i class="fas fa-check"></i> <span data-i18n="badge3">Color y tratamientos</span></div>
+                    <div class="badge"><i class="fas fa-check"></i> <span data-i18n="badge4">GOAT VIP Experience</span></div>
+                </div>
+            </div>
+        </header>
+        <section id="quick-links" class="quick-nav" aria-label="Accesos rapidos del sitio">
+            <div class="container">
+                <div class="quick-nav-inner reveal">
+                    <a class="quick-link-card" href="#servicios"><span>Servicios</span><small>Menú premium y experiencias</small></a>
+                    <a class="quick-link-card" href="#reserva"><span>Reservar</span><small>Cita rápida con tu barbero</small></a>
+                    <a class="quick-link-card" href="#pagos"><span>Pagos</span><small>Métodos aceptados</small></a>
+                    <a class="quick-link-card" href="#barberos"><span>Barberos</span><small>Especialidades y perfiles</small></a>
+                    <a class="quick-link-card" href="#nosotros"><span>Nosotros</span><small>Historia y esencia del estudio</small></a>
+                    <a class="quick-link-card" href="#productos"><span>Productos</span><small>Mantenimiento después del corte</small></a>
+                    <a class="quick-link-card" href="#resenas"><span>Reseñas</span><small>Opiniones y noticias</small></a>
+                    <a class="quick-link-card" href="#info"><span>FAQ</span><small>Preguntas y ubicación</small></a>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIDEO SECTION -->
+        <section id="video-section" aria-label="Experiencia visual de la barbería">
+            <video autoplay muted loop id="video-bg" poster="https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=1920&q=80">
+                <source src="https://cdn.coverr.co/videos/coverr-a-barber-cutting-hair-2633/1080p.mp4" type="video/mp4">
+            </video>
+            <div class="video-overlay"></div>
+            <div class="video-content reveal">
+                <h2>La Experiencia <span class="text-gold">GOAT STYLE</span></h2>
+            </div>
+        </section>
+
+        <!-- SERVICIOS -->
+        <section id="servicios">
+            <div class="container section-shell">
+                <div class="section-header reveal">
+                    <h2 data-i18n="servicesTitle">Menú de <span class="text-gold">Servicios</span></h2>
+                    <p data-i18n="servicesSub">Experiencias diseñadas para caballeros exigentes</p>
+                </div>
+                <div class="services-grid" id="services-container" data-maintenance-section="servicios"></div>
+                <div class="services-preview-actions reveal">
+                    <a class="btn btn-ghost" href="services.html">Ver Todos Los Servicios</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SISTEMA DE RESERVA -->
+        <section id="reserva">
+            <div class="container">
+                <div class="section-header reveal">
+                    <h2 data-i18n="bookingTitle">Sistema de <span class="text-gold">Reservaciones</span></h2>
+                </div>
+                <div class="booking-wrapper glass reveal" data-maintenance-section="reservas">
+                    <!-- Reserva paso a paso: booking-widget.js -->
+                    <div id="booking-widget"></div>
+
+                    <div class="consultation-box">
+                        <h3 style="font-family: var(--font-display); font-size: 1.5rem;" data-i18n="checkStatus">Consultar Estado de Cita</h3>
+                        <div class="consult-input-group">
+                            <input type="text" class="form-input" id="consult-input" placeholder="GS-XXXXXX" style="text-align: center; letter-spacing: 2px;">
+                            <button class="btn btn-ghost" onclick="checkStatus()" data-i18n="search">Buscar</button>
+                        </div>
+                        <div class="consult-status" id="consult-result"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- BARBEROS -->
+        <section id="barberos">
+            <div class="container section-shell">
+                <div class="section-header reveal">
+                    <h2>Nuestros <span class="text-gold">Maestros</span></h2>
+                    <p>Elige según especialidad, estilo y disponibilidad sin perderte en demasiada información.</p>
+                </div>
+                <!-- Carrusel con todos los barberos (se llena desde renderBarbersPublic) -->
+                <div class="barbers-marquee" id="barbers-marquee" data-maintenance-section="barberos" aria-label="Barberos del equipo">
+                    <div class="barbers-marquee-track" id="barbers-marquee-track"></div>
+                </div>
+                <div class="barbers-preview-actions reveal">
+                    <a class="btn btn-ghost" href="barbers.html">Ver Todos Los Barberos</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- NOSOTROS -->
+        <section id="nosotros">
+            <div class="container">
+                <div class="about-grid">
+                    <div class="about-text reveal">
+                        <h2>Historia de <span class="text-gold">Excelencia</span></h2>
+                        <p>GOAT STYLE SALON no es solo una barbería; es un santuario para el caballero moderno. Fundada con la visión de elevar el estándar de la barbería en Puerto Rico, nos hemos convertido en el lugar de confianza para figuras públicas, influencers y clientes exigentes.</p>
+                        <p>Nuestra filosofía se basa en la precisión milimétrica, la atención al detalle y una experiencia VIP que comienza desde el momento en que cruzas nuestras puertas.</p>
+                        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">Vive la Experiencia</button>
+                    </div>
+                    <div class="about-img reveal" style="background-image: url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=800&q=80');"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- PRODUCTOS -->
+        <section id="productos">
+            <div class="container section-shell">
+                <div class="section-header reveal">
+                    <h2>Productos <span class="text-gold">Selectos</span></h2>
+                    <p>Cada barbero vende sus propios productos para mantener el look después de cada visita.</p>
+                </div>
+                <div class="product-filters" id="product-filters" data-maintenance-hide="tienda" role="group" aria-label="Filtrar productos por barbero" hidden></div>
+                <div class="products-grid" id="products-container" data-maintenance-section="tienda"></div>
+            </div>
+        </section>
+
+        <!-- TESTIMONIOS -->
+        <section id="testimonios">
+            <div class="section-header reveal" style="padding: 0 2rem 4rem;">
+                <h2>Clientes <span class="text-gold">VIP</span></h2>
+                <p>Comentarios rápidos para que la confianza llegue antes de la reserva.</p>
+                <a class="btn btn-primary vip-review-link" href="resenas.html" data-maintenance-hide="resenas">Ver todas las reseñas</a>
+            </div>
+            <div class="marquee" role="region" aria-label="Reseñas recientes" tabindex="0" data-maintenance-section="resenas">
+                <div class="marquee-track" id="track-1"></div>
+                <div class="marquee-track" id="track-2" aria-hidden="true"></div>
+            </div>
+        </section>
+
+        <section id="resenas">
+            <div class="container section-shell">
+                <div class="section-header reveal">
+                    <h2>Reseñas y <span class="text-gold">Actualizaciones</span></h2>
+                    <p>Comparte tu experiencia y visita la página dedicada de noticias de la barbería.</p>
+                </div>
+                <div class="section-split">
+                    <div class="stack">
+                        <div class="panel-card glass reveal">
+                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;">Deja tu reseña</h3>
+                            <form id="review-form" class="stack" data-maintenance-hide="resenas" onsubmit="handleReviewSubmit(event)">
+                                <p class="review-form-note">Escribe tu nombre completo, el servicio que te hiciste y tu opinión. Tú decides si se publica en la página; la barbería la revisa antes de publicarla.</p>
+                                <div class="form-group"><label class="form-label" for="review-name">Nombre completo</label><input class="form-input" id="review-name" type="text" maxlength="80" autocomplete="name" placeholder="Tu nombre y apellido" required></div>
+                                <div class="form-group"><label class="form-label" for="review-service">Servicio</label><select class="form-input" id="review-service" required></select></div>
+                                <div class="form-group"><label class="form-label" for="review-barber">Barbero</label><select class="form-input" id="review-barber" required></select></div>
+                                <div class="form-group">
+                                    <span class="form-label">Calificación</span>
+                                    <div class="star-picker" id="review-star-picker" role="group" aria-label="Calificación de 1 a 5 estrellas">
+                                        <button type="button" class="star-btn" data-star="1" aria-label="1 estrella">★</button>
+                                        <button type="button" class="star-btn" data-star="2" aria-label="2 estrellas">★</button>
+                                        <button type="button" class="star-btn" data-star="3" aria-label="3 estrellas">★</button>
+                                        <button type="button" class="star-btn" data-star="4" aria-label="4 estrellas">★</button>
+                                        <button type="button" class="star-btn" data-star="5" aria-label="5 estrellas">★</button>
+                                    </div>
+                                    <input type="hidden" id="review-rating" value="5">
+                                </div>
+                                <div class="form-group"><label class="form-label" for="review-text">Tu opinión</label><textarea class="form-input" id="review-text" rows="4" maxlength="600" placeholder="Cuéntanos cómo te fue"></textarea></div>
+                                <fieldset class="form-group review-publish">
+                                    <legend class="form-label">¿Podemos publicar tu reseña en la página?</legend>
+                                    <label class="review-publish-option"><input type="radio" name="review-publish" value="yes" required><span>Sí, pueden publicarla con mi nombre</span></label>
+                                    <label class="review-publish-option"><input type="radio" name="review-publish" value="no"><span>No, solo para la barbería</span></label>
+                                </fieldset>
+                                <div class="form-group">
+                                    <label class="form-label" for="review-photo">Tu foto (opcional)</label>
+                                    <input class="form-input" id="review-photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="review-photo-help">
+                                    <p id="review-photo-help" class="review-form-note">JPG, PNG o WebP. Tu foto aparecerá junto a tu reseña si se publica.</p>
+                                </div>
+                                <button class="btn btn-primary" type="submit" style="justify-content: center;">Enviar reseña</button>
+                                <div id="review-status" class="review-form-note" role="status"></div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="stack">
+                        <div class="panel-card glass reveal">
+                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;">Noticias de la barbería</h3>
+                            <p class="review-form-note" style="margin-bottom: 1rem;">Visita la página completa de noticias para ver avisos, publicaciones y novedades del staff.</p>
+                            <div id="public-shop-status"></div>
+                            <div id="closure-notice" class="empty-state" style="margin-top: 1rem;"></div>
+                            <a class="btn btn-primary" href="news.html" style="margin-top: 1rem;">Ir a Noticias</a>
+                        </div>
+                        <div class="panel-card glass reveal">
+                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;">Última actualización</h3>
+                            <div id="news-feed" class="feed-list" data-maintenance-section="noticias"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+        <section id="info">
+            <div class="container section-shell">
+                <div class="info-split">
+                    <div class="reveal">
+                        <div class="section-header" style="text-align: left; margin-bottom: 3rem;">
+                            <h2 style="font-size: 2.5rem;">Preguntas <span class="text-gold">Frecuentes</span></h2>
+                        </div>
+                        <div class="faq-item active" onclick="toggleFaq(this)">
+                            <div class="faq-q">¿Necesito cita previa? <span class="faq-icon">+</span></div>
+                            <div class="faq-a">Sí, trabajamos exclusivamente con citas para garantizar la experiencia VIP de cada cliente.</div>
+                        </div>
+                        <div class="faq-item" onclick="toggleFaq(this)">
+                            <div class="faq-q">¿Manejan productos premium? <span class="faq-icon">+</span></div>
+                            <div class="faq-a">Vendemos productos seleccionados de la más alta calidad para el cuidado de tu cabello y barba.</div>
+                        </div>
+                        <div class="faq-item" onclick="toggleFaq(this)">
+                            <div class="faq-q">¿Dónde están ubicados? <span class="faq-icon">+</span></div>
+                            <div class="faq-a">Nos encontramos en Barranquitas, Puerto Rico.</div>
+                        </div>
+                        <div class="faq-item" onclick="toggleFaq(this)">
+                            <div class="faq-q">¿Puedo cancelar mi cita? <span class="faq-icon">+</span></div>
+                            <div class="faq-a">Sí. Comunícate con la barbería por teléfono o WhatsApp y te ayudamos a cancelarla o cambiarla.</div>
+                        </div>
+                        <div class="faq-item" onclick="toggleFaq(this)">
+                            <div class="faq-q">¿Cuánto tiempo dura un servicio VIP? <span class="faq-icon">+</span></div>
+                            <div class="faq-a">Depende de la opción elegida, pero los servicios VIP pueden durar desde 30 minutos hasta 2 horas y 45 minutos.</div>
+                        </div>
+                        <div class="faq-item" onclick="toggleFaq(this)">
+                            <div class="faq-q">¿Puedo elegir mi barbero favorito? <span class="faq-icon">+</span></div>
+                            <div class="faq-a">Claro, escoges tu barbero al reservar tu cita.</div>
+                        </div>
+                        <div class="faq-item" onclick="toggleFaq(this)">
+                            <div class="faq-q">¿Publican avisos importantes? <span class="faq-icon">+</span></div>
+                            <div class="faq-a">Sí, contamos con una página de noticias para cierres, horarios especiales y anuncios del equipo.</div>
+                        </div>
+                    </div>
+                    <div class="reveal">
+                        <div class="section-header" style="text-align: left; margin-bottom: 3rem;">
+                            <h2 style="font-size: 2.5rem;">Visitanos en <span class="text-gold">Barranquitas</span></h2>
+                        </div>
+                        <!-- El mapa solo se carga con consentimiento de cookies funcionales (lo maneja legal.js). -->
+                        <div class="map-wrapper" id="shop-map" data-consent-embed="functional" data-title="Mapa de la barbería"></div>
+                        <div class="map-address" id="shop-address"></div>
+                        <div class="map-actions" id="shop-directions"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer data-site-footer></footer>
+    </div>
+
+    <div class="barbers-overlay" id="barbers-overlay">
+        <div class="barbers-directory">
+            <div class="client-modal-header">
+                <div class="section-header" style="margin-bottom: 0; text-align: left;">
+                    <h2>Todos Nuestros <span class="text-gold">Barberos</span></h2>
+                    <p>Conoce al equipo completo sin sobrecargar la portada.</p>
+                </div>
+                <button class="client-close" type="button" onclick="closeBarbersDirectory()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="barbers-layout" id="barbers-directory-list"></div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD VIEW (HIDDEN FROM PUBLIC) -->
+    <div id="dashboard-view" style="display: none;">
+        <div class="container">
+
+            <div class="dash-header">
+                <div class="dash-brand">
+                    <img src="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png" alt="Logo GOAT Style Salón">
+                    <div class="dash-brand-copy">
+                        <h2 style="font-family: var(--font-display); color: var(--gold-2);">Panel de <span class="text-gold">Control</span></h2>
+                        <p>Acceso administrativo de GOAT Style Salón</p>
+                    </div>
+                </div>
+                <div style="display: flex; gap: 1rem;">
+                    <button class="btn btn-ghost" onclick="closeDashboard()"><i class="fas fa-arrow-left"></i> Volver a la Web</button>
+                    <button class="btn btn-primary" onclick="logoutDashboard()">Cerrar Sesión</button>
+                </div>
+            </div>
+            
+            <div class="dash-tabs">
+                <button class="dash-tab active" onclick="switchDashTab('general', this)">General (Admin)</button>
+                <button class="dash-tab" onclick="switchDashTab('general', this)">Admin General</button>
+                <button class="dash-tab" onclick="switchDashTab('darialex', this)">Panel Darialex</button>
+            </div>
+
+            <div id="dash-content"></div>
+        </div>
+    </div>
+
+    <!-- LIGHTBOX -->
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <div class="lightbox-info">
+                <button class="lightbox-close" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+                <h3 id="lightbox-title"></h3>
+                <p id="lightbox-desc"></p>
+                <div class="vip-includes" id="lightbox-vip-includes" hidden>
+                    <h4>Incluye</h4>
+                    <ul id="lightbox-vip-list"></ul>
+                </div>
+                <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
+                    <div><strong style="color: var(--gold-2)">Precio:</strong> <span id="lightbox-price"></span></div>
+                    <div><strong style="color: var(--gold-2)">Duración:</strong> <span id="lightbox-duration"></span></div>
+                </div>
+                <button class="btn btn-primary" onclick="closeLightbox(); reserveService(currentLightboxIndex)">Reservar este Servicio</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN OVERLAY -->
+    <div class="login-overlay" id="login-overlay" style="display: none;" onclick="closeLoginOverlay(event)">
+        <div class="login-box glass" onclick="event.stopPropagation()">
+            <img src="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png" alt="Logo GOAT Style Salón" class="brand-logo-mini">
+            <h2>Acceso Staff</h2>
+            <p>Ingrese su correo y contrase&ntilde;a para entrar al panel del staff.</p>
+            <form class="login-form" onsubmit="handleStaffLogin(event)">
+                <div class="form-group">
+                    <label class="form-label" for="staff-email">Correo electr&oacute;nico</label>
+                    <input class="form-input" type="email" id="staff-email" placeholder="tucorreo@goatstylesalon.com" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="staff-password">Contrase&ntilde;a</label>
+                    <input class="form-input" type="password" id="staff-password" placeholder="Tu contraseña" autocomplete="current-password" required>
+                </div>
+                <div class="login-error" id="login-error"></div>
+                <button class="btn btn-primary" type="submit" style="justify-content: center;">Entrar al Portal</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="password-policy.js"></script>
+    <script src="security.js"></script>
+    <script src="shared-forms.js"></script>
+    <script src="booking-engine.js"></script>
+    <script src="public-reviews.js"></script>
+    <script src="booking-widget.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        // =========================================
+        // 1. DATA & I18N DICTIONARY
+        // =========================================
+        const translations = {
+            es: { staffPortal: "Portal del personal", brand: "GOAT STYLE SALON", tagline: "SALÓN & BARBERÍA", heroTitle: "Donde las celebridades confían su imagen", heroSubtitle: "Cortes premium, experiencia VIP y resultados impecables en Barranquitas, Puerto Rico.", bookNow: "Reservar Cita", viewServices: "Ver Servicios", badge1: "Barbería Premium", badge2: "Atención VIP", badge3: "Especialistas Certificados", badge4: "Clientes Reconocidos", servicesTitle: "Servicios Premium", servicesSub: "Experiencias diseñadas para caballeros exigentes", bookingTitle: "Sistema de Reservaciones", service: "Servicios", firstName: "Nombre", lastName: "Apellido", email: "Email", phone: "Teléfono", dob: "Fecha Nacimiento", barber: "Barbero", dateTime: "Fecha y Hora", confirmBooking: "Confirmar solicitud de cita", bookingSuccess: "✓ Solicitud Enviada Correctamente", bookingCodeMsg: "Tu código de reserva es:", bookingCodeWarning: "Guarda este código para consultar el estado de tu cita.", checkStatus: "Consultar Estado de Cita", search: "Buscar" },
+            en: { staffPortal: "Staff Portal", brand: "GOAT STYLE SALON", tagline: "SALON & BARBERSHOP", heroTitle: "Where celebrities trust their image", heroSubtitle: "Premium cuts, VIP experience and impeccable results in Barranquitas, Puerto Rico.", bookNow: "Book Appointment", viewServices: "View Services", badge1: "Premium Barbershop", badge2: "VIP Service", badge3: "Certified Specialists", badge4: "Recognized Clients", servicesTitle: "Premium Services", servicesSub: "Experiences designed for demanding gentlemen", bookingTitle: "Booking System", service: "Services", firstName: "First Name", lastName: "Last Name", email: "Email", phone: "Phone", dob: "Date of Birth", barber: "Barber", dateTime: "Date and Time", confirmBooking: "Confirm appointment request", bookingSuccess: "✓ Request Sent Successfully", bookingCodeMsg: "Your booking code is:", bookingCodeWarning: "Save this code to check your appointment status.", checkStatus: "Check Appointment Status", search: "Search" }
+        };
+        let currentLang = (window.GabyData && window.GabyData.getState ? window.GabyData.getState().settings.defaultLanguage : 'es') || 'es';
+
+        const vipExperienceIncludes = [
+            "Signature Cut",
+            "Diseño de barba",
+            "Lavado",
+            "Toallas calientes",
+            "Masaje capilar",
+            "Limpieza facial express",
+            "Bebida de cortesía",
+            "Productos premium para finalizar"
+        ];
+
+        const services = [
+            { name: "Classic Cut", price: "$35", duration: "Incluye bebida y lavado", desc: "Todo corte incluye una bebida de preferencia y lavado de cabello." },
+            { name: "Premium Fade", price: "$40", duration: "Corte premium", desc: "Premium Fade con acabado limpio y profesional." },
+            { name: "Signature Cut", price: "$45", duration: "Traditional Hot Towel Shave", desc: "Signature Cut con Traditional Hot Towel Shave." },
+            { name: "Kids Premium", price: "$35", duration: "Hasta 12 años", desc: "Kids Premium para niños de hasta 12 años." },
+            { name: "Baby Cut", price: "Consultar", duration: "Consulta previa", desc: "Baby Cut sujeto a consulta previa." },
+            { name: "Hair Light", price: "$65", duration: "Color", desc: "Hair Light para un look más definido y moderno." },
+            { name: "Platinado", price: "$120", duration: "No incluye corte", desc: "Platinado completo. No incluye corte." },
+            { name: "Hidratación Capilar", price: "Desde $30", duration: "Tratamiento", desc: "Tratamiento de hidratación capilar." },
+            { name: "Keratina", price: "Desde $45", duration: "Tratamiento", desc: "Keratina para mejorar la textura y controlar el frizz." },
+            { name: "Limpieza Facial Profunda", price: "$50", duration: "Facial", desc: "Limpieza facial profunda." },
+            { name: "GOAT VIP Experience", price: "$100", duration: "Experiencia completa", desc: "Incluye Signature Cut, diseño de barba, lavado, toallas calientes, masaje capilar, limpieza facial express, bebida de cortesía y productos premium para finalizar." }
+        ];
+
+        const products = [
+            { name: "Pomada Premium Mate", desc: "Fijación fuerte, acabado mate.", price: "$20", stock: "15 en stock", img: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=600&q=80" },
+            { name: "Aceite para Barba Dorado", desc: "Hidrata y suaviza la barba.", price: "$25", stock: "8 en stock", img: "https://images.unsplash.com/photo-1626202373052-2bbb4f5b9d62?auto=format&fit=crop&w=600&q=80" },
+            { name: "Shampoo Artefacto", desc: "Limpieza profunda sin sulfatos.", price: "$18", stock: "20 en stock", img: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?auto=format&fit=crop&w=600&q=80" },
+            { name: "Cera Modeladora Classic", desc: "Para peinados clásicos con brillo.", price: "$22", stock: "12 en stock", img: "https://images.unsplash.com/photo-1631730486572-226d1f595b68?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        function getDb() {
+            if (window.GabyData && typeof window.GabyData.getState === 'function') {
+                return window.GabyData.getState();
+            }
+
+            return {
+                settings: { defaultLanguage: 'es', theme: 'dark', shopMode: 'online', closureNotice: '' },
+                services: services.map(service => ({
+                    ...service,
+                    active: true,
+                    description: service.desc
+                })),
+                products: products.map(product => ({ ...product, active: true })),
+                barbers: [],
+                clients: [],
+                appointments: [],
+                reviews: [],
+                news: []
+            };
+        }
+        function updateDb(mutator) {
+            if (window.GabyData && typeof window.GabyData.updateState === 'function') {
+                return window.GabyData.updateState(mutator);
+            }
+
+            const fallbackState = getDb();
+            if (typeof mutator === 'function') {
+                mutator(fallbackState);
+            }
+            return fallbackState;
+        }
+        function getBarberName(barberId) {
+            const db = getDb();
+            const barber = db.barbers.find(item => item.id === barberId);
+            if (!barber) return barberId;
+            return barber.alias && barber.alias !== barber.name ? `${barber.name} (${barber.alias})` : barber.name;
+        }
+        function formatDate(value) {
+            if (!value) return '-';
+            return new Date(value).toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' });
+        }
+        function formatDateTime(value) {
+            if (!value) return '-';
+            return new Date(value).toLocaleString('es-PR', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        }
+
+        // =========================================
+        // 2. INIT & RENDER
+        // =========================================
+        function applyTranslations() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) el.innerText = translations[currentLang][key];
+            });
+            const languageButton = document.getElementById('language-toggle');
+            if (languageButton) {
+                const flagSrc = currentLang === 'es'
+                    ? 'https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972287/Flag_of_Puerto_Rico.svg_awwgvz.webp'
+                    : 'https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972299/download_z6ticp.webp';
+                const flagAlt = currentLang === 'es' ? 'Bandera de Puerto Rico' : 'United States flag';
+                languageButton.innerHTML = '<img src="' + flagSrc + '" alt="' + flagAlt + '">';
+            }
+        }
+        function toggleLanguage() {
+            currentLang = currentLang === 'es' ? 'en' : 'es';
+            updateDb(db => {
+                db.settings.defaultLanguage = currentLang;
+            });
+            applyTranslations();
+        }
+        function applyThemePreference() {
+            const theme = getDb().settings.theme || 'dark';
+            const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+            const shouldLight = theme === 'light' || (theme === 'system' && prefersLight);
+            document.body.classList.toggle('light-mode', shouldLight);
+            updateThemeToggleIcon();
+        }
+        function updateThemeToggleIcon() {
+            const icon = document.querySelector('#theme-toggle i');
+            if (!icon) return;
+            icon.className = document.body.classList.contains('light-mode') ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        // Render Services
+        const servicesContainer = document.getElementById('services-container');
+        const FEATURED_SERVICES_LIMIT = 6;
+        let bookingWidget = null;
+
+        // "Reservar" en una tarjeta de servicio: lo marca en el paso 1 de la reserva.
+        function reserveService(index) {
+            const service = getDb().services.filter(item => item.active)[index];
+            if (bookingWidget && service) bookingWidget.selectService(service.name);
+            document.getElementById('reserva').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderServicesPublic() {
+            const db = getDb();
+            servicesContainer.innerHTML = '';
+            const visibleServices = db.services.filter(service => service.active);
+            const featuredIndexes = visibleServices
+                .map((service, i) => i)
+                .sort((a, b) => Number(visibleServices[b].requests || 0) - Number(visibleServices[a].requests || 0))
+                .slice(0, FEATURED_SERVICES_LIMIT);
+            featuredIndexes.forEach(i => {
+                const service = visibleServices[i];
+                servicesContainer.innerHTML += `
+                    <div class="service-card" onclick="openLightbox(${i})">
+                        <div class="service-info">
+                            <h3>${service.name}</h3>
+                            <div class="service-details">
+                                <div class="service-price">${service.price}</div>
+                                <div class="service-duration">${window.GabyBooking.formatDuration(window.GabyBooking.serviceMinutes(service))}</div>
+                            </div>
+                            <button type="button" class="btn btn-primary service-reserve-btn" onclick="event.stopPropagation(); reserveService(${i})">Reservar</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // Render Products
+        // Cada barbero vende sus propios productos: se filtran por vendedor.
+        const productsContainer = document.getElementById('products-container');
+        const productFilters = document.getElementById('product-filters');
+        let productBarberFilter = '';
+        function renderProductsPublic() {
+            const db = getDb();
+            const activeProducts = db.products.filter(product => product.active);
+            const sellers = db.barbers.filter(barber => activeProducts.some(product => product.barberId === barber.id));
+            if (productBarberFilter && !sellers.some(barber => barber.id === productBarberFilter)) productBarberFilter = '';
+
+            if (productFilters) {
+                productFilters.hidden = sellers.length < 2;
+                productFilters.innerHTML = [{ id: '', label: 'Todos' }, ...sellers.map(barber => ({ id: barber.id, label: barber.alias || barber.name }))]
+                    .map(option => `<button type="button" class="product-filter-btn ${option.id === productBarberFilter ? 'active' : ''}" data-product-barber="${option.id}" aria-pressed="${option.id === productBarberFilter}">${option.label}</button>`)
+                    .join('');
+                productFilters.querySelectorAll('[data-product-barber]').forEach(button => button.addEventListener('click', () => {
+                    productBarberFilter = button.dataset.productBarber;
+                    renderProductsPublic();
+                }));
+            }
+
+            const visible = activeProducts.filter(product => !productBarberFilter || product.barberId === productBarberFilter);
+            productsContainer.innerHTML = visible.length ? visible.map(product => {
+                const seller = db.barbers.find(barber => barber.id === product.barberId);
+                const sellerName = seller ? (seller.alias || seller.name) : '';
+                return `
+                    <div class="product-card">
+                        <div class="product-img" style="background-image: url('${product.image}')"></div>
+                        <div class="product-info">
+                            ${seller ? `<a class="product-seller" href="barber.html?id=${seller.id}"><i class="fas fa-user"></i> Vendido por ${sellerName}</a>` : ''}
+                            <h4>${product.name}</h4>
+                            <p>${product.desc}</p>
+                            <div class="product-bottom">
+                                <span class="product-price">${product.price}</span>
+                                <span class="stock-badge">${Number(product.stock) > 0 ? `${product.stock} en stock` : 'Agotado'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('') : '<p class="product-empty">No hay productos disponibles por ahora.</p>';
+        }
+
+        function getDailyBarberPreview(barbers, count) {
+            if (barbers.length <= count) return barbers;
+            const dayIndex = Math.floor(Date.now() / 86400000);
+            const start = dayIndex % barbers.length;
+            return barbers.slice(start).concat(barbers.slice(0, start)).slice(0, count);
+        }
+        function renderBarbersPublic() {
+            const db = getDb();
+            const track = document.getElementById('barbers-marquee-track');
+            const directory = document.getElementById('barbers-directory-list');
+            if (!track) return;
+            const renderCard = (barber, copy) => `
+                <div class="barber-card" role="link" tabindex="${copy ? -1 : 0}" ${copy ? 'aria-hidden="true"' : `aria-label="Ver perfil de ${barber.name}"`} data-barber-link="${barber.id}">
+                    <div class="barber-bg" style="background-image: url('${barber.avatar || barber.gallery?.[0] || 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=800&q=80'}');"></div>
+                    <div class="barber-overlay"></div>
+                    <div class="barber-content">
+                        <div class="barber-status ${barber.active !== false ? 'active' : 'offline'}"><span class="dot"></span>${barber.active !== false ? 'Activo' : 'No disponible'}</div>
+                        <h3 class="barber-name">${barber.name}</h3>
+                        <span class="barber-alias">${barber.alias}</span>
+                        <div class="barber-specialties">
+                            ${(barber.specialty || []).map(item => `<span class="specialty-tag">${item}</span>`).join('')}
+                        </div>
+                        <div class="barber-stats">
+                            <div class="stat-pill"><h4>${barber.yearsExperience || 0}+</h4><p>Años Exp.</p></div>
+                            <div class="stat-pill"><h4>${barber.vipClients || 0}+</h4><p>Clientes VIP</p></div>
+                        </div>
+                        <div style="color: #ddd; font-size: 0.9rem; margin-bottom: 1rem;">
+                            <span><i class="fas fa-phone" style="color: var(--gold-2)"></i> ${barber.phone}</span>
+                            <div class="barber-hours"><span class="barber-hours-label"><i class="fas fa-clock" style="color: var(--gold-2)"></i> Horario</span>${window.GabySchedule.html({ compact: true })}</div>
+                        </div>
+                        <div class="barber-socials" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                            <div style="display: flex; gap: 1rem;">
+                                ${barber.socials?.instagram ? `<a href="${barber.socials.instagram}" target="_blank" class="icon-btn"><i class="fab fa-instagram"></i></a>` : ''}
+                                ${barber.socials?.facebook ? `<a href="${barber.socials.facebook}" target="_blank" class="icon-btn"><i class="fab fa-facebook-f"></i></a>` : ''}
+                            </div>
+                            <a class="barber-view-btn" href="barber.html?id=${barber.id}">Ver Perfil <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Todos los barberos, repetidos una vez para que el giro sea continuo.
+            const barbers = db.barbers.filter(barber => barber.active !== false);
+            track.innerHTML = barbers.map(barber => renderCard(barber, false)).join('') + barbers.map(barber => renderCard(barber, true)).join('');
+            track.style.setProperty('--marquee-duration', `${Math.max(24, barbers.length * 14)}s`);
+            if (directory) directory.innerHTML = db.barbers.map(barber => renderCard(barber, false)).join('');
+        }
+
+        // Tocar la tarjeta (o "Ver perfil") abre el perfil del barbero; los botones de redes siguen funcionando.
+        document.addEventListener('click', event => {
+            const card = event.target.closest('[data-barber-link]');
+            if (!card || event.target.closest('a')) return;
+            window.location.href = `barber.html?id=${encodeURIComponent(card.dataset.barberLink)}`;
+        });
+        document.addEventListener('keydown', event => {
+            const card = event.target.closest && event.target.closest('[data-barber-link]');
+            if (!card || event.target !== card || (event.key !== 'Enter' && event.key !== ' ')) return;
+            event.preventDefault();
+            window.location.href = `barber.html?id=${encodeURIComponent(card.dataset.barberLink)}`;
+        });
+        // En celular: un toque detiene el carrusel un momento para poder leer.
+        document.getElementById('barbers-marquee')?.addEventListener('touchstart', event => {
+            const marquee = event.currentTarget;
+            marquee.classList.add('paused');
+            window.clearTimeout(marquee.resumeTimer);
+            marquee.resumeTimer = window.setTimeout(() => marquee.classList.remove('paused'), 4000);
+        }, { passive: true });
+
+        // Botones para navegar a la barbería. La dirección se configura en shared-data.js (SHOP_LOCATION).
+        function renderShopDirections() {
+            const links = window.GabyData.getDirectionsLinks();
+            const location = window.GabyData.SHOP_LOCATION;
+            const map = document.getElementById('shop-map');
+            if (map) map.dataset.src = links.embed;
+            const address = document.getElementById('shop-address');
+            if (address) {
+                address.innerHTML = `<i class="fas fa-location-dot" style="color: var(--gold-2); margin-top: 0.2rem;"></i><span>${location.address || location.fallbackQuery}</span>`;
+            }
+            const actions = document.getElementById('shop-directions');
+            if (actions) {
+                actions.innerHTML = `
+                    <a class="primary" href="${links.google}" target="_blank" rel="noopener noreferrer"><i class="fas fa-diamond-turn-right"></i> Cómo llegar (Google Maps)</a>
+                    <a href="${links.waze}" target="_blank" rel="noopener noreferrer"><i class="fab fa-waze"></i> Abrir en Waze</a>
+                    <a href="${links.apple}" target="_blank" rel="noopener noreferrer"><i class="fab fa-apple"></i> Apple Maps</a>
+                `;
+            }
+        }
+
+        window.GabyPassword.addToggle(document.getElementById('staff-password'));
+        renderServicesPublic();
+        renderProductsPublic();
+        renderBarbersPublic();
+        renderShopDirections();
+        // Reserva sin cuenta: el cliente escribe su nombre completo en el último paso.
+        bookingWidget = window.GabyBookingWidget.mount(document.getElementById('booking-widget'), {});
+
+        // Lightbox Logic
+        function openLightbox(index) {
+            const visibleServices = getDb().services.filter(service => service.active);
+            const activeService = visibleServices[index];
+            const fallback = services[index % services.length];
+            const vipBox = document.getElementById('lightbox-vip-includes');
+            const vipList = document.getElementById('lightbox-vip-list');
+            const s = {
+                name: activeService?.name || fallback.name,
+                desc: activeService?.description || fallback.desc,
+                price: activeService?.price || fallback.price,
+                duration: activeService?.duration || fallback.duration
+            };
+            document.getElementById('lightbox-title').innerText = s.name;
+            document.getElementById('lightbox-desc').innerText = s.desc;
+            document.getElementById('lightbox-price').innerText = s.price;
+            document.getElementById('lightbox-duration').innerText = s.duration;
+            if (s.name === 'GOAT VIP Experience') {
+                vipList.innerHTML = vipExperienceIncludes.map(item => `<li>${item}</li>`).join('');
+                vipBox.hidden = false;
+            } else {
+                vipList.innerHTML = '';
+                vipBox.hidden = true;
+            }
+            currentLightboxIndex = index;
+            document.getElementById('lightbox').classList.add('active');
+        }
+        let currentLightboxIndex = 0;
+        function closeLightbox() { document.getElementById('lightbox').classList.remove('active'); }
+
+        // =========================================
+        // 3. CRM & BOOKING LOGIC (Frontend)
+        // =========================================
+        async function checkStatus() {
+            const code = document.getElementById('consult-input').value;
+            const result = document.getElementById('consult-result');
+            let found = null;
+            try {
+                found = await window.GabyBooking.lookupByCode(code);
+            } catch (error) {
+                result.style.color = '#dc3545';
+                result.innerText = 'No se pudo consultar ahora. Intenta de nuevo.';
+                return;
+            }
+            if(found) {
+                let color = '#ffc107';
+                if(found.status === 'APROBADA' || found.status === 'COMPLETADA') color = '#28a745';
+                if(found.status === 'RECHAZADA') color = '#dc3545';
+                result.style.color = color;
+                result.innerText = `Estado: ${window.GabyBooking.statusLabel(found.status)} | ${found.service} | ${window.GabyBooking.relativeDay(String(found.dateTime).slice(0, 10))} ${window.GabyBooking.formatTime(String(found.dateTime).slice(11, 16))}`;
+            } else {
+                result.style.color = '#dc3545';
+                result.innerText = 'Código no encontrado.';
+            }
+        }
+
+        // =========================================
+        // 4. STAFF ACCESS LOGIC
+        // =========================================
+        let currentDashRole = 'general';
+        // Las cuentas del personal y sus contrasenas (solo como hash) estan en security.js.
+
+        function openDashboard() {
+            document.getElementById('login-error').innerText = '';
+            document.getElementById('staff-email').value = '';
+            document.getElementById('staff-password').value = '';
+            document.getElementById('login-overlay').style.display = 'flex';
+        }
+        function openStaffDashboard(role) {
+            currentDashRole = role || 'general';
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('main-view').style.display = 'none';
+            document.getElementById('dashboard-view').style.display = 'block';
+            const targetButton = currentDashRole === 'darialex'
+                ? document.querySelectorAll('.dash-tab')[2]
+                : document.querySelectorAll('.dash-tab')[0];
+            switchDashTab(currentDashRole, targetButton || document.querySelector('.dash-tab.active'));
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function closeDashboard() {
+            document.getElementById('dashboard-view').style.display = 'none';
+            document.getElementById('main-view').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function logoutDashboard() {
+            currentDashRole = 'general';
+            closeDashboard();
+        }
+        function openBarbersDirectory() {
+            document.getElementById('barbers-overlay').classList.add('active');
+        }
+        function closeBarbersDirectory() {
+            document.getElementById('barbers-overlay').classList.remove('active');
+        }
+        function closeLoginOverlay(event) {
+            if (event.target.id !== 'login-overlay') return;
+            document.getElementById('login-overlay').style.display = 'none';
+        }
+        async function handleStaffLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('staff-email').value.trim();
+            const password = document.getElementById('staff-password').value;
+            const errorBox = document.getElementById('login-error');
+            errorBox.innerText = '';
+
+            const button = e.target.querySelector('button[type=submit]');
+            if (button) button.disabled = true;
+            // Verifica la contrasena (hash), cuenta los intentos y bloquea al tercer error.
+            const result = await window.GabySecurity.login({ email, password });
+            if (button) button.disabled = false;
+            if (!result.ok) {
+                errorBox.innerText = result.message;
+                window.GabyData.toast(result.message, result.reason === 'locked' ? 'error' : 'warning');
+                return;
+            }
+            document.getElementById('staff-password').value = '';
+            if (result.mustChangePassword) {
+                await window.GabySecurity.promptPasswordChange({
+                    email,
+                    name: result.account?.name,
+                    title: 'Crea tu contraseña personal',
+                    message: 'Por seguridad, antes de entrar al panel debes crear una contraseña nueva que solo tú conozcas.'
+                });
+            }
+            window.GabyData.toast('Sesión iniciada. Entrando al panel...', 'success');
+            window.location.href = result.portal;
+        }
+
+        // Estado de la barbería (abierta en línea / fuera de línea) y aviso especial.
+        function renderShopStatus() {
+            const db = getDb();
+            const offline = db.settings.shopMode === 'offline';
+            document.getElementById('public-shop-status').innerHTML = `<div class="status-chip ${offline ? 'status-offline' : 'status-online'}">${offline ? 'Fuera de línea' : 'Abiertos en línea'}</div>`;
+            document.getElementById('closure-notice').innerText = db.settings.closureNotice || 'Sin avisos especiales por el momento.';
+        }
+
+        // Opciones de servicio y barbero del formulario de reseñas (se conserva lo escogido al refrescar).
+        function fillReviewSelects() {
+            const db = getDb();
+            const serviceSelect = document.getElementById('review-service');
+            const barberSelect = document.getElementById('review-barber');
+            if (!serviceSelect || !barberSelect) return;
+            const keepService = serviceSelect.value;
+            const keepBarber = barberSelect.value;
+            const serviceNames = db.services.filter(service => service.active).map(service => service.name);
+            serviceNames.push(window.GabyBooking.unknownCutService(db).name);
+            serviceSelect.innerHTML = '<option value="">Escoge el servicio</option>' + serviceNames.map(name => `<option value="${escapeText(name)}">${escapeText(name)}</option>`).join('');
+            barberSelect.innerHTML = '<option value="">Escoge tu barbero</option>' + db.barbers.filter(barber => barber.active !== false)
+                .map(barber => `<option value="${escapeText(barber.id)}">${escapeText(barber.alias ? `${barber.name} (${barber.alias})` : barber.name)}</option>`).join('');
+            if (serviceNames.includes(keepService)) serviceSelect.value = keepService;
+            if (db.barbers.some(barber => barber.id === keepBarber)) barberSelect.value = keepBarber;
+        }
+
+        function paintStarPicker(value) {
+            document.querySelectorAll('#review-star-picker .star-btn').forEach(star => {
+                star.classList.toggle('active', Number(star.dataset.star) <= value);
+            });
+        }
+        function initStarPicker() {
+            const picker = document.getElementById('review-star-picker');
+            const ratingInput = document.getElementById('review-rating');
+            if (!picker || !ratingInput) return;
+            const stars = Array.from(picker.querySelectorAll('.star-btn'));
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    ratingInput.value = star.dataset.star;
+                    paintStarPicker(Number(star.dataset.star));
+                });
+                star.addEventListener('mouseenter', () => paintStarPicker(Number(star.dataset.star)));
+            });
+            picker.addEventListener('mouseleave', () => paintStarPicker(Number(ratingInput.value)));
+            paintStarPicker(Number(ratingInput.value));
+        }
+        initStarPicker();
+
+        // Reseña sin cuenta: nombre completo, servicio, barbero, estrellas y opinión. Queda pendiente de aprobación.
+        async function handleReviewSubmit(event) {
+            event.preventDefault();
+            const status = document.getElementById('review-status');
+            const form = document.getElementById('review-form');
+            const button = form.querySelector('[type=submit]');
+            const publishChoice = form.querySelector('input[name="review-publish"]:checked');
+            if (!publishChoice) {
+                status.textContent = 'Indica si permites que publiquemos tu reseña en la página.';
+                window.GabyData.toast(status.textContent, 'warning');
+                return;
+            }
+            const publish = publishChoice.value === 'yes';
+            button.disabled = true;
+            status.textContent = '';
+            let clientPhoto;
+            try {
+                clientPhoto = await window.GabyPublicReviews.preparePhoto(document.getElementById('review-photo').files[0]);
+            } catch (error) {
+                status.textContent = error.message;
+                button.disabled = false;
+                return;
+            }
+            const ok = await window.GabyData.commit(db => {
+                window.GabyBooking.addPublicReview(db, {
+                    name: document.getElementById('review-name').value,
+                    service: document.getElementById('review-service').value,
+                    barberId: document.getElementById('review-barber').value,
+                    rating: document.getElementById('review-rating').value,
+                    text: document.getElementById('review-text').value,
+                    clientPhoto,
+                    publish
+                });
+            }, { success: publish ? 'Gracias. Tu reseña se envió y se publicará cuando la barbería la apruebe.' : 'Gracias. Tu reseña se envió a la barbería y no se publicará en la página.', error: 'No se pudo enviar tu reseña.' });
+            button.disabled = false;
+            if (!ok) return;
+            form.reset();
+            document.getElementById('review-rating').value = '5';
+            paintStarPicker(5);
+            fillReviewSelects();
+            status.innerText = publish ? 'Reseña enviada. Se publicará cuando la barbería la apruebe.' : 'Reseña enviada. Solo la verá la barbería.';
+        }
+
+        function renderNews() {
+            const feed = document.getElementById('news-feed');
+            const db = getDb();
+            if (!feed) return;
+            feed.innerHTML = db.news.map(item => `
+                <article class="news-card">
+                    <div class="feed-top">
+                        <div>
+                            <div class="feed-role">${item.role}</div>
+                            <h3 style="font-family: var(--font-display); margin-top: 0.35rem;">${item.title}</h3>
+                        </div>
+                        <small>${formatDateTime(item.createdAt)}</small>
+                    </div>
+                    ${item.image ? `<img src="${item.image}" alt="${item.title}" style="width: 100%; border-radius: 18px; margin-bottom: 1rem; max-height: 280px; object-fit: cover;">` : ''}
+                    <p style="line-height: 1.7;">${item.body}</p>
+                    <div class="feed-actions">
+                        <span><i class="fas fa-user"></i> ${item.authorName}</span>
+                        <span><i class="fas fa-heart"></i> ${item.likes}</span>
+                        <span><i class="fas fa-comment"></i> ${item.comments}</span>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function escapeText(value) {
+            return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        }
+
+        function renderReviews() {
+            const state = getDb();
+            const { list, card } = window.GabyPublicReviews;
+            const reviews = list(state).slice(0, 10);
+            const cards = reviews.map(review => card(review, state)).join('');
+            const firstTrack = document.getElementById('track-1');
+            const secondTrack = document.getElementById('track-2');
+            const copies = cards ? '<div class="review-set" aria-hidden="true">' + cards + '</div>' : '';
+            firstTrack.classList.toggle('review-empty', !cards);
+            firstTrack.innerHTML = cards
+                ? '<div class="review-set">' + cards + '</div>' + copies
+                : '<p class="review-card">Pronto verás aquí las reseñas de nuestros clientes.</p>';
+            secondTrack.innerHTML = copies.repeat(2);
+        }
+
+        function switchDashTab(tab, btn) {
+            document.querySelectorAll('.dash-tab').forEach(t => t.classList.remove('active'));
+            btn.classList.add('active');
+            const content = document.getElementById('dash-content');
+            let html = '';
+
+            if(tab === 'admin' || tab === 'general') {
+                html += `
+                    <div class="dash-grid">
+                        <div class="stat-card"><h3>Ingresos del Día</h3><div class="number">$1,250</div></div>
+                        <div class="stat-card"><h3>Clientes Nuevos (Mes)</h3><div class="number">45</div></div>
+                        <div class="stat-card"><h3>Clientes VIP</h3><div class="number">12</div></div>
+                        <div class="stat-card"><h3>Citas Completadas</h3><div class="number">320</div></div>
+                    </div>
+                    <div class="chart-container">
+                        <h3 style="margin-bottom: 2rem; font-family: var(--font-display);">Rendimiento Semanal (Ingresos)</h3>
+                        <div class="chart-bars">
+                            <div class="bar" style="height: 40%;"><span>Lun</span></div>
+                            <div class="bar" style="height: 60%;"><span>Mar</span></div>
+                            <div class="bar" style="height: 80%;"><span>Mié</span></div>
+                            <div class="bar" style="height: 50%;"><span>Jue</span></div>
+                            <div class="bar" style="height: 90%;"><span>Vie</span></div>
+                            <div class="bar" style="height: 100%;"><span>Sáb</span></div>
+                            <div class="bar" style="height: 30%;"><span>Dom</span></div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += `
+                <div class="chart-container">
+                    <h3 style="margin-bottom: 1rem; font-family: var(--font-display);">Gestión de Citas (${tab.charAt(0).toUpperCase() + tab.slice(1)})</h3>
+                    <table class="dash-table">
+                        <thead><tr><th>Código</th><th>Cliente</th><th>Servicio</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody id="appointments-table"></tbody>
+                    </table>
+                </div>
+            `;
+
+            content.innerHTML = html;
+            renderAppointmentsTable(tab);
+        }
+
+        function renderAppointmentsTable(role) {
+            let db = JSON.parse(localStorage.getItem('gs_crm')) || { appointments: [] };
+            const tbody = document.getElementById('appointments-table');
+            tbody.innerHTML = '';
+            
+            if(db.appointments.length === 0) {
+                db.appointments.push({ code: 'GS-123456', client: 'Carlos M.', service: 'Corte y barba', barber: 'gabriel', status: 'PENDIENTE' });
+                db.appointments.push({ code: 'GS-789012', client: 'Luis R.', service: 'Servicio VIP', barber: 'darialex', status: 'APROBADA' });
+            }
+            
+            db.appointments.forEach(apt => {
+                if(role === 'admin' || role === 'general' || apt.barber === role) {
+                    tbody.innerHTML += `
+                        <tr>
+                            <td>${apt.code}</td>
+                            <td>${apt.client}</td>
+                            <td>${apt.service}</td>
+                            <td><span class="status-badge status-${apt.status.toLowerCase()}">${apt.status}</span></td>
+                            <td>
+                                <button class="icon-btn" style="width: 30px; height: 30px; font-size: 0.7rem;" onclick="updateStatus('${apt.code}', 'APROBADA')"><i class="fas fa-check"></i></button>
+                                <button class="icon-btn" style="width: 30px; height: 30px; font-size: 0.7rem;" onclick="updateStatus('${apt.code}', 'RECHAZADA')"><i class="fas fa-times"></i></button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        function updateStatus(code, status) {
+            let db = JSON.parse(localStorage.getItem('gs_crm'));
+            db.appointments = db.appointments.map(apt => apt.code === code ? {...apt, status: status} : apt);
+            localStorage.setItem('gs_crm', JSON.stringify(db));
+            renderAppointmentsTable(currentDashRole);
+        }
+
+        // =========================================
+        // 5. UI EFFECTS (Scroll, Particles, FAQ)
+        // =========================================
+        const pContainer = document.getElementById('particles-js');
+        for(let i=0; i<30; i++) {
+            let p = document.createElement('div');
+            p.className = 'particle';
+            let size = Math.random() * 4 + 1;
+            p.style.width = `${size}px`; p.style.height = `${size}px`;
+            p.style.left = `${Math.random() * 100}%`;
+            p.style.animationDuration = `${Math.random() * 15 + 10}s`;
+            p.style.animationDelay = `${Math.random() * 5}s`;
+            pContainer.appendChild(p);
+        }
+
+        window.addEventListener('scroll', () => {
+            const winHeight = window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight - winHeight;
+            const scrolled = (window.scrollY / docHeight) * 100;
+            document.getElementById('progress-bar').style.width = `${scrolled}%`;
+            document.querySelectorAll('.reveal').forEach(el => {
+                if(el.getBoundingClientRect().top < winHeight - 100) el.classList.add('visible');
+            });
+        });
+
+        function toggleFaq(el) { el.classList.toggle('active'); }
+        function toggleTheme() {
+            const currentTheme = getDb().settings.theme || 'dark';
+            const nextTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            updateDb(db => {
+                db.settings.theme = nextTheme;
+            });
+            applyThemePreference();
+        }
+
+        // Las resenas se muestran desde renderReviews() con datos reales del sistema.
+
+        function syncIndexFromSharedState() {
+            renderShopStatus();
+            fillReviewSelects();
+            renderNews();
+            renderReviews();
+            applyThemePreference();
+            applyTranslations();
+        }
+
+        window.addEventListener('storage', event => {
+            if (event.key === window.GabyData.STORAGE_KEY) {
+                syncIndexFromSharedState();
+            }
+        });
+
+        window.addEventListener('gabydatachange', event => {
+            if (event.detail?.key === window.GabyData.STORAGE_KEY) {
+                syncIndexFromSharedState();
+            }
+        });
+
+        syncIndexFromSharedState();
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

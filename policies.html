@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Política de Reservaciones | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <link rel="stylesheet" href="legal-pages.css">
+</head>
+<body>
+    <div class="top" data-mobile-topbar><div class="top-inner"><a class="brand" href="index.html">GOAT STYLE SALON</a><a href="settings.html">← Volver</a></div></div>
+
+    <main class="wrap">
+        <div class="draft-banner" data-legal-draft hidden>
+            <strong>Borrador pendiente de revisión.</strong> Los datos <span class="legal-ph">[RESALTADOS]</span> están pendientes.
+        </div>
+
+        <header class="doc-head">
+            <span class="eyebrow">Antes de reservar</span>
+            <h1>Política de Reservaciones</h1>
+            <div class="doc-meta">
+                <span>Fecha de entrada en vigor: <strong data-legal="effectiveDate"></strong></span>
+                <span>Última actualización: <strong data-legal="lastUpdated"></strong></span>
+            </div>
+            <p class="doc-intro">Cancelaciones, reprogramaciones, tardanzas y no-show, explicado en corto. Esta misma información aparece resumida en el formulario antes de confirmar cada cita.</p>
+        </header>
+
+        <section class="summary-card" aria-label="Resumen">
+            <dl>
+                <div><dt>Servicio</dt><dd>El precio de cada servicio aparece en el <a href="services.html">menú de servicios</a> y junto al servicio que escojas al reservar.</dd></div>
+                <div><dt>Depósito</dt><dd>Los servicios no requieren depósito.</dd></div>
+                <div><dt>Cancelación gratuita</dt><dd>Con <span data-legal="freeCancelHours"></span> horas o más de anticipación.</dd></div>
+                <div><dt>Cancelación tardía</dt><dd>Si cancelas con menos de <span data-legal="freeCancelHours"></span> horas de anticipación, el cargo es <span data-legal="lateCancelFee"></span>.</dd></div>
+                <div><dt>No-Show</dt><dd><span data-legal="noShowConsequence"></span></dd></div>
+                <div><dt>Tardanza máxima</dt><dd><span data-legal="graceMinutes"></span> minutos.</dd></div>
+                <div><dt>Reprogramaciones</dt><dd>Según disponibilidad. <span data-legal="rescheduleRule"></span></dd></div>
+
+            </dl>
+        </section>
+
+        <section class="doc-section" id="r1">
+            <h2>1. Cómo funciona una reservación</h2>
+            <ul>
+                <li>Escoges servicio, barbero, fecha y hora, escribes tu nombre completo y envías la solicitud. No necesitas cuenta.</li>
+                <li>Tu cita queda <strong>pendiente</strong> hasta que el barbero la apruebe. Consulta el estado con tu código de reserva (por ejemplo, GS-123456).</li>
+                <li>La cita está confirmada cuando su estado es <strong>APROBADA</strong>.</li>
+            </ul>
+        </section>
+
+        <section class="doc-section" id="r2">
+            <h2>2. Cómo cancelar</h2>
+            <ul>
+                <li>Comunícate con tu barbero o con la barbería al <span data-legal="phone"></span> y dinos tu nombre y el código de tu cita.</li>
+                <li>Para calcular el plazo, cuenta la hora en que nos comunicas la cancelación.</li>
+                <li>Cancelar con <span data-legal="freeCancelHours"></span> horas o más de anticipación no tiene costo.</li>
+                <li>Si cancelas con menos de <span data-legal="freeCancelHours"></span> horas de anticipación, el cargo es <span data-legal="lateCancelFee"></span>. Por ejemplo, si reservaste un servicio de $30, el cargo es de $30.</li>
+            </ul>
+        </section>
+
+        <section class="doc-section" id="r3">
+            <h2>3. Tardanzas</h2>
+            <ul>
+                <li>Te recomendamos llegar unos 5 minutos antes.</li>
+                <li>Hay un período de tolerancia de <span data-legal="graceMinutes"></span> minutos.</li>
+                <li>Si llegas después de ese período, el barbero puede: hacer un servicio más corto si el tiempo que queda lo permite (te lo dirá antes de empezar), o reprogramar la cita.</li>
+
+                <li>Nosotros también procuramos respetar tu horario. Algunos servicios pueden extenderse de forma inesperada; si tu turno se atrasa, te avisaremos.</li>
+            </ul>
+        </section>
+
+        <section class="doc-section" id="r4">
+            <h2>4. No-Show (no presentarse)</h2>
+            <p>Una cita se considera <strong>No-Show</strong> cuando no llegas dentro del período de tolerancia de <span data-legal="graceMinutes"></span> minutos y no hiciste una cancelación válida antes.</p>
+            <p>Posibles consecuencias, solo si se te mostraron antes de confirmar la cita: <span data-legal="noShowConsequence"></span>.</p>
+        </section>
+
+        <section class="doc-section" id="r5">
+            <h2>5. Si la barbería cancela o cambia tu cita</h2>
+            <p>Si tenemos que cancelar o mover tu cita, te avisaremos lo antes posible y te ofreceremos otra fecha. No te cobraremos cargos por cancelación en ese caso.</p>
+        </section>
+
+        <section class="doc-section" id="r6">
+            <h2>6. Excepciones razonables y revisión de cargos</h2>
+            <p>Entendemos que pasan cosas: emergencias médicas, accidentes, situaciones de clima u otras circunstancias fuera de tu control. En esos casos podemos eximir el cargo. Si crees que un cargo no corresponde, escríbenos a <a data-legal-mail="claimsEmail" href="#"><span data-legal="claimsEmail"></span></a> con el código de la cita y lo revisaremos.</p>
+        </section>
+
+        <section class="doc-section" id="r7">
+            <h2>7. Pagos</h2>
+            <p>Los servicios se pagan en la barbería o directamente con el barbero. La plataforma no procesa pagos. Nunca se aplicará un cargo que no se haya mostrado antes de confirmar la cita.</p>
+        </section>
+
+        <section class="doc-section" id="r8">
+            <h2>8. Servicio VIP a domicilio</h2>
+            <p>Debes dar una dirección y una descripción correctas del lugar. Si no es posible llegar o el lugar no es seguro, el servicio puede cancelarse o reprogramarse. Cualquier cargo de traslado se informa antes de confirmar.</p>
+        </section>
+
+        <section class="doc-section" id="r9">
+            <h2>9. Conducta</h2>
+            <ul>
+                <li>Se espera respeto hacia el barbero y los demás clientes en todo momento.</li>
+                <li>Responde las llamadas, mensajes o emails del barbero sobre tu cita.</li>
+                <li>La barbería puede cancelar o detener un servicio por conducta abusiva o inapropiada.</li>
+            </ul>
+            <div class="related">
+                <a href="terminos.html"><i class="fas fa-scale-balanced"></i> Términos y Condiciones</a>
+                <a href="privacidad.html"><i class="fas fa-lock"></i> Política de Privacidad</a>
+                <a class="doc-btn solid" href="booking.html"><i class="fas fa-calendar-check"></i> Entendido, reservar cita</a>
+            </div>
+        </section>
+    </main>
+
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav">
+        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
+        <a href="services.html"><i class="fas fa-scissors"></i><span>Servicios</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>window.GabyPreferences.initPreferences({});</script>
+</body>
+</html>

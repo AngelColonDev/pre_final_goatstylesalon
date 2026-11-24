@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conviértete en barbero | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        :root { --bg: var(--theme-bg); --panel: var(--theme-panel); --text: var(--theme-text); --muted: var(--theme-muted); --gold: var(--theme-gold); --border: var(--theme-line); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Inter',sans-serif; background:radial-gradient(circle at top right, rgba(212,175,55,.12), transparent 22%), linear-gradient(180deg,#090909 0%,#040404 100%); color:var(--text); min-height:100vh; padding:0 0 92px; }
+        body.light-mode { background:var(--bg); }
+        a { color:inherit; text-decoration:none; } h1,h2{font-family:'Cinzel',serif}
+        .top{position:sticky;top:0;background:rgba(8,8,8,.88);backdrop-filter:blur(18px);padding:1rem;border-bottom:1px solid rgba(212,175,55,.10)}
+        body.light-mode .top{background:rgba(245,245,247,.92);border-bottom-color:rgba(0,0,0,.06)}
+        .wrap{max-width:860px;margin:0 auto;padding:1.2rem 1rem 3rem}
+        .sub{color:var(--muted);line-height:1.8;margin:.7rem 0 1.4rem}
+        .card{background:linear-gradient(180deg, rgba(18,18,18,.98), rgba(11,11,11,.98));border:1px solid var(--border);border-radius:22px;padding:1.25rem;box-shadow:0 12px 28px rgba(0,0,0,.24)}
+        body.light-mode .card{background:var(--panel);box-shadow:0 10px 24px rgba(16,24,40,.08)}
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+        .field{display:grid;gap:.45rem;margin-bottom:1rem}
+        .field label{font-weight:700;color:var(--text)}
+        .field input,.field textarea,.field select{padding:.9rem 1rem;border-radius:14px;border:1px solid var(--border);font:inherit;background:rgba(255,255,255,.03);color:var(--text)}
+        body.light-mode .field input, body.light-mode .field textarea, body.light-mode .field select{background:#fff}
+        .field textarea{min-height:120px;resize:vertical}
+        .btn{width:100%;border:none;border-radius:16px;padding:1rem;background:linear-gradient(135deg,#f6dfa0 0%,#d4af37 62%,#87640f 100%);color:#111;font:inherit;font-weight:800;cursor:pointer}
+        .status{margin-top:1rem;color:var(--muted)}
+        .eyebrow{display:block;color:var(--gold);font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;margin:1rem 0 .6rem}
+        .wrap h1{font-size:clamp(2rem,5vw,2.8rem);line-height:1.1}
+        .join-card{margin-bottom:1rem;padding:1.5rem}
+        .join-card h2{color:var(--gold);font-size:1.25rem;margin-bottom:1rem}
+        .join-list{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:.75rem 1.25rem}
+        .join-list li{display:flex;gap:.7rem;align-items:flex-start;line-height:1.55}
+        .join-list i{color:var(--gold);margin-top:.2rem;flex-shrink:0}
+        .join-philosophy{border-color:rgba(212,175,55,.35);background:linear-gradient(135deg,rgba(212,175,55,.12),rgba(11,11,11,.98) 60%)}
+        body.light-mode .join-philosophy{background:linear-gradient(135deg,rgba(212,175,55,.14),var(--panel) 60%)}
+        .join-philosophy blockquote{border-left:3px solid var(--gold);padding:.2rem 0 .2rem 1.1rem;font-size:1.05rem;line-height:1.8;font-style:italic}
+        .form-title{font-size:1.5rem;margin-top:2rem}
+        .mobile-bottom-nav{display:none}.mobile-bottom-nav a,.mobile-bottom-nav button{background:transparent;border:none;color:#d8d2c3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;font-size:.68rem;font-weight:600;letter-spacing:.02em;min-width:0;cursor:pointer}.mobile-bottom-nav i{font-size:1.05rem;color:#d4af37}.mobile-bottom-nav .active{color:#d4af37}
+        body.light-mode .mobile-bottom-nav{background:rgba(255,255,255,.96);border-top-color:rgba(0,0,0,.08);box-shadow:0 -12px 30px rgba(0,0,0,.12)}body.light-mode .mobile-bottom-nav a{color:#6b7280}
+        body.light-mode .mobile-bottom-nav .active{color:var(--gold)}
+        @media(max-width:760px){.grid{grid-template-columns:1fr}}
+        @media (max-width: 968px){body{padding-bottom:92px}.mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:2500;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.25rem;padding:.8rem .7rem calc(.8rem + env(safe-area-inset-bottom));background:rgba(8,8,8,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(212,175,55,.15);box-shadow:0 -12px 30px rgba(0,0,0,.3)}}
+        @media(min-width:969px){body{padding-bottom:0}.mobile-bottom-nav{display:none}}
+    </style>
+</head>
+<body>
+    <div class="top" data-mobile-topbar><a href="settings.html">← Volver</a></div>
+    <main class="wrap">
+        <span class="eyebrow">Goat Style Salon · Únete a nuestro equipo</span>
+        <h1>Conviértete en barbero</h1>
+        <p class="sub">En Goat Style Salon no buscamos simplemente barberos con talento. Buscamos personas comprometidas, con valores y con ganas de crecer tanto profesional como personalmente.</p>
+
+        <section class="card join-card" aria-labelledby="join-values-title">
+            <h2 id="join-values-title">¿Qué buscamos en nuestro equipo?</h2>
+            <ul class="join-list">
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Responsabilidad y puntualidad.</li>
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Excelente presentación personal.</li>
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Organización, limpieza e higiene profesional.</li>
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Estudios y preparación en barbería.</li>
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Respeto, humildad y compañerismo.</li>
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Buena actitud y excelente servicio al cliente.</li>
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Disciplina, compromiso y ética de trabajo.</li>
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Deseos de aprender, superarse y seguir evolucionando.</li>
+                <li><i class="fas fa-circle-check" aria-hidden="true"></i>Capacidad para trabajar en equipo y mantener un ambiente positivo.</li>
+            </ul>
+        </section>
+
+        <section class="card join-card join-philosophy" aria-labelledby="join-philosophy-title">
+            <h2 id="join-philosophy-title">Nuestra filosofía</h2>
+            <blockquote>En Goat Style Salon creemos que el talento se desarrolla, las técnicas se perfeccionan y la experiencia se adquiere con el tiempo. Pero los valores, la humildad, el respeto y la calidad humana son los que realmente definen a un profesional.</blockquote>
+        </section>
+
+        <h2 class="form-title">Envía tu solicitud</h2>
+        <p class="sub">Completa el formulario. Tu solicitud quedará pendiente de revisión por un administrador.</p>
+        <div class="card">
+            <form id="apply-form">
+                <div class="grid">
+                    <div class="field"><label>Nombre completo</label><input id="name" required></div>
+                    <div class="field"><label>Correo electrónico</label><input id="email" type="email" required></div>
+                    <div class="field"><label>Número de teléfono</label><input id="phone" required></div>
+                    <div class="field"><label>Ciudad</label><input id="city" required></div>
+                    <div class="field"><label>Años de experiencia</label><input id="experience" type="number" min="0" required></div>
+                    <div class="field"><label>Especialidades</label><input id="specialties" placeholder="Fade, barba, color..." required></div>
+                    <div class="field"><label>Redes sociales (opcional)</label><input id="socials"></div>
+                    <div class="field"><label>Currículum (PDF)</label><input id="resume" type="file" accept=".pdf,application/pdf" required></div>
+                    <div class="field" style="grid-column:1 / -1;"><label>Carta de presentación</label><textarea id="cover" required></textarea></div>
+                    <div class="field"><label>Disponibilidad</label><input id="availability" placeholder="Martes a sábado, tiempo completo" required></div>
+                    <div class="field"><label>Fotografías de trabajos realizados</label><input id="photos" type="file" accept="image/*" multiple></div>
+                    <div class="field" style="grid-column:1 / -1;"><label>Comentarios adicionales</label><textarea id="comments"></textarea></div>
+                </div>
+                <button class="btn" type="submit">Enviar solicitud</button>
+                <div class="status" id="status"></div>
+            </form>
+        </div>
+    </main>
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav"><a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a><a href="services.html"><i class="fas fa-scissors"></i><span>Servicios</span></a><a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a><a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a><a class="active" href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a></div>
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        window.GabyPreferences.initPreferences({});
+        document.getElementById('apply-form').addEventListener('submit', async function (event) {
+            event.preventDefault();
+            const form = event.target;
+            const ok = await window.GabyData.commit(db => {
+                db.barberApplications.unshift({
+                    id: window.GabyData.makeId('barber-app'),
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    city: document.getElementById('city').value.trim(),
+                    experience: document.getElementById('experience').value.trim(),
+                    specialties: document.getElementById('specialties').value.trim(),
+                    socials: document.getElementById('socials').value.trim(),
+                    cover: document.getElementById('cover').value.trim(),
+                    availability: document.getElementById('availability').value.trim(),
+                    comments: document.getElementById('comments').value.trim(),
+                    resumeName: document.getElementById('resume').files[0]?.name || '',
+                    photosCount: document.getElementById('photos').files.length,
+                    status: 'Pendiente de revisión',
+                    createdAt: new Date().toISOString()
+                });
+            }, { success: 'Solicitud enviada. Un administrador la revisará pronto.', error: 'No se pudo enviar tu solicitud.' });
+            if (!ok) return;
+            document.getElementById('status').innerText = 'Solicitud enviada. Un administrador la revisará pronto.';
+            form.reset();
+        });
+    </script>
+</body>
+</html>

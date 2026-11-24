@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración de la app | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        :root { --bg: var(--theme-bg); --panel: var(--theme-panel); --text: var(--theme-text); --muted: var(--theme-muted); --gold: var(--theme-gold); --border: var(--theme-line); }
+        * { box-sizing:border-box; margin:0; padding:0; }
+        body { font-family:'Inter',sans-serif; background:radial-gradient(circle at top right, rgba(212,175,55,.12), transparent 22%), linear-gradient(180deg,#090909 0%,#040404 100%); color:var(--text); padding:0 0 92px; min-height:100vh; }
+        body.light-mode { background:var(--bg); }
+        a { color:inherit; text-decoration:none; }
+        h1,h2 { font-family:'Cinzel',serif; }
+        .eyebrow { display:block; color:var(--gold); font-size:.78rem; letter-spacing:.2em; text-transform:uppercase; margin:1rem 0 .6rem; }
+        .wrap h1 { font-size:clamp(2rem,5vw,2.8rem); line-height:1.1; }
+        .intro { color:var(--muted); line-height:1.7; margin-top:.7rem; }
+        .wrap { max-width:820px; margin:0 auto; padding:1.2rem 1rem 3rem; }
+        .card { background:linear-gradient(180deg, rgba(18,18,18,.98), rgba(11,11,11,.98)); border:1px solid var(--border); border-radius:20px; padding:1.2rem; box-shadow:0 12px 28px rgba(0,0,0,.24); margin-top:1rem; }
+        body.light-mode .card { background:var(--panel); box-shadow:0 10px 24px rgba(16,24,40,.08); }
+        .row { display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:.95rem 0; }
+        .row + .row { border-top:1px solid var(--border); }
+        label { font-weight:700; display:block; }
+        small { display:block; color:var(--muted); margin-top:.25rem; line-height:1.5; }
+        select, input { padding:.8rem 1rem; border-radius:14px; border:1px solid var(--border); background:rgba(255,255,255,.03); color:var(--text); font:inherit; }
+        body.light-mode select, body.light-mode input { background:#fff; }
+        .btn { width:100%; margin-top:1rem; border:none; border-radius:16px; padding:1rem; background:linear-gradient(135deg,#f6dfa0 0%,#d4af37 62%,#87640f 100%); color:#111; font:inherit; font-weight:800; cursor:pointer; }
+        .mobile-bottom-nav{display:none}.mobile-bottom-nav a,.mobile-bottom-nav button{background:transparent;border:none;color:#d8d2c3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;font-size:.68rem;font-weight:600;letter-spacing:.02em;min-width:0;cursor:pointer}.mobile-bottom-nav i{font-size:1.05rem;color:#d4af37}.mobile-bottom-nav .active{color:#d4af37}
+        body.light-mode .mobile-bottom-nav{background:rgba(255,255,255,.96);border-top-color:rgba(0,0,0,.08);box-shadow:0 -12px 30px rgba(0,0,0,.12)}body.light-mode .mobile-bottom-nav a{color:#6b7280}
+        
+        @media (max-width: 968px){body{padding-bottom:92px}.mobile-bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:2500;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.25rem;padding:.8rem .7rem calc(.8rem + env(safe-area-inset-bottom));background:rgba(8,8,8,.96);backdrop-filter:blur(16px);border-top:1px solid rgba(212,175,55,.15);box-shadow:0 -12px 30px rgba(0,0,0,.3)}}@media(min-width:969px){body{padding-bottom:0}.mobile-bottom-nav{display:none}}
+    </style>
+</head>
+<body>
+    <main class="wrap">
+        <span class="eyebrow">Goat Style Salon</span>
+        <h1 data-i18n="title">Idioma y tema</h1>
+        <p class="intro" data-i18n="intro">Escoge cómo quieres ver la página. Se guarda en este dispositivo.</p>
+        <div class="card">
+            <div class="row"><div><label for="language" data-i18n="languageTitle">Idioma</label><small data-i18n="languageDesc">Idioma en que se muestra la página.</small></div><select id="language"><option value="es">Español</option><option value="en">English</option></select></div>
+            <div class="row"><div><label for="theme" data-i18n="themeTitle">Tema</label><small data-i18n="themeDesc">Apariencia clara, oscura o igual que tu dispositivo.</small></div><select id="theme"><option value="light" data-i18n="light">Claro</option><option value="dark" data-i18n="dark">Oscuro</option><option value="system" data-i18n="system">Automático</option></select></div>
+        </div>
+        <button class="btn" type="button" onclick="saveSettings()" data-i18n="save">Guardar</button>
+    </main>
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav"><a href="index.html"><i class="fas fa-house"></i><span data-i18n="homeTab">Inicio</span></a><a href="services.html"><i class="fas fa-scissors"></i><span data-i18n="servicesTab">Servicios</span></a><a href="booking.html"><i class="fas fa-calendar-check"></i><span data-i18n="bookingTab">Cita</span></a><a href="news.html"><i class="fas fa-newspaper"></i><span data-i18n="newsTab">Noticias</span></a><a class="active" href="settings.html"><i class="fas fa-gear"></i><span data-i18n="configTab">Config</span></a></div>
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        const translations = {
+            es: { title:'Idioma y tema', intro:'Escoge cómo quieres ver la página. Se guarda en este dispositivo.', languageTitle:'Idioma', languageDesc:'Idioma en que se muestra la página.', themeTitle:'Tema', themeDesc:'Apariencia clara, oscura o igual que tu dispositivo.', light:'Claro', dark:'Oscuro', system:'Automático', save:'Guardar', homeTab:'Inicio', servicesTab:'Servicios', bookingTab:'Cita', newsTab:'Noticias', configTab:'Config' },
+            en: { title:'Language and theme', intro:'Choose how you want to see the site. It is saved on this device.', languageTitle:'Language', languageDesc:'Language used to show the site.', themeTitle:'Theme', themeDesc:'Light, dark, or the same as your device.', light:'Light', dark:'Dark', system:'Automatic', save:'Save', homeTab:'Home', servicesTab:'Services', bookingTab:'Booking', newsTab:'News', configTab:'Settings' }
+        };
+        const db = window.GabyData.getState();
+        document.getElementById('language').value = db.settings.defaultLanguage || 'es';
+        document.getElementById('theme').value = db.settings.theme || 'dark';
+        async function saveSettings() {
+            const en = document.getElementById('language').value === 'en';
+            const ok = await window.GabyData.commit(state => {
+                state.settings.defaultLanguage = document.getElementById('language').value;
+                state.settings.theme = document.getElementById('theme').value;
+            }, { success: en ? 'Settings saved.' : 'Configuración guardada.', error: en ? 'Could not save your settings.' : 'No se pudo guardar la configuración.' });
+            if (!ok) return;
+            window.GabyPreferences.applyTheme();
+            window.GabyPreferences.applyLanguage(translations);
+        }
+        window.GabyPreferences.initPreferences({ translations });
+    </script>
+</body>
+</html>

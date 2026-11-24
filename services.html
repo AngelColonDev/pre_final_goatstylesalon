@@ -1,0 +1,350 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicios | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        :root {
+            --gold: var(--theme-gold);
+            --gold-soft: var(--theme-gold-soft);
+            --text: var(--theme-text);
+            --muted: var(--theme-muted);
+            --panel: var(--theme-panel);
+            --border: var(--theme-line);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top right, rgba(212,175,55,.16), transparent 20%),
+                linear-gradient(180deg, #0a0a0a 0%, #040404 100%);
+            min-height: 100vh;
+            padding-bottom: 92px;
+        }
+        a { color: inherit; text-decoration: none; }
+        h1, h2, h3, h4 { font-family: 'Cinzel', serif; }
+        body.light-mode .service-card, body.light-mode .lightbox-card { background: #fff; box-shadow: 0 12px 28px rgba(16,24,40,.08); }
+        body.light-mode .footer-pro { background: #fff; border-top-color: rgba(0,0,0,.06); }
+        body.light-mode .footer-col a, body.light-mode .footer-col p { color: #555; }
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.3rem;
+            background: rgba(8,8,8,.86);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid rgba(212,175,55,.12);
+        }
+        .brand { color: var(--gold); font-weight: 800; letter-spacing: .12em; }
+        .wrap { max-width: 1180px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
+        .hero {
+            display: grid;
+            gap: 1.1rem;
+            padding: 2rem 0 2.4rem;
+        }
+        .eyebrow {
+            color: var(--gold-soft);
+            font-size: .82rem;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+        }
+        h1 { font-size: clamp(2.2rem, 5vw, 4rem); }
+        .sub { color: var(--muted); max-width: 760px; line-height: 1.8; }
+        .hero-actions, .service-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .65rem;
+            border-radius: 999px;
+            padding: .95rem 1.45rem;
+            font-size: .78rem;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+        }
+        .btn-primary { background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 62%, #87640f 100%); color: #111; }
+        .btn-ghost { border: 1px solid rgba(212,175,55,.35); background: transparent; color: var(--text); }
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.25rem;
+        }
+        .service-card {
+            background: linear-gradient(180deg, rgba(18,18,18,.98), rgba(9,9,9,.98));
+            border: 1px solid var(--border);
+            border-radius: 26px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+        }
+        .service-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(212,175,55,.24);
+            box-shadow: 0 18px 35px rgba(0,0,0,.28);
+        }
+        .service-info { padding: 1.4rem; display: grid; gap: .9rem; }
+        .service-info p { color: var(--muted); line-height: 1.75; }
+        .service-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-wrap: wrap;
+            color: var(--gold-soft);
+            font-weight: 600;
+        }
+        .service-reserve-btn { width: 100%; justify-content: center; }
+        .footer-pro {
+            background: linear-gradient(180deg, #0a0a0a 0%, #050505 100%);
+            padding: 4rem 2rem;
+            border-top: 1px solid rgba(212,175,55,0.12);
+        }
+        .footer-pro-inner {
+            max-width: 1180px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        .footer-brand img { width: 88px; margin-bottom: 1rem; filter: drop-shadow(0 0 18px rgba(212,175,55,0.28)); }
+        .footer-brand h3 { font-size: 1.4rem; margin-bottom: .75rem; }
+        .footer-col h4 { color: var(--gold); margin-bottom: 1rem; }
+        .footer-col a, .footer-col p { color: #b6b6b6; line-height: 1.8; }
+        .footer-payments { max-width: 1180px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(212,175,55,0.12); display: flex; align-items: center; justify-content: center; gap: 1.3rem; flex-wrap: wrap; color: #999; font-size: 0.85rem; }
+        .footer-payments i { font-size: 1.8rem; }
+        .footer-payments .fa-cc-visa { color: #2566AF; }
+        .footer-payments .fa-cc-mastercard { color: #EB5424; }
+        .footer-payments .fa-apple-pay { color: #e8e8e8; }
+        .footer-payments .fa-paypal { color: #3B8FE0; }
+        .footer-payments .ath-badge { font-weight: 700; letter-spacing: 0.03em; padding: 0.3rem 0.7rem; border: 1px solid rgba(76,196,99,0.4); border-radius: 8px; color: #4CC463; font-size: 0.78rem; }
+        body.light-mode .footer-payments { color: #666; border-top-color: rgba(0,0,0,0.06); }
+        body.light-mode .footer-payments .fa-apple-pay { color: #1d1d1f; }
+        .footer-credit { display: inline-flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; color: var(--gold-soft); font-weight: 600; }
+        .footer-credit-logo { width: 30px; height: 30px; border-radius: 8px; display: block; box-shadow: 0 8px 18px rgba(0,0,0,0.22); }
+        .mobile-bottom-nav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 30;
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: .25rem;
+            padding: .8rem .7rem calc(.8rem + env(safe-area-inset-bottom));
+            background: rgba(8,8,8,.96);
+            backdrop-filter: blur(16px);
+            border-top: 1px solid rgba(212,175,55,.15);
+        }
+        .mobile-bottom-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: .3rem;
+            color: #d8d2c3;
+            font-size: .68rem;
+            font-weight: 600;
+        }
+        .mobile-bottom-nav i { color: var(--gold); font-size: 1.05rem; }
+        .mobile-bottom-nav .active { color: var(--gold-soft); }
+        .lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.88);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            padding: 1.25rem;
+        }
+        .lightbox-overlay.active { display: flex; }
+        .lightbox-card {
+            width: min(920px, 100%);
+            background: linear-gradient(180deg, rgba(18,18,18,.98), rgba(9,9,9,.98));
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            overflow: hidden;
+            display: grid;
+        }
+        .lightbox-body { padding: 1.6rem; display: grid; gap: 1rem; }
+        .lightbox-body p { color: var(--muted); line-height: 1.8; }
+        .vip-includes { border: 1px solid rgba(212,175,55,.18); border-radius: 18px; background: rgba(212,175,55,.08); padding: 1rem 1.1rem; }
+        .vip-includes h4 { margin-bottom: .75rem; color: var(--gold); font-size: .95rem; letter-spacing: .04em; text-transform: uppercase; }
+        .vip-includes ul { list-style: none; display: grid; gap: .55rem; padding: 0; margin: 0; }
+        .vip-includes li { display: flex; align-items: center; gap: .65rem; color: var(--text); }
+        .vip-includes li::before { content: '•'; color: var(--gold); font-size: 1.1rem; line-height: 1; }
+        .lightbox-close {
+            justify-self: end;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            border: 1px solid rgba(212,175,55,.35);
+            background: transparent;
+            color: var(--gold);
+            cursor: pointer;
+        }
+        @media (max-width: 900px) {
+            .footer-pro-inner, .lightbox-card { grid-template-columns: 1fr; }
+        }
+        @media (min-width: 969px) {
+            body { padding-bottom: 0; }
+            .mobile-bottom-nav { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar" data-mobile-topbar>
+        <a class="brand" href="index.html">GOAT STYLE SALON</a>
+        <div class="hero-actions">
+            <a class="btn btn-ghost" href="index.html">Inicio</a>
+            <a class="btn btn-primary" href="booking.html">Sacar cita</a>
+        </div>
+    </div>
+
+    <main class="wrap">
+        <section class="hero">
+            <span class="eyebrow">Servicios premium</span>
+            <h1>Nuestros cortes y experiencias en una página dedicada</h1>
+            <p class="sub">La portada se mantiene elegante y esta página concentra todos los servicios para que en teléfono la experiencia se sienta más limpia, directa y profesional.</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="booking.html"><i class="fas fa-calendar-check"></i> Reservar ahora</a>
+                <a class="btn btn-ghost" href="settings.html"><i class="fas fa-gear"></i> Ir a configuración</a>
+            </div>
+        </section>
+
+        <section class="services-grid" id="services-container" data-maintenance-section="servicios"></section>
+    </main>
+
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav">
+        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
+        <a href="services.html" class="active"><i class="fas fa-scissors"></i><span>Servicios</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+    </div>
+
+    <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-card" onclick="event.stopPropagation()">
+            <div class="lightbox-body">
+                <button class="lightbox-close" type="button" onclick="closeLightbox()"><i class="fas fa-times"></i></button>
+                <h2 id="lightbox-title"></h2>
+                <p id="lightbox-desc"></p>
+                <div class="vip-includes" id="lightbox-vip-includes" hidden>
+                    <h4>Incluye</h4>
+                    <ul id="lightbox-vip-list"></ul>
+                </div>
+                <div class="service-meta">
+                    <span id="lightbox-price"></span>
+                    <span id="lightbox-duration"></span>
+                </div>
+                <div class="service-actions">
+                    <a class="btn btn-primary" id="lightbox-reserve-link" href="booking.html">Reservar este servicio</a>
+                    <a class="btn btn-ghost" href="settings.html">Configuración</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        const vipExperienceIncludes = [
+            "Signature Cut",
+            "Diseño de barba",
+            "Lavado",
+            "Toallas calientes",
+            "Masaje capilar",
+            "Limpieza facial express",
+            "Bebida de cortesía",
+            "Productos premium para finalizar"
+        ];
+
+        const fallbackServices = [
+            { desc: "Corte clásico y preciso adaptado a tu estilo." },
+            { desc: "Combinación perfecta de corte y barba." },
+            { desc: "Detalle exhaustivo para barbas largas o exigentes." },
+            { desc: "Lavado, corte y peinado con productos premium." },
+            { desc: "Tratamientos faciales y experiencia de lujo." }
+        ];
+
+        const db = window.GabyData.getState();
+        const services = db.services.filter(service => service.active);
+        const container = document.getElementById('services-container');
+
+        function renderServices() {
+            container.innerHTML = services.map((service, index) => {
+                const fallback = fallbackServices[index % fallbackServices.length];
+                return `
+                    <article class="service-card">
+                        <div class="service-info">
+                            <h3 onclick="openLightbox(${index})">${service.name}</h3>
+                            <p onclick="openLightbox(${index})">${service.description || fallback.desc}</p>
+                            <div class="service-meta" onclick="openLightbox(${index})">
+                                <span>${service.price}</span>
+                                <span>${service.duration}</span>
+                            </div>
+                            <a class="btn btn-primary service-reserve-btn" href="booking.html?service=${encodeURIComponent(service.name)}">Reservar</a>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function openLightbox(index) {
+            const service = services[index];
+            const fallback = fallbackServices[index % fallbackServices.length];
+            const vipBox = document.getElementById('lightbox-vip-includes');
+            const vipList = document.getElementById('lightbox-vip-list');
+            document.getElementById('lightbox-title').innerText = service.name;
+            document.getElementById('lightbox-desc').innerText = service.description || fallback.desc;
+            document.getElementById('lightbox-price').innerText = service.price;
+            document.getElementById('lightbox-duration').innerText = service.duration;
+            document.getElementById('lightbox-reserve-link').href = `booking.html?service=${encodeURIComponent(service.name)}`;
+            if (service.name === 'GOAT VIP Experience') {
+                vipList.innerHTML = vipExperienceIncludes.map(item => `<li>${item}</li>`).join('');
+                vipBox.hidden = false;
+            } else {
+                vipList.innerHTML = '';
+                vipBox.hidden = true;
+            }
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        renderServices();
+        window.GabyPreferences.initPreferences({});
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

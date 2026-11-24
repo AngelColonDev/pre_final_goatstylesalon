@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barberos | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="apple-touch-icon" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        :root {
+            --bg: var(--theme-bg);
+            --panel: var(--theme-panel);
+            --panel-soft: var(--theme-panel-soft);
+            --text: var(--theme-text);
+            --muted: var(--theme-muted);
+            --gold: var(--theme-gold);
+            --gold-soft: var(--theme-gold-soft);
+            --line: var(--theme-line);
+            --success: var(--theme-success);
+            --danger: var(--theme-danger);
+            --shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+        }
+
+        body.light-mode { --shadow: 0 18px 45px rgba(16, 24, 40, 0.1); }
+        body.light-mode .card,
+        body.light-mode .meta-card,
+        body.light-mode .btn-link,
+        body.light-mode .icon { background: #fff; }
+        body.light-mode .tags span { background: rgba(0, 0, 0, 0.04); color: #7a5c12; }
+        body.light-mode .nav { background: rgba(255, 255, 255, .96); border-top-color: rgba(0, 0, 0, .08); }
+        body.light-mode .nav a { color: #6b7280; }
+
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(212, 175, 55, 0.16), transparent 28%),
+                radial-gradient(circle at top right, rgba(212, 175, 55, 0.10), transparent 24%),
+                linear-gradient(180deg, #090909 0%, #040404 100%);
+            padding: 0 0 92px;
+        }
+
+        a { color: inherit; text-decoration: none; }
+        h1, h2, h3 { font-family: 'Cinzel', serif; margin: 0; }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 30;
+            backdrop-filter: blur(18px);
+            background: rgba(7, 7, 7, 0.82);
+            border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+        }
+
+        .topbar-inner {
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 1rem 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .brand strong {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.2rem;
+            font-size: 1rem;
+        }
+
+        .brand span {
+            color: var(--muted);
+            font-size: 0.78rem;
+            letter-spacing: 0.18rem;
+            text-transform: uppercase;
+        }
+
+        .top-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            border-radius: 999px;
+            padding: 0.9rem 1.1rem;
+            border: 1px solid rgba(212, 175, 55, 0.18);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text);
+            font-weight: 600;
+            transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+        }
+
+        .btn-link:hover {
+            transform: translateY(-1px);
+            border-color: rgba(212, 175, 55, 0.45);
+            background: rgba(212, 175, 55, 0.08);
+        }
+
+        .btn-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+        /* El boton dorado conserva su fondo y texto al pasar el cursor, tocar o enfocar
+           (antes el :hover generico le quitaba el fondo y quedaba negro). */
+        .btn-primary,
+        .btn-primary:hover,
+        .btn-primary:active,
+        .btn-primary:focus,
+        body.light-mode .btn-primary {
+            background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 58%, #8c6916 100%);
+            color: #111;
+            border-color: transparent;
+        }
+        .btn-primary:hover { filter: brightness(1.06); box-shadow: 0 10px 24px rgba(212, 175, 55, 0.28); }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .page {
+            max-width: 1220px;
+            margin: 0 auto;
+            padding: 2rem 1.1rem 4rem;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 34px;
+            border: 1px solid rgba(212, 175, 55, 0.14);
+            background:
+                linear-gradient(135deg, rgba(212, 175, 55, 0.10), transparent 40%),
+                linear-gradient(180deg, rgba(17, 17, 17, 0.96), rgba(9, 9, 9, 0.98));
+            box-shadow: var(--shadow);
+            padding: 2.25rem;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: auto -80px -120px auto;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.18), transparent 68%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.55rem 0.9rem;
+            border-radius: 999px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.18);
+            color: var(--gold-soft);
+            font-size: 0.76rem;
+            letter-spacing: 0.12rem;
+            text-transform: uppercase;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+            gap: 2rem;
+            align-items: end;
+            margin-top: 1.5rem;
+        }
+
+        .hero-copy h1 {
+            font-size: clamp(2.3rem, 4vw, 4.4rem);
+            line-height: 1.04;
+            margin-bottom: 1rem;
+        }
+
+        .hero-copy p {
+            max-width: 700px;
+            color: var(--muted);
+            line-height: 1.8;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .hero-stats {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .stat {
+            border-radius: 22px;
+            padding: 1.1rem 1.2rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .stat strong {
+            display: block;
+            color: var(--gold-soft);
+            font-size: 1.7rem;
+            margin-bottom: 0.25rem;
+            font-family: 'Cinzel', serif;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 1rem;
+            margin: 2rem 0 1.2rem;
+        }
+
+        .section-head p {
+            margin: 0;
+            color: var(--muted);
+            max-width: 720px;
+            line-height: 1.75;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.35rem;
+        }
+
+        .card {
+            border-radius: 30px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(18, 18, 18, 0.98), rgba(8, 8, 8, 0.98));
+            border: 1px solid var(--line);
+            box-shadow: var(--shadow);
+        }
+
+        .card-cover {
+            position: relative;
+            min-height: 420px;
+            display: flex;
+            align-items: end;
+            padding: 1.5rem;
+            background-size: cover;
+            background-position: center top;
+        }
+
+        .card-cover::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.78));
+        }
+
+        .card-badges {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.5rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            letter-spacing: 0.08rem;
+            text-transform: uppercase;
+            backdrop-filter: blur(12px);
+        }
+
+        .chip .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .chip.online {
+            color: #09220f;
+            background: var(--success);
+            font-weight: 700;
+        }
+
+        .chip.offline {
+            color: #fff;
+            background: var(--danger);
+            font-weight: 700;
+        }
+
+        .chip.gold {
+            color: var(--gold-soft);
+            background: rgba(212, 175, 55, 0.12);
+            border: 1px solid rgba(212, 175, 55, 0.18);
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-body h2 {
+            font-size: 2rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .alias {
+            display: inline-block;
+            color: var(--gold-soft);
+            letter-spacing: 0.18rem;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .bio {
+            color: var(--muted);
+            line-height: 1.75;
+            min-height: 88px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            margin: 1.2rem 0;
+        }
+
+        .tags span {
+            padding: 0.55rem 0.85rem;
+            border-radius: 999px;
+            background: var(--panel-soft);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            color: #f3dfad;
+            font-size: 0.8rem;
+        }
+
+        .meta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.9rem;
+            margin: 1.2rem 0 1.4rem;
+        }
+
+        .meta-card {
+            padding: 1rem;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .meta-card small {
+            display: block;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08rem;
+            margin-bottom: 0.35rem;
+            font-size: 0.72rem;
+        }
+
+        .meta-card {
+            min-width: 0;
+        }
+
+        /* Correos y textos largos bajan de línea en vez de salirse del cuadro */
+        .meta-card strong {
+            display: block;
+            font-size: 1rem;
+            line-height: 1.45;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        .footer-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .socials {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--gold);
+            transition: transform 0.25s ease, border-color 0.25s ease;
+        }
+
+        .icon:hover {
+            transform: translateY(-2px);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+
+        .quick-back {
+            display: inline-flex;
+            margin-top: 1.4rem;
+        }
+
+        .nav {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            padding: 0.8rem 0.7rem calc(0.8rem + env(safe-area-inset-bottom));
+            background: rgba(8, 8, 8, 0.96);
+            border-top: 1px solid rgba(212, 175, 55, 0.15);
+            backdrop-filter: blur(18px);
+        }
+
+        .nav a {
+            text-align: center;
+            font-size: 0.68rem;
+            color: #d8d2c3;
+        }
+
+        .nav .active-link { color: var(--gold); }
+
+        @media (max-width: 820px) {
+            .hero { padding: 1.4rem; }
+            .hero-grid { grid-template-columns: 1fr; }
+            .topbar-inner, .top-actions, .section-head, .footer-row { align-items: stretch; }
+            .topbar-inner, .top-actions { flex-direction: column; }
+            .top-actions { width: 100%; }
+            .btn-link { justify-content: center; }
+            .card-cover { min-height: 360px; }
+            .meta { grid-template-columns: 1fr; }
+        }
+
+        @media (min-width: 969px) {
+            body { padding-bottom: 0; }
+            .nav { display: none; }
+        }
+        .meta-card-hours, .meta-card-wide { grid-column: 1 / -1; }
+        .meta-card-wide strong { overflow-wrap: anywhere; }
+    </style>
+</head>
+<body>
+    <header class="topbar" data-mobile-topbar>
+        <div class="topbar-inner">
+            <a class="brand" href="index.html">
+                <strong>GOAT STYLE SALON</strong>
+            </a>
+            <div class="top-actions">
+                <a class="btn-link" href="index.html">
+                    <i class="fas fa-house"></i>
+                    <span>Inicio</span>
+                </a>
+                <button class="btn-link" type="button" onclick="goBackToSite()">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Regresar</span>
+                </button>
+                <a class="btn-link btn-primary" href="booking.html">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Reservar cita</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="page">
+        <section class="hero">
+            <div class="hero-badge">
+                <i class="fas fa-scissors"></i>
+                <span>Equipo Profesional</span>
+            </div>
+            <div class="hero-grid">
+                <div class="hero-copy">
+                    <h1>Conoce a los artistas detrás de cada detalle.</h1>
+                    <p>Explora el perfil completo del equipo de Goat Style Salon con una presencia visual más limpia, elegante y lista para transmitir confianza desde el primer vistazo.</p>
+                    <button class="btn-link quick-back" type="button" onclick="goBackToSite()">
+                        <i class="fas fa-chevron-left"></i>
+                        <span>Volver a la página anterior</span>
+                    </button>
+                </div>
+                <div class="hero-stats" id="hero-stats"></div>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-head">
+                <div>
+                    <h2>Todos los barberos</h2>
+                    <p>Cada perfil muestra experiencia, disponibilidad, especialidades y accesos directos para que el cliente encuentre rápidamente a su profesional ideal.</p>
+                </div>
+            </div>
+            <div class="grid" id="barber-grid" data-maintenance-section="barberos"></div>
+        </section>
+    </main>
+
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav site-bottom-nav">
+        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
+        <a href="barbers.html" class="active"><i class="fas fa-users"></i><span>Barberos</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        function getDb() {
+            return window.GabyData.getState();
+        }
+
+        function goBackToSite() {
+            if (window.history.length > 1) {
+                window.history.back();
+                return;
+            }
+            window.location.href = 'index.html';
+        }
+
+        function barberStatusClass(barber) {
+            return barber.active !== false ? 'online' : 'offline';
+        }
+
+        function barberStatusLabel(barber) {
+            return barber.active !== false ? 'Disponible hoy' : 'Fuera de línea';
+        }
+
+        function renderHeroStats(barbers) {
+            const total = barbers.length;
+            const active = barbers.filter(barber => barber.active !== false).length;
+            const totalVip = barbers.reduce((sum, barber) => sum + Number(barber.vipClients || 0), 0);
+            const avgExp = total ? Math.round(barbers.reduce((sum, barber) => sum + Number(barber.yearsExperience || 0), 0) / total) : 0;
+            document.getElementById('hero-stats').innerHTML = `
+                <div class="stat"><strong>${total}</strong><span>barberos en el equipo</span></div>
+                <div class="stat"><strong>${active}</strong><span>disponibles actualmente</span></div>
+                <div class="stat"><strong>${avgExp}+</strong><span>años promedio de experiencia</span></div>
+                <div class="stat"><strong>${totalVip.toLocaleString('en-US')}+</strong><span>clientes atendidos</span></div>
+            `;
+        }
+
+        function renderBarbers() {
+            const db = getDb();
+            const grid = document.getElementById('barber-grid');
+            const barbers = db.barbers || [];
+            renderHeroStats(barbers);
+            grid.innerHTML = barbers.map(barber => `
+                <article class="card">
+                    <div class="card-cover" style="background-image:url('${barber.avatar || barber.gallery?.[0] || ''}')">
+                        <div class="card-badges">
+                            <span class="chip ${barberStatusClass(barber)}"><span class="dot"></span>${barberStatusLabel(barber)}</span>
+                            <span class="chip gold"><i class="fas fa-award"></i>${barber.yearsExperience || 0}+ años</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h2>${barber.name}</h2>
+                        <span class="alias">${barber.alias}</span>
+                        <p class="bio">${barber.bio || 'Perfil profesional en actualización.'}</p>
+                        <div class="tags">${(barber.specialty || []).map(item => `<span>${item}</span>`).join('')}</div>
+                        <div class="meta">
+                            <div class="meta-card">
+                                <small>Contacto</small>
+                                <strong><i class="fas fa-phone" style="color:#d4af37"></i> ${barber.phone || 'No disponible'}</strong>
+                            </div>
+                            <div class="meta-card">
+                                <small>Clientes</small>
+                                <strong>${Number(barber.vipClients || 0).toLocaleString('en-US')}+ atendidos</strong>
+                            </div>
+                            <div class="meta-card meta-card-wide">
+                                <small>Correo</small>
+                                <strong>${barber.email || 'No disponible'}</strong>
+                            </div>
+                            <div class="meta-card meta-card-hours">
+                                <small><i class="fas fa-clock" style="color:#d4af37"></i> Horario</small>
+                                ${window.GabySchedule.html({ compact: true })}
+                            </div>
+                        </div>
+                        <div class="footer-row">
+                            <div class="socials">
+                                ${barber.socials?.instagram ? `<a class="icon" href="${barber.socials.instagram}" target="_blank" rel="noopener noreferrer" aria-label="Instagram de ${barber.name}"><i class="fab fa-instagram"></i></a>` : ''}
+                                ${barber.socials?.facebook ? `<a class="icon" href="${barber.socials.facebook}" target="_blank" rel="noopener noreferrer" aria-label="Facebook de ${barber.name}"><i class="fab fa-facebook-f"></i></a>` : ''}
+                            </div>
+                            <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                                <a class="btn-link" href="barber.html?id=${barber.id}">Ver perfil</a>
+                                <a class="btn-link btn-primary" href="booking.html?barber=${barber.id}"><i class="fas fa-calendar-check"></i>Reservar con ${barber.alias || barber.name}</a>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        renderBarbers();
+        window.GabyPreferences.initPreferences({});
+    </script>
+</body>
+</html>

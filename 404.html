@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <script>
+        // El hosting muestra esta pagina en cualquier ruta que no exista (ej. /citas/abc),
+        // asi que los enlaces deben salir siempre desde la raiz del sitio.
+        (function () {
+            if (location.protocol === 'file:') return;
+            var parts = location.pathname.split('/');
+            var root = /github\.io$/.test(location.hostname) && parts.length > 2 ? '/' + parts[1] + '/' : '/';
+            document.write('<base href="' + root + '">');
+        })();
+    </script>
+    <title>Página no encontrada | Goat Style Salon</title>
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; color: var(--theme-text); min-height: 100vh; padding-bottom: 92px;
+            background: radial-gradient(circle at top, rgba(212,175,55,.16), transparent 40%), linear-gradient(180deg, #090909 0%, #040404 100%); }
+        body.light-mode { background: var(--theme-bg); }
+        a { color: inherit; text-decoration: none; }
+        .not-found { min-height: 70vh; display: grid; place-items: center; padding: 3rem 1.25rem; text-align: center; }
+        .not-found-card { max-width: 640px; display: grid; gap: 1.2rem; justify-items: center; }
+        .code { font-family: 'Cinzel', serif; font-size: clamp(5rem, 22vw, 9rem); line-height: 1; font-weight: 800;
+            background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 55%, #87640f 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .scissors { font-size: 2rem; color: var(--theme-gold); transform: rotate(-20deg); }
+        h1 { font-family: 'Cinzel', serif; font-size: clamp(1.6rem, 5vw, 2.3rem); }
+        p { color: var(--theme-muted); line-height: 1.8; }
+        .links { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; margin-top: .5rem; }
+        .btn { display: inline-flex; align-items: center; gap: .55rem; padding: .9rem 1.3rem; border-radius: 999px; font-weight: 700; font-size: .88rem; border: 1px solid rgba(212,175,55,.35); background: transparent; color: inherit; cursor: pointer; font-family: inherit; }
+        .btn:hover { border-color: var(--theme-gold); color: var(--theme-gold); }
+        .btn.primary { background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 62%, #87640f 100%); color: #111; border-color: transparent; }
+        .btn.primary:hover { color: #111; filter: brightness(1.06); }
+        .btn:focus-visible { outline: 2px solid var(--theme-gold); outline-offset: 3px; }
+        .path { font-family: ui-monospace, Consolas, monospace; font-size: .8rem; color: var(--theme-muted); overflow-wrap: anywhere; }
+        .mobile-bottom-nav { display: none; }
+        .mobile-bottom-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .3rem; color: #d8d2c3; font-size: .68rem; font-weight: 600; }
+        .mobile-bottom-nav i { color: #d4af37; font-size: 1.05rem; }
+        @media (max-width: 968px) {
+            .mobile-bottom-nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 2500; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .25rem; padding: .8rem .7rem calc(.8rem + env(safe-area-inset-bottom)); background: rgba(8,8,8,.96); border-top: 1px solid rgba(212,175,55,.15); }
+        }
+        @media (min-width: 969px) { body { padding-bottom: 0; } }
+    </style>
+</head>
+<body>
+    <main class="not-found">
+        <div class="not-found-card">
+            <i class="fas fa-scissors scissors" aria-hidden="true"></i>
+            <div class="code" aria-hidden="true">404</div>
+            <h1>No encontramos esta página</h1>
+            <p>Puede que el enlace esté incompleto, que la página se haya movido o que ya no exista. No te preocupes: desde aquí puedes seguir navegando.</p>
+            <p class="path" id="missing-path"></p>
+            <div class="links">
+                <a class="btn primary" href="index.html"><i class="fas fa-house"></i> Ir al inicio</a>
+                <a class="btn" href="booking.html"><i class="fas fa-calendar-check"></i> Reservar cita</a>
+                <a class="btn" href="barbers.html"><i class="fas fa-users"></i> Barberos</a>
+                <a class="btn" href="services.html"><i class="fas fa-scissors"></i> Servicios</a>
+                <a class="btn" href="support.html#contacto"><i class="fas fa-headset"></i> Contacto</a>
+                <button class="btn" type="button" onclick="history.length > 1 ? history.back() : location.assign('index.html')"><i class="fas fa-arrow-left"></i> Volver atrás</button>
+            </div>
+        </div>
+    </main>
+
+    <footer data-site-footer></footer>
+
+    <div class="mobile-bottom-nav">
+        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
+        <a href="services.html"><i class="fas fa-scissors"></i><span>Servicios</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+    </div>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        window.GabyPreferences.initPreferences({});
+        document.getElementById('missing-path').textContent = location.pathname.endsWith('404.html') ? '' : `Dirección: ${location.pathname}`;
+    </script>
+</body>
+</html>

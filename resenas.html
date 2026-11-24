@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Lee las reseñas de Goat Style Salon y consulta el desglose de las calificaciones por estrellas.">
+    <title>Reseñas de clientes | Goat Style Salon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="shared-theme.css">
+    <link rel="stylesheet" href="public-reviews.css">
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: var(--theme-bg); color: var(--theme-text); font: 1rem/1.5 system-ui, sans-serif; }
+        .reviews-page { width: min(70rem, calc(100% - 2rem)); margin: 0 auto; padding: clamp(2rem, 6vw, 4.5rem) 0; }
+        .reviews-back { color: inherit; text-underline-offset: .2em; }
+        .reviews-page h1 { font: 700 clamp(2rem, 6vw, 3.75rem)/1.1 Georgia, serif; margin: 1.25rem 0 .75rem; }
+        .review-summary { display: grid; grid-template-columns: minmax(10rem, 1fr) 2fr; gap: 2rem; align-items: center; margin: 1.75rem 0 2.5rem; padding: clamp(1.25rem, 4vw, 2rem); border: 1px solid var(--theme-line); border-radius: 16px; background: var(--theme-panel); }
+        .review-average { margin: 0; font-size: 1.125rem; }
+        .review-average strong { font-size: clamp(2.5rem, 6vw, 3.5rem); }
+        .review-total { margin: .25rem 0 0; color: var(--theme-muted); }
+        .rating-counts { display: grid; gap: .45rem; margin: 0; padding: 0; list-style: none; }
+        .rating-counts button { display: grid; grid-template-columns: 6.5rem 1fr 2rem; gap: .65rem; align-items: center; text-align: left; width: 100%; padding: .5rem .625rem; border: 1px solid transparent; border-radius: 8px; color: inherit; background: transparent; font: inherit; cursor: pointer; }
+        .rating-counts button:hover, .rating-counts button[aria-pressed="true"] { border-color: var(--theme-gold); background: var(--theme-accent); }
+        .rating-counts button span:last-child { text-align: right; font-variant-numeric: tabular-nums; }
+        .rating-bar { height: .5rem; border-radius: 999px; background: var(--theme-panel-soft); overflow: hidden; }
+        .rating-bar-fill { display: block; height: 100%; background: var(--theme-gold); }
+        .reviews-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+        .reviews-heading h2 { margin: 0; font-size: 1.375rem; }
+        .clear-filter { padding: .55rem .85rem; border: 1px solid var(--theme-gold); border-radius: 8px; color: inherit; background: var(--theme-accent); font: inherit; cursor: pointer; }
+        .review-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+        .review-list > p { grid-column: 1 / -1; margin: 0; color: var(--theme-muted); }
+        @media (max-width: 650px) {
+            .review-summary, .review-list { grid-template-columns: 1fr; }
+            .review-summary { gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+    <main class="reviews-page">
+        <a class="reviews-back" href="index.html#testimonios">Volver a Clientes VIP</a>
+        <h1>Reseñas de clientes</h1>
+        <div data-maintenance-section="resenas">
+            <section class="review-summary" aria-label="Desglose de calificaciones">
+                <div>
+                    <p class="review-average" id="review-average"></p>
+                    <p class="review-total" id="review-total"></p>
+                </div>
+                <ul class="rating-counts" id="rating-counts" aria-label="Filtrar reseñas por estrellas"></ul>
+            </section>
+            <section aria-labelledby="reviews-heading">
+                <div class="reviews-heading">
+                    <h2 id="reviews-heading" aria-live="polite">Todas las reseñas</h2>
+                    <button class="clear-filter" id="clear-filter" type="button" hidden>Ver todas</button>
+                </div>
+                <div class="review-list" id="review-list"></div>
+            </section>
+        </div>
+    </main>
+    <footer data-site-footer></footer>
+
+    <script src="supabase-config.js"></script>
+    <script src="shared-data.js"></script>
+    <script src="supabase-sync.js"></script>
+    <script src="site-guard.js"></script>
+    <script src="shared-preferences.js"></script>
+    <script src="booking-engine.js"></script>
+    <script src="public-reviews.js"></script>
+    <script src="legal.js"></script>
+    <script src="site-chrome.js"></script>
+    <script>
+        (() => {
+            const { list, card } = window.GabyPublicReviews;
+            const ratingCounts = document.getElementById('rating-counts');
+            const clearFilter = document.getElementById('clear-filter');
+            const ratings = [5, 4, 3, 2, 1];
+            const ratingLabel = rating => rating === 1 ? '1 estrella' : `${rating} estrellas`;
+            const number = new Intl.NumberFormat('es-PR');
+            const decimal = new Intl.NumberFormat('es-PR', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            let activeRating = 0;
+            let state;
+            let reviews;
+
+            ratingCounts.innerHTML = ratings.map(rating => `
+                <li><button type="button" data-rating="${rating}" aria-pressed="false" aria-controls="review-list">
+                    <span>${ratingLabel(rating)}</span>
+                    <span class="rating-bar" aria-hidden="true"><span class="rating-bar-fill" style="width:0%"></span></span>
+                    <span data-count>0</span>
+                </button></li>`).join('');
+
+            function renderList() {
+                const visible = activeRating ? reviews.filter(review => Number(review.rating) === activeRating) : reviews;
+                ratingCounts.querySelectorAll('button').forEach(button => {
+                    button.setAttribute('aria-pressed', String(Number(button.dataset.rating) === activeRating));
+                });
+                clearFilter.hidden = !activeRating;
+                document.getElementById('reviews-heading').textContent = activeRating ? `Reseñas de ${ratingLabel(activeRating)}` : 'Todas las reseñas';
+                document.getElementById('review-list').innerHTML = visible.map(review => card(review, state)).join('') ||
+                    `<p>${activeRating ? 'Todavía no hay reseñas con esa calificación.' : 'Todavía no hay reseñas publicadas.'}</p>`;
+            }
+
+            function refresh() {
+                state = window.GabyData.getState();
+                reviews = list(state);
+                const counts = [0, 0, 0, 0, 0, 0];
+                reviews.forEach(review => {
+                    const rating = Number(review.rating);
+                    if (ratings.includes(rating)) counts[rating] += 1;
+                });
+                const rated = counts.reduce((sum, count) => sum + count, 0);
+                const points = ratings.reduce((sum, rating) => sum + rating * counts[rating], 0);
+                document.getElementById('review-average').innerHTML = rated ? `<strong>${decimal.format(points / rated)}</strong> de 5` : 'Sin calificaciones';
+                document.getElementById('review-total').textContent = reviews.length === 1 ? '1 reseña publicada' : `${number.format(reviews.length)} reseñas publicadas`;
+                ratingCounts.querySelectorAll('button').forEach(button => {
+                    const count = counts[Number(button.dataset.rating)];
+                    button.querySelector('[data-count]').textContent = number.format(count);
+                    button.querySelector('.rating-bar-fill').style.width = `${rated ? count / rated * 100 : 0}%`;
+                });
+                renderList();
+            }
+
+            ratingCounts.addEventListener('click', event => {
+                const button = event.target.closest('[data-rating]');
+                if (!button) return;
+                const rating = Number(button.dataset.rating);
+                activeRating = activeRating === rating ? 0 : rating;
+                renderList();
+            });
+            clearFilter.addEventListener('click', () => {
+                const previous = ratingCounts.querySelector(`[data-rating="${activeRating}"]`);
+                activeRating = 0;
+                renderList();
+                previous?.focus();
+            });
+            window.addEventListener('gabydatachange', event => {
+                if (event.detail?.key === window.GabyData.STORAGE_KEY) refresh();
+            });
+            window.addEventListener('storage', event => {
+                if (event.key === window.GabyData.STORAGE_KEY) refresh();
+            });
+            window.GabyPreferences.initPreferences({});
+            refresh();
+        })();
+    </script>
+</body>
+</html>
