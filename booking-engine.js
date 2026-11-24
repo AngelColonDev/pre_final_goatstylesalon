@@ -329,15 +329,23 @@
     }
 
     // ---------------------------------------------------------------------
-    // Notificaciones del personal (panel de barberos)
+    // Notificaciones (centro de avisos: notificaciones.html)
+    // audience 'staff' (panel del personal, como hasta ahora) o 'client' (el
+    // cliente lo ve por su código de cita). Las llamadas actuales no pasan
+    // audience y siguen siendo avisos del personal.
     // ---------------------------------------------------------------------
-    function notify(state, { barberId, type, title, body, code }) {
+    function notify(state, { barberId, clientId, audience, type, title, body, code }) {
         state.notifications = state.notifications || [];
         state.notifications.unshift({
-            id: uid('ntf'), audience: 'staff', barberId: barberId || null,
+            id: uid('ntf'), audience: audience || 'staff', barberId: barberId || null, clientId: clientId || null,
             type, title, body, appointmentCode: code || null, createdAt: nowIso(), readAt: null
         });
         if (state.notifications.length > 500) state.notifications.length = 500;
+    }
+
+    // Textos de los avisos al cliente en el idioma de este navegador (es/en).
+    function clientText(state, es, en) {
+        return settings(state).defaultLanguage === 'en' ? en : es;
     }
 
     function describe(appointment) {
@@ -451,6 +459,13 @@
         pushHistory(appointment, 'Creada', by || (manual ? 'Personal' : 'Cliente'), `${statusLabel(status)} · ${describe(appointment)}`);
         state.appointments.push(appointment);
         notify(state, { barberId, type: 'nueva', code, title: 'Nueva cita', body: `${appointment.client}: ${describe(appointment)}.` });
+        // Aviso al cliente: confirmada, o recibida y pendiente de aprobación del barbero.
+        notify(state, {
+            audience: 'client', clientId: appointment.clientId, code,
+            type: status === 'APROBADA' ? 'aprobada' : 'nueva',
+            title: clientText(state, status === 'APROBADA' ? 'Cita confirmada' : 'Cita recibida', status === 'APROBADA' ? 'Appointment confirmed' : 'Appointment received'),
+            body: `${describe(appointment)} con ${appointment.barberName}.${status === 'APROBADA' ? '' : clientText(state, ' Te avisaremos cuando el barbero la confirme.', ' We will let you know when the barber confirms it.')}`
+        });
         state.activity = state.activity || [];
         state.activity.unshift({ id: uid('act'), type: 'booking', text: `${appointment.client} reservó ${appointment.service} con ${appointment.barberName}.`, createdAt: nowIso() });
         return appointment;
@@ -545,6 +560,14 @@
         appointment.lateCancellation = hoursUntil(appointment) < (Number(settings(state).booking.cancelPolicyHours) || 0);
         pushHistory(appointment, 'Cancelada', actor || by, reason ? `Motivo: ${reason}` : '');
         notify(state, { barberId: appointment.barber, type: 'cancelada', code, title: 'Cita cancelada', body: `${appointment.client} · ${describe(appointment)} (por ${by}).` });
+        // Si canceló la barbería, el cliente debe enterarse (si canceló el cliente, ya lo sabe).
+        if (by !== 'cliente') {
+            notify(state, {
+                audience: 'client', clientId: appointment.clientId, code, type: 'cancelada',
+                title: clientText(state, 'Cita cancelada', 'Appointment cancelled'),
+                body: clientText(state, `Tu cita ${describe(appointment)} con ${appointment.barberName} fue cancelada por la barbería.`, `Your appointment ${describe(appointment)} with ${appointment.barberName} was cancelled by the barbershop.`)
+            });
+        }
         return appointment;
     }
 
@@ -567,6 +590,11 @@
         appointment.price = priceLabel(newServices);
         pushHistory(appointment, 'Reprogramada', actor || by, `Antes: ${before} · Ahora: ${describe(appointment)} con ${appointment.barberName}`);
         notify(state, { barberId: newBarber, type: 'reprogramada', code, title: 'Cita reprogramada', body: `${appointment.client}: ${before} → ${describe(appointment)}.` });
+        notify(state, {
+            audience: 'client', clientId: appointment.clientId, code, type: 'reprogramada',
+            title: clientText(state, 'Cita reprogramada', 'Appointment rescheduled'),
+            body: `${before} → ${describe(appointment)} con ${appointment.barberName}.`
+        });
         return appointment;
     }
 
@@ -580,6 +608,40 @@
         if (status === 'COMPLETADA') appointment.completedAt = nowIso();
         if (status === 'NO_SHOW') appointment.noShowAt = nowIso();
         pushHistory(appointment, statusLabel(status), actor || 'Personal', previous !== status ? `Antes: ${statusLabel(previous)}${reason ? ` · ${reason}` : ''}` : '');
+        if (status === 'APROBADA' && previous !== 'APROBADA') {
+            notify(state, {
+                audience: 'client', clientId: appointment.clientId, code, type: 'aprobada',
+                title: clientText(state, 'Cita aprobada', 'Appointment approved'),
+                body: `${describe(appointment)} con ${appointment.barberName}.`
+            });
+        }
+        if (status === 'RECHAZADA' && previous !== 'RECHAZADA') {
+            notify(state, {
+                audience: 'client', clientId: appointment.clientId, code, type: 'rechazada',
+                title: clientText(state, 'Cita no aprobada', 'Appointment not approved'),
+                body: clientText(state, `${describe(appointment)} con ${appointment.barberName} no pudo confirmarse. Comunícate con la barbería para buscar otro horario.`, `${describe(appointment)} with ${appointment.barberName} could not be confirmed. Contact the barbershop to find another time.`)
+            });
+        }
+        if (status === 'COMPLETADA') {
+            notify(state, {
+                audience: 'client', clientId: appointment.clientId, code, type: 'completada',
+                title: clientText(state, '¡Gracias por tu visita!', 'Thanks for your visit!'),
+                body: `${describe(appointment)} con ${appointment.barberName}.`
+            });
+            // Hito de cliente frecuente: 5 visitas completadas (settings.booking.frequentClientVisits).
+            // La fidelidad real es esa; no existe ningún "GOAT Club".
+            if (appointment.clientId) {
+                const visits = clientStats(appointment.clientId, state).completed;
+                const goal = Number(settings(state).booking.frequentClientVisits) || 5;
+                if (visits === goal) {
+                    notify(state, {
+                        audience: 'client', clientId: appointment.clientId, code, type: 'fidelidad',
+                        title: clientText(state, '¡Ya eres cliente frecuente!', 'You are now a frequent client!'),
+                        body: clientText(state, `Completaste ${goal} visitas en GOAT Style Salon. ¡Gracias por tu confianza!`, `You completed ${goal} visits at GOAT Style Salon. Thank you for your trust!`)
+                    });
+                }
+            }
+        }
         if (status === 'NO_SHOW' && appointment.clientId) applyNoShowRules(state, appointment.clientId);
         return appointment;
     }

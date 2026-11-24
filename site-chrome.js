@@ -9,6 +9,16 @@
     const LOGO = 'https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png';
     const DEV_LOGO = 'https://res.cloudinary.com/dtw3qx4qq/image/upload/v1781464069/favicon-32x32_flnhtq.png';
 
+    // Carpeta desde la que se cargó este archivo: así el manifiesto, el service worker
+    // y notifications.js se resuelven bien también desde las subcarpetas (staff/).
+    const SCRIPT_BASE = (() => {
+        try {
+            const src = document.currentScript && document.currentScript.src;
+            if (src) return src.slice(0, src.lastIndexOf('/') + 1);
+        } catch (_) { /* sin currentScript: rutas relativas */ }
+        return '';
+    })();
+
     // Idioma escogido (Configuración → Idioma y tema). Todo lo que dibuja este archivo sale en ese idioma.
     const LANG = (() => {
         try { return (window.GabyData && window.GabyData.getState().settings.defaultLanguage) === 'en' ? 'en' : 'es'; } catch (_) { return 'es'; }
@@ -21,7 +31,7 @@
             footerAbout: 'Cortes, color, tratamientos y una experiencia VIP diseñada para que cada visita se sienta especial.',
             footerNews: 'Noticias de la barbería', footerSupport: 'Contacto y soporte', legal: 'Legal', cookiePrefs: 'Preferencias de cookies',
             development: 'Desarrollo', weAccept: 'Aceptamos:', rights: 'Todos los derechos reservados.',
-            terms: 'Términos y Condiciones', privacy: 'Política de Privacidad', cookies: 'Política de Cookies', bookingPolicy: 'Política de Reservaciones', notices: 'Avisos legales',
+            terms: 'Términos y Condiciones', privacy: 'Política de Privacidad', cookies: 'Política de Cookies', bookingPolicy: 'Política de Reservaciones', notices: 'Avisos legales', notifications: 'Notificaciones',
             cash: 'Efectivo', visaMc: 'Visa y Mastercard'
         },
         en: {
@@ -31,7 +41,7 @@
             footerAbout: 'Cuts, color, treatments and a VIP experience designed to make every visit feel special.',
             footerNews: 'Barbershop news', footerSupport: 'Contact and support', legal: 'Legal', cookiePrefs: 'Cookie preferences',
             development: 'Development', weAccept: 'We accept:', rights: 'All rights reserved.',
-            terms: 'Terms and Conditions', privacy: 'Privacy Policy', cookies: 'Cookie Policy', bookingPolicy: 'Booking Policy', notices: 'Legal notices',
+            terms: 'Terms and Conditions', privacy: 'Privacy Policy', cookies: 'Cookie Policy', bookingPolicy: 'Booking Policy', notices: 'Legal notices', notifications: 'Notifications',
             cash: 'Cash', visaMc: 'Visa and Mastercard'
         }
     };
@@ -71,6 +81,7 @@
         'support.html': { href: 'settings.html', label: t('settings') },
         'app-info.html': { href: 'settings.html', label: t('settings') },
         'avisos.html': { href: 'settings.html', label: t('settings') },
+        'settings-notifications.html': { href: 'settings.html', label: t('settings') },
         'cookies.html': { href: 'settings.html', label: t('settings') },
         'privacidad.html': { href: 'settings.html', label: t('settings') },
         'terminos.html': { href: 'settings.html', label: t('settings') },
@@ -97,6 +108,10 @@
             .site-header-actions { display: flex; align-items: center; gap: .75rem; }
             .site-header-icon { width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(212,175,55,.35); color: #d4af37; text-decoration: none; }
             .site-header-icon:hover { background: #d4af37; color: #111; }
+            .site-header-bell { position: relative; }
+            .site-bell-badge { position: absolute; top: -5px; right: -5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 999px; background: #d4af37; color: #111; font-size: .65rem; font-weight: 800; line-height: 18px; text-align: center; display: none; }
+            .site-bell-badge.show { display: inline-block; }
+            .site-mobilebar-btn.site-header-bell { position: relative; }
             .site-header-cta { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1.4rem; border-radius: 999px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; text-decoration: none; color: #111; background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 62%, #87640f 100%); }
             .site-header-cta:hover { filter: brightness(1.06); color: #111; }
             .site-header a:focus-visible { outline: 2px solid #d4af37; outline-offset: 3px; }
@@ -199,6 +214,7 @@
                 </ul>
             </nav>
             <div class="site-header-actions">
+                <a class="site-header-icon site-header-bell" href="notificaciones.html" title="${t('notifications')}" aria-label="${t('notifications')}"><i class="fas fa-bell"></i><span class="site-bell-badge" data-bell-badge hidden></span></a>
                 <a class="site-header-icon" href="settings.html" title="${t('settings')}" aria-label="${t('settings')}"><i class="fas fa-gear"></i></a>
                 <a class="site-header-cta" href="booking.html"><i class="fas fa-calendar-check"></i>${t('bookNow')}</a>
             </div>
@@ -218,6 +234,7 @@
                 <img src="${LOGO}" alt="">
                 <span>GOAT STYLE SALON</span>
             </a>
+            <a class="site-mobilebar-btn site-header-bell" href="notificaciones.html" aria-label="${t('notifications')}"><i class="fas fa-bell"></i><span class="site-bell-badge" data-bell-badge hidden></span></a>
             <a class="site-mobilebar-btn" href="index.html" aria-label="${t('home')}"><i class="fas fa-house"></i></a>
         `;
         const header = document.querySelector('.site-header');
@@ -347,6 +364,39 @@
         });
     }
 
+    // PWA: manifiesto + service worker + módulo de notificaciones.
+    // No se toca index.html: todo se inyecta desde aquí, en todas las páginas.
+    function injectPwa() {
+        if (!document.querySelector('link[rel="manifest"]')) {
+            const link = document.createElement('link');
+            link.rel = 'manifest';
+            link.href = `${SCRIPT_BASE}manifest.webmanifest`;
+            document.head.appendChild(link);
+        }
+        if (!document.querySelector('meta[name="theme-color"]')) {
+            const meta = document.createElement('meta');
+            meta.name = 'theme-color';
+            meta.content = '#070707';
+            document.head.appendChild(meta);
+        }
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register(`${SCRIPT_BASE}sw.js`).catch(() => { /* sin service worker: la página funciona igual */ });
+        }
+        // El aviso de instalación se guarda para el botón de Ajustes (notifications.js lo usa).
+        window.addEventListener('beforeinstallprompt', event => {
+            event.preventDefault();
+            window.__gabyInstallPrompt = event;
+        });
+        // Campana, recordatorios y push (notifications.js). Las páginas de avisos ya lo cargan directo.
+        if (!window.GabyNotifications && !document.querySelector('script[data-gaby-notifications]')) {
+            const script = document.createElement('script');
+            script.src = `${SCRIPT_BASE}notifications.js`;
+            script.defer = true;
+            script.dataset.gabyNotifications = '1';
+            document.head.appendChild(script);
+        }
+    }
+
     function init() {
         injectStyles();
         renderHeader();
@@ -354,6 +404,10 @@
         renderFooters();
         updateBookingTab();
         askLanguage();
+        injectPwa();
+        // La campana se actualiza al renderizar el header (notifications.js puede
+        // haberse cargado antes de que existiera el botón).
+        if (window.GabyNotifications) window.GabyNotifications.updateBell();
         window.addEventListener('gabymyappointments', updateBookingTab);
         // Las traducciones de cada página se aplican después; se vuelve a poner al terminar de cargar.
         window.addEventListener('load', updateBookingTab);
