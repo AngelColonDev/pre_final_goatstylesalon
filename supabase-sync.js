@@ -143,7 +143,14 @@
         notifications: {
             // Avisos del centro de notificaciones. El personal los ve todos por sync;
             // el cliente solo los suyos, por código de cita, con myNotifications() (RPC).
+            // Sin sesión del personal, el visitante solo puede insertar avisos de cliente
+            // (la política notifications_staff_insert exige is_staff()): si el aviso del
+            // personal entrara en el push, toda la inserción fallaría por RLS y la reserva
+            // no mostraría la confirmación. El aviso del personal se queda solo en local.
+            // staffRole se lee en tiempo de llamada (diff/push), no en la definición,
+            // así que no hay problema de TDZ aunque se declare después del mapa.
             table: 'notifications', key: 'id', staffOnly: true,
+            filter: n => staffRole ? true : n.audience === 'client',
             toRow: n => ({ id: n.id, audience: n.audience || 'staff', barber_id: n.barberId || null, client_id: n.clientId || null, type: n.type || '', title: n.title || '', body: n.body || '', appointment_code: n.appointmentCode || null, read_at: toDate(n.readAt), created_at: toDate(n.createdAt) || new Date().toISOString() }),
             fromRow: r => ({ id: r.id, audience: r.audience, barberId: r.barber_id, clientId: r.client_id, type: r.type, title: r.title, body: r.body, appointmentCode: r.appointment_code, readAt: r.read_at, createdAt: r.created_at })
         },
