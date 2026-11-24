@@ -879,6 +879,26 @@ $$;
 revoke all on function public.my_notifications(text[]) from public;
 grant execute on function public.my_notifications(text[]) to anon, authenticated;
 
+-- Marcar avisos de cliente como leídos por sus códigos de cita (sin cuenta).
+-- SECURITY DEFINER porque anon no puede hacer UPDATE directo sobre notifications
+-- bajo RLS (la política notifications_client_update devuelve 0 filas aunque el
+-- aviso sea de cliente). Solo toca avisos de cliente de los códigos pasados y
+-- nunca sobrescribe un read_at ya fijado.
+create or replace function public.mark_my_notifications_read(p_ids text[], p_codes text[])
+returns table (id text)
+language sql security definer set search_path = public as $$
+    update public.notifications n
+    set read_at = coalesce(n.read_at, now())
+    where n.audience = 'client'
+      and n.id = any (p_ids)
+      and n.appointment_code = any (p_codes)
+      and n.read_at is null
+    returning n.id;
+$$;
+comment on function public.mark_my_notifications_read(text[], text[]) is 'Marca avisos de cliente como leídos por sus códigos de cita. SECURITY DEFINER porque anon no puede hacer UPDATE directo sobre notifications bajo RLS (la política notifications_client_update devuelve 0 filas).';
+revoke all on function public.mark_my_notifications_read(text[], text[]) from public;
+grant execute on function public.mark_my_notifications_read(text[], text[]) to anon, authenticated;
+
 -- Cuenta de Angel (desarrollador): creala en Authentication > Users, cambia el correo abajo y ejecuta:
 -- insert into public.staff_roles (user_id, barber_id, is_admin, is_developer)
 -- select id, null, false, true from auth.users where email = 'TU-CORREO@ejemplo.com'
