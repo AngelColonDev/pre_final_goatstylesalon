@@ -450,10 +450,16 @@
             // datos): se consulta el estado real para no mostrar PENDIENTE cuando
             // la cita ya está confirmada.
             const localStatus = created.status;
-            try {
-                const server = await B().lookupByCode(created.code);
-                if (server && server.status) created.status = server.status;
-            } catch (_) { /* sin conexión: se muestra lo último que se sabía */ }
+            // La fila del servidor puede no verse en la primera consulta justo
+            // después de guardar: se reintenta un par de veces con una pausa
+            // corta antes de quedarse con el estado local.
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const server = await B().lookupByCode(created.code);
+                    if (server && server.status) { created.status = server.status; break; }
+                } catch (_) { /* sin conexión: se reintenta y luego se muestra lo último que se sabía */ }
+                if (attempt < 2) await new Promise(resolve => setTimeout(resolve, 400));
+            }
             // El aviso al cliente se creó con el estado local (PENDIENTE): si el
             // servidor ya aprobó la cita, se corrige a la redacción de confirmada
             // (las mismas palabras que createAppointment usa para APROBADA).
