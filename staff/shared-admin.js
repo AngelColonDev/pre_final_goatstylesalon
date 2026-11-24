@@ -1726,25 +1726,34 @@
     }
 
     function renderSection() {
-        if (window.GabyAdminPro && window.GabyAdminPro.has(currentSection)) {
-            window.GabyAdminPro.render(currentSection, proContext());
-            if (currentSection === 'inventory') appendBusinessSections();
-            addRequiredLegends();
-            renderCancellationAlertBanner();
-            window.setTimeout(showCancellationAlertPopup, 80);
-            return;
+        // Si el dibujo de una sección falla (datos incompletos, por ejemplo),
+        // se muestra un aviso en vez de dejar la sección anterior en pantalla
+        // como si nada hubiera pasado: el usuario ve que algo falló y puede reintentar.
+        try {
+            if (window.GabyAdminPro && window.GabyAdminPro.has(currentSection)) {
+                window.GabyAdminPro.render(currentSection, proContext());
+                if (currentSection === 'inventory') appendBusinessSections();
+            } else {
+                const renderers = {
+                    dashboard: renderDashboard,
+                    clients: renderClients,
+                    reviews: renderReviewsSection,
+                    appointments: renderAppointmentsSection,
+                    calendar: renderCalendar,
+                    services: renderServicesSection,
+                    settings: renderSettingsSection,
+                    profile: renderProfileSection
+                };
+                renderers[currentSection]();
+            }
+        } catch (error) {
+            console.error('[Panel] No se pudo mostrar la sección:', error);
+            const host = document.getElementById('admin-section-content');
+            if (host) {
+                host.innerHTML = `<section class="card"><div class="section-title">No se pudo mostrar esta sección</div><p class="item-meta">Intenta de nuevo: vuelve a tocar la sección en el menú. Si sigue pasando, recarga la página.</p><div class="form-actions"><button class="btn btn-primary" type="button" data-retry-section>Reintentar</button></div></section>`;
+                host.querySelector('[data-retry-section]')?.addEventListener('click', () => renderSection());
+            }
         }
-        const renderers = {
-            dashboard: renderDashboard,
-            clients: renderClients,
-            reviews: renderReviewsSection,
-            appointments: renderAppointmentsSection,
-            calendar: renderCalendar,
-            services: renderServicesSection,
-            settings: renderSettingsSection,
-            profile: renderProfileSection
-        };
-        renderers[currentSection]();
         addRequiredLegends();
         renderCancellationAlertBanner();
         window.setTimeout(showCancellationAlertPopup, 80);

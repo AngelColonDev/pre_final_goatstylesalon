@@ -30,7 +30,8 @@
 
     function scopedAppointments(ctx) {
         const db = ctx.getDb();
-        return ctx.isAdmin() ? db.appointments : db.appointments.filter(item => item.barber === ctx.config.role);
+        const list = db.appointments || [];
+        return ctx.isAdmin() ? list : list.filter(item => item.barber === ctx.config.role);
     }
 
     function scopedClients(ctx) {
@@ -1169,7 +1170,7 @@
     // ---------------------------------------------------------------------
     function staffNotifications(ctx) {
         const db = ctx.getDb();
-        return db.notifications.filter(n => n.audience === 'staff' && (ctx.isAdmin() || !n.barberId || n.barberId === ctx.config.role));
+        return (db.notifications || []).filter(n => n.audience === 'staff' && (ctx.isAdmin() || !n.barberId || n.barberId === ctx.config.role));
     }
 
     // Citas próximas que el remitente puede avisar: el admin ve todas; cada
@@ -1192,6 +1193,11 @@
     function appointmentLabel(ctx, a) {
         return `${a.code} · ${a.client || 'Cliente'} · ${a.service || ''} · ${fmtDateTime(a)}`;
     }
+
+    // Nota: el push al teléfono de los avisos al cliente que crea una acción
+    // del panel (aprobar, rechazar, cancelar, reprogramar) lo envía el propio
+    // guardado (supabase-sync.js, al insertar el aviso). El panel NO lo invoca
+    // aquí: si lo hiciera, el cliente recibiría el aviso dos veces.
 
     // Envía el aviso del compositor: una fila por cita destinataria (audience
     // 'client', con su código de cita). Se guarda por el flujo normal de commit,
@@ -1291,7 +1297,7 @@
             <section class="card" style="margin-top:18px;">
                 <div class="section-title">Avisos enviados a clientes</div>
                 <div class="list-grid">${sent.slice(0, 50).map(n => {
-                    const appt = n.appointmentCode ? db.appointments.find(a => a.code === n.appointmentCode) : null;
+                    const appt = n.appointmentCode ? (db.appointments || []).find(a => a.code === n.appointmentCode) : null;
                     return `<div class="ap-notif ${n.readAt ? '' : 'unread'}"><strong>${esc(n.title)}</strong><span>${esc(n.body)}</span><span class="item-meta">${fmtStamp(n.createdAt)}${n.appointmentCode ? ` · ${esc(n.appointmentCode)}${appt ? ` · ${esc(appt.client || '')}` : ''} · <button class="action-btn approve" data-open="${esc(n.appointmentCode)}">Ver cita</button>` : ''} · ${n.readAt ? 'Leído' : 'Sin leer'}</span></div>`;
                 }).join('') || '<div class="empty">Todavía no has enviado avisos a clientes.</div>'}</div>
             </section>

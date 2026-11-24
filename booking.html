@@ -305,7 +305,21 @@
             document.getElementById('booking-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
         renderMyAppointments();
-        B.refreshMyAppointments().then(renderMyAppointments).catch(() => {});
+        // El estado real vive en el servidor: se vuelve a consultar cada vez
+        // que se muestra la vista (al cargar, al volver a la pestaña o al
+        // reabrir la página desde el historial), para que una cita aprobada
+        // por el barbero no se quede como pendiente en esta vista. Sin
+        // conexión se muestra lo último que se sabía.
+        let refreshingStatuses = false;
+        function refreshStatuses() {
+            if (refreshingStatuses) return;
+            refreshingStatuses = true;
+            B.refreshMyAppointments().then(renderMyAppointments).catch(() => {}).finally(() => { refreshingStatuses = false; });
+        }
+        refreshStatuses();
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) refreshStatuses(); });
+        window.addEventListener('pageshow', refreshStatuses);
+        window.addEventListener('focus', refreshStatuses);
         // Recién reservada, se deja ver la confirmación; la próxima vez que abras Cita verás tu cita.
         window.addEventListener('gabymyappointments', () => { if (!showingNewBooking && bookingWidget.step !== 5) renderMyAppointments(); });
 
