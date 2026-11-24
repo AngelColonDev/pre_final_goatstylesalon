@@ -337,6 +337,18 @@
         return /iphone|ipad|ipod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
     }
 
+    // En iPhone, "Añadir a pantalla de inicio" solo existe en Safari: Chrome
+    // (CriOS), Firefox (FxiOS), Edge (EdgiOS) y Opera (OPiOS) usan WebKit pero
+    // no tienen esa opción, y tampoco la tienen los navegadores dentro de
+    // otras apps. El UA de Safari trae "Version/... Safari/..."; el de los
+    // demás, no.
+    function isIOSSafari() {
+        if (!isIOS()) return false;
+        const ua = navigator.userAgent || '';
+        if (/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua)) return false;
+        return /Version\//i.test(ua) && /Safari\//i.test(ua);
+    }
+
     function isStandalone() {
         return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
     }
@@ -380,6 +392,6 @@
     window.GabyNotifications = {
         myCodes, visibleNotifications, unreadCount, updateBell, markRead, markAllRead,
         checkReminders, pushStatus, enablePush, disablePush,
-        installApp, canInstall, isIOS, isStandalone, prefs
+        installApp, canInstall, isIOS, isIOSSafari, isStandalone, prefs
     };
 })();
