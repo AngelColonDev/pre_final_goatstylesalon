@@ -613,7 +613,10 @@
                     </nav>
                     <div class="nav-footer">
                         <a class="nav-btn" href="../../index.html"><i class="fas fa-arrow-left"></i><span>Página principal</span></a>
-                        ${config.role === 'gabriel' ? '<a class="nav-btn" href="../darialex/index.html"><i class="fas fa-user-tie"></i><span>Panel de Darialex</span></a>' : ''}
+                        <div class="nav-group ap-panels">
+                            <div class="nav-group-label">Todos los paneles</div>
+                            ${[['gaby', 'Panel de Gaby', 'gabriel'], ['darialex', 'Panel de Darialex', 'darialex'], ['wilo', 'Panel de Wilo', 'wilo']].map(([folder, label, role]) => `<a class="nav-btn ${config.role === role ? 'active' : ''}" href="../${folder}/index.html"><i class="fas fa-user-tie"></i><span>${label}</span></a>`).join('')}
+                        </div>
                         <button class="nav-btn nav-logout" type="button" data-staff-logout><i class="fas fa-right-from-bracket"></i><span>Cerrar sesión</span></button>
                     </div>
                 </aside>

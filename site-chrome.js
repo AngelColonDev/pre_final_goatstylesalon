@@ -399,7 +399,7 @@
         // Campana, recordatorios y push (notifications.js). Las páginas de avisos ya lo cargan directo.
         if (!window.GabyNotifications && !document.querySelector('script[data-gaby-notifications]')) {
             const script = document.createElement('script');
-            script.src = `${SCRIPT_BASE}notifications.js?v=20261124b`;
+            script.src = `${SCRIPT_BASE}notifications.js?v=20261124c`;
             script.defer = true;
             script.dataset.gabyNotifications = '1';
             document.head.appendChild(script);

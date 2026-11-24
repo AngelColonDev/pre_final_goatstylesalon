@@ -7,6 +7,34 @@
     const B = () => window.GabyBooking;
     const Data = () => window.GabyData;
     const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+    // FormSpark: un formulario por barbero (ya existen y están verificados). El
+    // aviso por correo llega al barbero de la cita y a angelcolonnegron@gmail.com,
+    // con el asunto "Nueva cita — GOAT Style Salon". Si un barbero no tiene
+    // formulario aquí, simplemente no se envía el correo.
+    const FORMSPARK_URLS = {
+        gabriel: 'https://submit-form.com/f0i9yTbl2',
+        darialex: 'https://submit-form.com/RcbBqUtzU',
+        wilo: 'https://submit-form.com/SPFHqNvbZ'
+    };
+
+    // Aviso por correo al barbero cuando se crea una cita en línea. Nunca
+    // bloquea la reserva: se envía en segundo plano y cualquier error se ignora.
+    function notifyBarberByEmail(appointment) {
+        try {
+            const url = appointment && FORMSPARK_URLS[appointment.barber];
+            if (!url || !appointment.code) return;
+            const body = new URLSearchParams({
+                nombre: appointment.client || '',
+                servicio: appointment.service || '',
+                barbero: appointment.barberName || appointment.barber || '',
+                fecha: String(appointment.dateTime || '').slice(0, 10),
+                hora: String(appointment.dateTime || '').slice(11, 16),
+                codigo: appointment.code
+            });
+            fetch(url, { method: 'POST', body, keepalive: true }).catch(() => {});
+        } catch (_) { /* el correo nunca bloquea la reserva */ }
+    }
+
     const isVip = service => service && (service.category === 'VIP' || /VIP/i.test(service.name));
     const PR_TOWNS = ['Adjuntas', 'Aguada', 'Aguadilla', 'Aguas Buenas', 'Aibonito', 'Añasco', 'Arecibo', 'Arroyo', 'Barceloneta', 'Barranquitas', 'Bayamón', 'Cabo Rojo', 'Caguas', 'Camuy', 'Canóvanas', 'Carolina', 'Cataño', 'Cayey', 'Ceiba', 'Ciales', 'Cidra', 'Coamo', 'Comerío', 'Corozal', 'Culebra', 'Dorado', 'Fajardo', 'Florida', 'Guánica', 'Guayama', 'Guayanilla', 'Guaynabo', 'Gurabo', 'Hatillo', 'Hormigueros', 'Humacao', 'Isabela', 'Jayuya', 'Juana Díaz', 'Juncos', 'Lajas', 'Lares', 'Las Marías', 'Las Piedras', 'Loíza', 'Luquillo', 'Manatí', 'Maricao', 'Maunabo', 'Mayagüez', 'Moca', 'Morovis', 'Naguabo', 'Naranjito', 'Orocovis', 'Patillas', 'Peñuelas', 'Ponce', 'Quebradillas', 'Rincón', 'Río Grande', 'Sabana Grande', 'Salinas', 'San Germán', 'San Juan', 'San Lorenzo', 'San Sebastián', 'Santa Isabel', 'Toa Alta', 'Toa Baja', 'Trujillo Alto', 'Utuado', 'Vega Alta', 'Vega Baja', 'Vieques', 'Villalba', 'Yabucoa', 'Yauco'];
 
@@ -489,6 +517,9 @@
                     window.GabyNotifications.refreshPushToken();
                 }
             } catch (_) { /* el push del token no bloquea la confirmación */ }
+            // El barbero también recibe la cita por correo (FormSpark, un
+            // formulario por barbero). Nunca bloquea la confirmación.
+            notifyBarberByEmail(created);
             Data().toast(created.status === 'APROBADA' ? '¡Tu cita fue confirmada!' : 'Recibimos tu solicitud de cita.', 'success');
             if (typeof opts.onDone === 'function') opts.onDone(created);
         }
