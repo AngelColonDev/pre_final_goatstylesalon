@@ -94,20 +94,36 @@
 
     function markRead(id) {
         if (!id) return;
+        const item = allNotifications().find(n => n.id === id);
         window.GabyData.updateState(state => {
-            const item = (state.notifications || []).find(n => n.id === id);
-            if (item && !item.readAt) item.readAt = new Date().toISOString();
+            const target = (state.notifications || []).find(n => n.id === id);
+            if (target && !target.readAt) target.readAt = new Date().toISOString();
         });
         updateBell();
+        // Guardar el cambio en la base de datos (RPC mark_my_notifications_read:
+        // el UPDATE directo no funciona para el visitante bajo RLS). Si no hay
+        // conexión, el aviso queda marcado solo en este navegador.
+        try {
+            if (item && item.appointmentCode && window.GabyCloud && typeof window.GabyCloud.markNotificationsRead === 'function') {
+                window.GabyCloud.markNotificationsRead([id], [item.appointmentCode]);
+            }
+        } catch (_) { /* el aviso ya está marcado en este navegador */ }
     }
 
     function markAllRead() {
-        const ids = new Set(visibleNotifications().map(n => n.id));
+        const visible = visibleNotifications();
+        const ids = new Set(visible.map(n => n.id));
         if (!ids.size) return;
+        const codes = [...new Set(visible.map(n => n.appointmentCode).filter(Boolean))];
         window.GabyData.updateState(state => {
             (state.notifications || []).forEach(n => { if (ids.has(n.id) && !n.readAt) n.readAt = new Date().toISOString(); });
         });
         updateBell();
+        try {
+            if (codes.length && window.GabyCloud && typeof window.GabyCloud.markNotificationsRead === 'function') {
+                window.GabyCloud.markNotificationsRead([...ids], codes);
+            }
+        } catch (_) { /* los avisos ya están marcados en este navegador */ }
     }
 
     // -------------------------------------------------------------------------

@@ -449,6 +449,29 @@
         return row ? { code: row.code, status: row.status, service: row.service, dateTime: toLocalDateTime(row.date_time), barberName: row.barber_name || '' } : null;
     }
 
+    // Marca avisos de cliente como leídos en la base de datos (RPC SECURITY
+    // DEFINER: anon no puede hacer UPDATE directo sobre notifications bajo RLS,
+    // aunque la política notifications_client_update lo permita; verificado en
+    // vivo: el UPDATE devuelve 0 filas). Devuelve cuántos avisos se marcaron.
+    // Nunca lanza: si falla, el aviso queda marcado solo en este navegador y se
+    // reintentará la próxima vez que se abra la página. Sin configuración de
+    // Supabase no hace nada.
+    async function markNotificationsRead(ids, codes) {
+        try {
+            const list = Array.isArray(ids) ? ids.filter(Boolean) : [];
+            const known = Array.isArray(codes) ? codes.filter(Boolean) : [];
+            if (!list.length || !known.length) return 0;
+            const client = await getClient();
+            if (!client) return 0;
+            const { data, error } = await client.rpc('mark_my_notifications_read', { p_ids: list, p_codes: known });
+            if (error) throw error;
+            return Array.isArray(data) ? data.length : 0;
+        } catch (error) {
+            console.error('[GabyCloud] No se pudo marcar como leído en el servidor:', error);
+            return 0;
+        }
+    }
+
     // -------------------------------------------------------------------------
     let ready = Promise.resolve();
     if (enabled) {
@@ -474,6 +497,7 @@
         requireStaff,
         appointmentStatus,
         myNotifications,
+        markNotificationsRead,
         myAppointmentCodes,
         transferClient,
         friendly
