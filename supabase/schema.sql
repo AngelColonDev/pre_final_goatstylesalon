@@ -941,10 +941,32 @@ grant execute on function public.appointment_status(text) to anon, authenticated
 
 -- Sin sesión del personal, un aviso solo puede cambiar su contenido (título,
 -- cuerpo, tipo, leído): los datos que lo identifican no se pueden tocar.
+-- Excepción estricta: enlazar el aviso a la ficha de su cita cuando la RPC
+-- register_client_for_appointment() registra al cliente de una reserva en
+-- línea. El aviso solo toma la misma ficha que su cita ya tiene (la RPC
+-- actualiza la cita antes que los avisos), así que no se puede desviar un
+-- aviso a otra ficha: cualquier otro cambio de client_id sigue rechazado.
 create or replace function public.guard_notification_update() returns trigger
 language plpgsql security definer set search_path = public as $$
 begin
     if public.is_staff() then
+        return new;
+    end if;
+    -- Excepción estricta: enlazar el aviso a la ficha de su cita. El aviso
+    -- solo toma la misma ficha que su cita ya tiene (la RPC actualiza la
+    -- cita antes que los avisos), así que no se puede desviar un aviso a
+    -- otra ficha: cualquier otro cambio de client_id sigue rechazado abajo.
+    if old.client_id is null
+        and new.client_id is not null
+        and new.id is not distinct from old.id
+        and new.audience is not distinct from old.audience
+        and new.appointment_code is not distinct from old.appointment_code
+        and new.barber_id is not distinct from old.barber_id
+        and exists (
+            select 1 from public.appointments a
+            where a.code = new.appointment_code
+              and a.client_id = new.client_id
+        ) then
         return new;
     end if;
     if new.id is distinct from old.id

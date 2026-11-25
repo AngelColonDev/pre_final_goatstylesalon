@@ -28,6 +28,15 @@
 -- pg_advisory_xact_lock evita que dos reservas simultáneas con el mismo
 -- nombre nuevo creen dos fichas. También enlaza los avisos de esa cita
 -- que todavía no tienen client_id.
+--
+-- El update de avisos de esta función disparaba guard_notification_update,
+-- que protege client_id para no-staff: auth.uid() sigue siendo el del
+-- llamador (anónimo) dentro de una función SECURITY DEFINER, así que el
+-- trigger rechazaba el enlace y TODA la transacción se revertía (ni ficha
+-- ni cita enlazada). Por eso esta migración redefine el guard al final del
+-- archivo con una excepción ESTRICTA: solo permite enlazar el aviso a la
+-- misma ficha que su cita ya tiene (la RPC actualiza la cita antes que los
+-- avisos). Cualquier otro cambio de client_id sigue rechazado.
 create or replace function public.register_client_for_appointment(p_code text)
 returns jsonb
 language plpgsql security definer set search_path = public, pg_temp as $$
@@ -96,3 +105,43 @@ $$;
 comment on function public.register_client_for_appointment(text) is 'Registra la ficha del cliente de una reserva en línea y la une a la cita y a sus avisos. SECURITY DEFINER porque el visitante anónimo no puede insertar en clients por sync (clients_staff_insert exige is_staff()). Solo recibe el código: el nombre y el barbero se leen de la cita.';
 revoke all on function public.register_client_for_appointment(text) from public;
 grant execute on function public.register_client_for_appointment(text) to anon, authenticated;
+
+-- Redefinición de guard_notification_update con la excepción estricta para
+-- register_client_for_appointment() (ver el comentario del encabezado).
+-- Sin esta excepción, el update de avisos de la RPC se revertía entero
+-- porque el guard rechazaba el cambio de client_id para no-staff.
+create or replace function public.guard_notification_update() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+    if public.is_staff() then
+        return new;
+    end if;
+    -- Excepción estricta: enlazar el aviso a la ficha de su cita. El aviso
+    -- solo toma la misma ficha que su cita ya tiene (la RPC actualiza la
+    -- cita antes que los avisos), así que no se puede desviar un aviso a
+    -- otra ficha: cualquier otro cambio de client_id sigue rechazado abajo.
+    if old.client_id is null
+        and new.client_id is not null
+        and new.id is not distinct from old.id
+        and new.audience is not distinct from old.audience
+        and new.appointment_code is not distinct from old.appointment_code
+        and new.barber_id is not distinct from old.barber_id
+        and exists (
+            select 1 from public.appointments a
+            where a.code = new.appointment_code
+              and a.client_id = new.client_id
+        ) then
+        return new;
+    end if;
+    if new.id is distinct from old.id
+        or new.audience is distinct from old.audience
+        or new.appointment_code is distinct from old.appointment_code
+        or new.barber_id is distinct from old.barber_id
+        or new.client_id is distinct from old.client_id then
+        raise exception 'No puedes cambiar a quién pertenece este aviso.';
+    end if;
+    return new;
+end;
+$$;
+drop trigger if exists notifications_update_guard on public.notifications;
+create trigger notifications_update_guard before update on public.notifications for each row execute function public.guard_notification_update();
