@@ -492,31 +492,50 @@
   }
 
   /* ============ Envío push compartido (memos / notificaciones) ============ */
+  async function pushNtf(api, nid) {
+    // OJO: api.client() es asíncrono — hay que esperarlo con await. Sin el
+    // await, .functions cae sobre la promesa y el envío NUNCA ocurre (bug
+    // corregido: los avisos salían en la campana pero el push no sonaba).
+    try {
+      var c = await api.client();
+      if (c && c.functions && typeof c.functions.invoke === 'function') {
+        await c.functions.invoke('send-push', { body: { mode: 'send', notificationId: nid } });
+      }
+    } catch (e) {}
+  }
   async function enviarPushMasivo(api, titulo, cuerpo, audiencia, persona) {
     // audiencia: 'barberos' | 'clientes' | 'todos' | 'persona' | 'app'
     // persona: {tipo:'barber'|'client'|'profile', id, nombre}
     if (audiencia === 'barberos' || audiencia === 'todos') {
-      await api.rpc('send_mass_notification', { p_title: titulo, p_body: cuerpo, p_audience: 'staff', p_client_ids: [], p_barber_ids: [] });
+      var resM = await api.rpc('send_mass_notification', { p_title: titulo, p_body: cuerpo, p_audience: 'staff', p_client_ids: [], p_barber_ids: [] });
+      // La RPC crea los avisos del personal pero no devuelve sus ids: se
+      // buscan los recién creados para disparar el push de cada uno.
+      var nEsp = (resM && resM.inserted) ? resM.inserted : 0;
+      if (nEsp > 0) {
+        var desde = new Date(Date.now() - 3 * 60 * 1000).toISOString();
+        var filasStaff = await api.select('notifications', { columns: 'id', eq: [['audience', 'staff'], ['type', 'masiva'], ['title', titulo]], gte: [['created_at', desde]], order: 'created_at', ascending: false, limit: nEsp });
+        for (var s = 0; s < filasStaff.length; s++) await pushNtf(api, filasStaff[s].id);
+      }
     }
     if (audiencia === 'clientes' || audiencia === 'todos') {
       var clientes = await api.select('clients', { columns: 'id', limit: 1000 });
       for (var i = 0; i < clientes.length; i++) {
         var nid = uid('nt');
         await api.insert('notifications', { id: nid, audience: 'client', client_id: clientes[i].id, type: 'masiva', title: titulo, body: cuerpo });
-        try { await api.client().functions.invoke('send-push', { body: { mode: 'send', notificationId: nid } }); } catch (e) {}
+        await pushNtf(api, nid);
       }
     }
     if (audiencia === 'app') {
       var idApp = uid('nt');
       await api.insert('notifications', { id: idApp, audience: 'app', type: 'masiva', title: titulo, body: cuerpo });
-      try { await api.client().functions.invoke('send-push', { body: { mode: 'send', notificationId: idApp } }); } catch (e) {}
+      await pushNtf(api, idApp);
     }
     if (audiencia === 'persona' && persona) {
       var id2 = uid('nt');
       var fila = { id: id2, audience: persona.tipo === 'barber' ? 'staff' : 'client', type: 'masiva', title: titulo, body: cuerpo };
       if (persona.tipo === 'barber') fila.barber_id = persona.id; else fila.client_id = persona.id;
       await api.insert('notifications', fila);
-      try { await api.client().functions.invoke('send-push', { body: { mode: 'send', notificationId: id2 } }); } catch (e) {}
+      await pushNtf(api, id2);
     }
   }
 
