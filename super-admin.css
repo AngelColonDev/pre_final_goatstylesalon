@@ -55,6 +55,14 @@ a { color: inherit; }
 .sa-field input:focus, .sa-field select:focus, .sa-field textarea:focus {
     outline: 2px solid var(--accent); outline-offset: 1px;
 }
+.sa-password-wrap { position: relative; display: block; }
+.sa-password-wrap input { padding-right: 2.9rem; }
+.sa-password-toggle {
+    position: absolute; right: 0.45rem; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    padding: 0.4rem; font-size: 1rem; line-height: 1;
+}
+.sa-password-toggle:hover { color: var(--accent); }
 .sa-error { color: var(--danger); font-size: 0.88rem; font-weight: 600; }
 .sa-note { color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
 .sa-login-foot { margin-top: 1.25rem; font-size: 0.88rem; }

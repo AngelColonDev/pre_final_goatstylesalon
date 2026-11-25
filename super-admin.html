@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="super-admin.css?v=20261124g">
+    <link rel="stylesheet" href="super-admin.css?v=20261124h">
 </head>
 <body>
     <!-- ======================= LOGIN SUPER ADMIN ======================= -->
@@ -27,7 +27,10 @@
                 </label>
                 <label class="sa-field">
                     <span>Contraseña</span>
-                    <input type="password" id="sa-password" required placeholder="tu contraseña" autocomplete="current-password">
+                    <span class="sa-password-wrap">
+                        <input type="password" id="sa-password" required placeholder="tu contraseña" autocomplete="current-password">
+                        <button type="button" class="sa-password-toggle" id="sa-password-toggle" aria-label="Mostrar contraseña"><i class="fas fa-eye"></i></button>
+                    </span>
                 </label>
                 <p id="sa-login-error" class="sa-error" hidden></p>
                 <button type="submit" class="btn btn-primary sa-block" id="sa-login-btn">Continuar</button>
@@ -119,7 +122,7 @@
     <div id="sa-modal-root"></div>
 
     <script src="supabase-config.js?v=20261124f"></script>
-    <script src="supabase-sync.js?v=20261124f"></script>
-    <script src="super-admin-panel.js?v=20261124f"></script>
+    <script src="supabase-sync.js?v=20261124h"></script>
+    <script src="super-admin-panel.js?v=20261124h"></script>
 </body>
 </html>
