@@ -1,0 +1,122 @@
+/* Centro de Soporte Técnico — GOAT Style Salon. Oscuro profesional, dorado. */
+:root{
+  --cs-bg:#070707; --cs-card:#111111; --cs-border:#262626; --cs-gold:#d4af37;
+  --cs-text:#f5f1e6; --cs-muted:#b8b2a3; --cs-ok:#2fbf71; --cs-warn:#e0a800; --cs-error:#e5484d;
+  --cs-ok-bg:rgba(47,191,113,.14); --cs-warn-bg:rgba(224,168,0,.14); --cs-error-bg:rgba(229,72,77,.16);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--cs-bg);color:var(--cs-text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:16px;line-height:1.45;min-height:100vh}
+[hidden]{display:none !important}
+button,input,select,textarea{font:inherit}
+:focus-visible{outline:3px solid var(--cs-gold);outline-offset:2px;border-radius:6px}
+.cs-muted{color:var(--cs-muted)}
+.cs-btn{display:inline-flex;align-items:center;gap:.5rem;min-height:48px;padding:.6rem 1rem;
+  border:1px solid var(--cs-border);border-radius:10px;background:#1a1a1a;color:var(--cs-text);
+  cursor:pointer;font-weight:600}
+.cs-btn:hover{border-color:var(--cs-gold)}
+.cs-btn:disabled{opacity:.55;cursor:not-allowed}
+.cs-btn-primary{background:var(--cs-gold);color:#141414;border-color:var(--cs-gold)}
+.cs-btn-danger{background:var(--cs-error);color:#fff;border-color:var(--cs-error)}
+.cs-btn-ghost{background:transparent}
+.cs-block{width:100%;justify-content:center}
+.cs-btn svg{width:20px;height:20px}
+
+/* ---------- Login ---------- */
+.cs-login{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem}
+.cs-login-card{width:100%;max-width:420px;background:var(--cs-card);border:1px solid var(--cs-border);
+  border-radius:16px;padding:2rem 1.5rem;text-align:center}
+.cs-login-logo{color:var(--cs-gold);display:flex;justify-content:center}
+.cs-login-logo svg{width:56px;height:56px}
+.cs-login-card h1{font-size:1.5rem;margin:.75rem 0 .25rem}
+.cs-subtitle{color:var(--cs-muted);margin:0 0 1.5rem}
+.cs-field{display:block;text-align:left;margin-bottom:1rem}
+.cs-field>span{display:block;margin-bottom:.35rem;font-weight:600}
+.cs-field input{width:100%;min-height:52px;padding:.7rem .9rem;border-radius:10px;
+  border:1px solid var(--cs-border);background:#0c0c0c;color:var(--cs-text)}
+.cs-password-wrap{position:relative;display:block}
+.cs-password-wrap input{padding-right:56px}
+.cs-password-toggle{position:absolute;right:4px;top:50%;transform:translateY(-50%);
+  width:48px;height:48px;border:0;background:transparent;color:var(--cs-muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;border-radius:8px}
+.cs-password-toggle svg{width:22px;height:22px}
+.cs-error{background:var(--cs-error-bg);color:#ffb3b5;border:1px solid var(--cs-error);
+  border-radius:10px;padding:.7rem .9rem;text-align:left}
+.cs-note{color:var(--cs-muted);font-size:.9rem;margin-top:1rem}
+
+/* ---------- App / topbar ---------- */
+.cs-app{min-height:100vh;display:flex;flex-direction:column}
+.cs-topbar{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between;
+  padding:.75rem 1rem;border-bottom:1px solid var(--cs-border);background:#0c0c0c;
+  position:sticky;top:0;z-index:30}
+.cs-topbar-user{display:flex;flex-direction:column;min-width:0}
+.cs-topbar-user strong{color:var(--cs-gold)}
+.cs-topbar-search{flex:1 1 260px;max-width:520px}
+.cs-search-wrap{position:relative;display:flex;gap:.5rem}
+.cs-search-wrap input{flex:1;min-height:48px;padding:.6rem .9rem;border-radius:10px;
+  border:1px solid var(--cs-border);background:#111;color:var(--cs-text)}
+.cs-search-panel{position:absolute;top:calc(100% + 6px);left:0;right:0;background:#141414;
+  border:1px solid var(--cs-border);border-radius:12px;padding:.5rem;z-index:40;
+  max-height:60vh;overflow:auto;box-shadow:0 12px 32px rgba(0,0,0,.6)}
+.cs-search-group{font-size:.8rem;text-transform:uppercase;letter-spacing:.05em;color:var(--cs-muted);padding:.5rem .5rem .25rem}
+.cs-search-item{display:flex;width:100%;align-items:center;gap:.6rem;text-align:left;background:transparent;
+  border:0;color:var(--cs-text);padding:.65rem .5rem;border-radius:8px;cursor:pointer;min-height:48px}
+.cs-search-item:hover{background:#1e1e1e}
+.cs-search-tag{flex:none;font-size:.75rem;font-weight:700;padding:.15rem .5rem;border-radius:999px;
+  background:rgba(212,175,55,.18);color:var(--cs-gold);border:1px solid var(--cs-gold)}
+.cs-search-empty{padding:.75rem .5rem;color:var(--cs-muted)}
+.cs-topbar-meta{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
+.cs-conn{display:inline-flex;align-items:center;gap:.45rem;font-weight:600}
+.cs-conn-dot{width:12px;height:12px;border-radius:50%;background:var(--cs-ok);flex:none}
+.cs-conn-dot.off{background:var(--cs-error)}
+.cs-clock{font-variant-numeric:tabular-nums;color:var(--cs-muted)}
+
+/* ---------- Main / statusbar / grid ---------- */
+.cs-main{flex:1;width:100%;max-width:1400px;margin:0 auto;padding:1rem}
+.cs-statusbar{border-radius:12px;padding:.85rem 1rem;font-weight:700;margin-bottom:1rem;border:1px solid var(--cs-border)}
+.cs-statusbar.ok{background:var(--cs-ok-bg);border-color:var(--cs-ok);color:#a9e8c6}
+.cs-statusbar.warn{background:var(--cs-warn-bg);border-color:var(--cs-warn);color:#ffe08a}
+.cs-statusbar.error{background:var(--cs-error-bg);border-color:var(--cs-error);color:#ffb3b5}
+.cs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.85rem}
+@media (min-width:768px){.cs-grid{grid-template-columns:repeat(4,1fr)}}
+@media (min-width:1200px){.cs-grid{grid-template-columns:repeat(6,1fr)}}
+.cs-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:.4rem;
+  background:var(--cs-card);border:1px solid var(--cs-border);border-radius:16px;
+  padding:.9rem .5rem 1rem;color:var(--cs-text);cursor:pointer;text-align:center;min-height:150px}
+.cs-card:hover{border-color:var(--cs-gold)}
+.cs-card-icon{min-height:96px;display:flex;align-items:center;justify-content:center}
+.cs-card-icon svg{width:40px;height:40px}
+.cs-card-name{font-weight:700;font-size:.98rem}
+.cs-dot{width:12px;height:12px;border-radius:50%;background:#555;flex:none}
+.cs-dot.ok{background:var(--cs-ok)} .cs-dot.warn{background:var(--cs-warn)} .cs-dot.error{background:var(--cs-error)}
+.cs-pill{position:absolute;top:8px;right:8px;min-width:28px;height:28px;padding:0 .45rem;
+  display:inline-flex;align-items:center;justify-content:center;border-radius:999px;
+  background:var(--cs-gold);color:#141414;font-weight:800;font-size:.9rem}
+
+/* ---------- Section window ---------- */
+.cs-section{background:var(--cs-card);border:1px solid var(--cs-border);border-radius:16px;padding:1rem}
+@media (max-width:767px){.cs-section{position:fixed;inset:0;border-radius:0;overflow:auto;z-index:35}}
+@media (min-width:768px){.cs-section{max-width:1100px;margin:0 auto}}
+.cs-section-head{display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
+.cs-section-head h2{margin:0;color:var(--cs-gold);font-size:1.3rem}
+.cs-section-body{min-height:200px}
+.cs-error-box{background:var(--cs-error-bg);border:1px solid var(--cs-error);border-radius:12px;padding:1rem}
+.cs-error-box details{margin-top:.6rem}
+.cs-error-box pre{white-space:pre-wrap;word-break:break-word;color:#ffb3b5;font-size:.85rem}
+
+/* ---------- Toasts & modal ---------- */
+.cs-toasts{position:fixed;bottom:1rem;right:1rem;left:1rem;z-index:60;display:flex;flex-direction:column;gap:.5rem;align-items:flex-end}
+@media (max-width:600px){.cs-toasts{align-items:stretch}}
+.cs-toast{background:#1c1c1c;border:1px solid var(--cs-border);border-left:6px solid var(--cs-gold);
+  color:var(--cs-text);border-radius:10px;padding:.8rem 1rem;max-width:420px;box-shadow:0 8px 24px rgba(0,0,0,.55)}
+.cs-toast.success{border-left-color:var(--cs-ok)} .cs-toast.error{border-left-color:var(--cs-error)}
+.cs-toast.warning{border-left-color:var(--cs-warn)} .cs-toast.info{border-left-color:var(--cs-gold)}
+.cs-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:70;
+  display:flex;align-items:center;justify-content:center;padding:1rem}
+.cs-modal{background:#141414;border:1px solid var(--cs-border);border-radius:16px;
+  padding:1.5rem;width:100%;max-width:460px}
+.cs-modal h3{margin:0 0 .5rem;color:var(--cs-gold)}
+.cs-modal-actions{display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.25rem;flex-wrap:wrap}
+.cs-loading{color:var(--cs-muted);padding:2rem;text-align:center}

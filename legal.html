@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentos legales | GOAT Style Salon</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #070707; color: #f5f0e6; font-family: 'Inter', system-ui, -apple-system, sans-serif; line-height: 1.6; }
+        main { max-width: 820px; margin: 0 auto; padding: 1.2rem 1rem 3rem; }
+        .back { color: #d4af37; text-decoration: none; font-weight: 600; }
+        .back:hover { text-decoration: underline; }
+        h1 { color: #d4af37; font-size: 1.7rem; margin: 1rem 0 .4rem; }
+        .intro { color: #cfc8b8; margin: 0 0 1.4rem; }
+        nav.index { background: #111; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1rem 1.2rem; margin-bottom: 1.6rem; }
+        nav.index h2 { margin: 0 0 .5rem; font-size: 1rem; color: #d4af37; }
+        nav.index ul { margin: 0; padding-left: 1.1rem; }
+        nav.index a { color: #f5f0e6; }
+        section.doc { background: #0e0e0e; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.3rem 1.2rem; margin-bottom: 1.4rem; }
+        section.doc.destacada { border-color: #d4af37; box-shadow: 0 0 0 2px rgba(212,175,55,.35); }
+        section.doc h2 { color: #d4af37; margin: 0 0 .3rem; font-size: 1.3rem; }
+        .meta { color: #a89f8a; font-size: .85rem; margin: 0 0 1rem; }
+        section.doc p { margin: 0 0 .9rem; }
+        .state { background: #111; border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.4rem 1.2rem; text-align: center; }
+        .state button { background: #d4af37; color: #111; border: 0; border-radius: 10px; padding: .8rem 1.4rem; font-weight: 700; cursor: pointer; margin-top: .8rem; }
+    </style>
+</head>
+<body>
+    <main>
+        <a class="back" href="index.html">← Volver</a>
+        <h1>Documentos legales</h1>
+        <p class="intro">Términos y políticas vigentes de GOAT Style Salon.</p>
+        <div id="legal-content"><div class="state">Cargando documentos…</div></div>
+    </main>
+
+    <script src="supabase-config.js?v=20261124f"></script>
+    <script src="supabase-sync.js?v=20261124h"></script>
+    <script>
+    (function () {
+        'use strict';
+        var ORDER = ['terminos', 'privacidad', 'cookies', 'reservas', 'pagos'];
+        var container = document.getElementById('legal-content');
+
+        function esc(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function fechaLarga(iso) {
+            var d = new Date(iso);
+            if (isNaN(d.getTime())) return esc(iso || '');
+            try {
+                return new Intl.DateTimeFormat('es', { dateStyle: 'long' }).format(d);
+            } catch (_) {
+                return d.toLocaleDateString('es');
+            }
+        }
+
+        function ordenados(docs) {
+            var rank = function (slug) {
+                var i = ORDER.indexOf(slug);
+                return i === -1 ? ORDER.length : i;
+            };
+            return docs.slice().sort(function (a, b) {
+                var r = rank(a.slug) - rank(b.slug);
+                if (r !== 0) return r;
+                return String(a.slug).localeCompare(String(b.slug));
+            });
+        }
+
+        function render(docs) {
+            var list = ordenados(docs || []);
+            if (!list.length) { showError(); return; }
+            var html = '<nav class="index" aria-label="Índice de documentos"><h2>Índice</h2><ul>';
+            list.forEach(function (d) {
+                html += '<li><a href="#doc-' + esc(d.slug) + '">' + esc(d.titulo || d.slug) + '</a></li>';
+            });
+            html += '</ul></nav>';
+            list.forEach(function (d) {
+                html += '<section class="doc" id="doc-' + esc(d.slug) + '">';
+                html += '<h2>' + esc(d.titulo || d.slug) + '</h2>';
+                html += '<p class="meta">Última actualización: ' + fechaLarga(d.updated_at) + ' · Versión ' + esc(d.version) + '</p>';
+                var paras = String(d.contenido || '').split(/\n\s*\n/).map(function (p) { return p.trim(); }).filter(Boolean);
+                paras.forEach(function (p) { html += '<p>' + esc(p) + '</p>'; });
+                html += '</section>';
+            });
+            container.innerHTML = html;
+            highlightRequested();
+        }
+
+        function highlightRequested() {
+            var slug = null;
+            try { slug = new URLSearchParams(window.location.search).get('doc'); } catch (_) {}
+            if (!slug) return;
+            var el = document.getElementById('doc-' + slug);
+            if (!el) return;
+            el.classList.add('destacada');
+            try { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) { el.scrollIntoView(); }
+        }
+
+        function showError() {
+            container.innerHTML = '';
+            var box = document.createElement('div');
+            box.className = 'state';
+            var msg = document.createElement('p');
+            msg.textContent = 'No pudimos cargar los documentos. Revisa tu conexión e inténtalo de nuevo.';
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.textContent = 'Reintentar';
+            btn.addEventListener('click', load);
+            box.appendChild(msg);
+            box.appendChild(btn);
+            container.appendChild(box);
+        }
+
+        async function getClient() {
+            // supabase-sync.js expone window.GabyCloud de forma asíncrona:
+            // se espera unos segundos a que esté listo.
+            for (var i = 0; i < 50; i++) {
+                if (window.GabyCloud && typeof window.GabyCloud.getClient === 'function') {
+                    try { return await window.GabyCloud.getClient(); } catch (_) { return null; }
+                }
+                await new Promise(function (r) { setTimeout(r, 100); });
+            }
+            return null;
+        }
+
+        async function load() {
+            container.innerHTML = '<div class="state">Cargando documentos…</div>';
+            try {
+                var client = await getClient();
+                if (!client) { showError(); return; }
+                var res = await client.from('legal_documents')
+                    .select('slug, titulo, contenido, version, updated_at')
+                    .order('slug', { ascending: true });
+                if (res && res.error) { showError(); return; }
+                render((res && res.data) || []);
+            } catch (_) {
+                showError();
+            }
+        }
+
+        load();
+    })();
+    </script>
+</body>
+</html>
