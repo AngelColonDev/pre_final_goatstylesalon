@@ -4,7 +4,7 @@
 //   cerrada y abre notificaciones.html al tocar el aviso.
 // - Las páginas HTML se piden siempre a la red primero (para no servir una versión
 //   vieja después de publicar cambios); los archivos estáticos salen de la caché.
-const CACHE = 'goat-style-v4';
+const CACHE = 'goat-style-v5';
 const CORE = ['index.html', 'booking.html', 'services.html', 'barbers.html', 'news.html', 'settings.html', 'notificaciones.html', 'manifest.webmanifest', 'shared-theme.css', 'shared-data.js', 'site-chrome.js'];
 const LOGO = 'https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png';
 

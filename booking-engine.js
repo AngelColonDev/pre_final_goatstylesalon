@@ -446,10 +446,16 @@
         const error = validateBooking({ clientId: record && record.id, barberId, services, date, time, staff: manual }, state);
         if (error) throw Object.assign(new Error('booking'), { userMessage: error });
         // Si nadie reservó antes con ese nombre, se crea su ficha de cliente para
-        // que aparezca en Clientes con su historial, no-shows y bloqueos. En
-        // línea solo se conoce el nombre; el teléfono llega cuando lo escribe el
+        // que aparezca en Clientes con su historial, no-shows y bloqueos. SOLO en
+        // citas manuales (personal): en línea NO se crea ficha local — la cita y
+        // el aviso salen con clientId null, como antes del PR #15, y la ficha la
+        // registra el servidor por RPC después de guardar la reserva. Si la ficha
+        // entrara en el push anónimo, la inserción en clients fallaría por RLS y
+        // la confirmación mostraría "No tienes permiso para hacer este cambio";
+        // y el aviso llevaría un client_id local que la FK rechazaría. En línea
+        // solo se conoce el nombre; el teléfono llega cuando lo escribe el
         // personal (o en la cita manual sin ficha).
-        if (!record) {
+        if (!record && manual) {
             record = {
                 id: uid('cl'), name: typedName, email: '', phone: (walkIn && walkIn.phone) || '',
                 birthDate: '', haircut: '', beard: '', preferredBarber: barberId,

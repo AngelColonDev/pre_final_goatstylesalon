@@ -101,7 +101,15 @@
         },
         clients: {
             // Fichas de clientes que maneja el personal (los clientes no tienen cuenta).
+            // Sin sesión del personal, el visitante no intenta subir fichas por sync
+            // (la política clients_staff_insert exige is_staff()): si la ficha de una
+            // reserva en línea entrara en el push, toda la inserción fallaría por RLS
+            // y la confirmación mostraría "No tienes permiso para hacer este cambio".
+            // La ficha se registra después por RPC (registerClientForAppointment).
+            // staffRole se lee en tiempo de llamada (diff/push), no en la definición,
+            // así que no hay problema de TDZ aunque se declare después del mapa.
             table: 'clients', key: 'id', staffOnly: true,
+            filter: () => Boolean(staffRole),
             toRow: c => ({ id: c.id, name: c.name, email: c.email || '', phone: c.phone || '', birth_date: c.birthDate || null, haircut: c.haircut || '', beard: c.beard || '', preferred_barber: c.preferredBarber || null, photo_url: c.photo || '', consent: c.consent || null, marketing_consent: c.marketingConsent || null, registered_at: toDate(c.registeredAt) || new Date().toISOString() }),
             fromRow: r => ({ id: r.id, name: r.name, email: r.email, phone: r.phone, birthDate: r.birth_date || '', haircut: r.haircut, beard: r.beard, preferredBarber: r.preferred_barber, photo: r.photo_url, consent: r.consent, marketingConsent: r.marketing_consent, registeredAt: r.registered_at })
         },
@@ -147,11 +155,17 @@
             // (la política notifications_staff_insert exige is_staff()): si el aviso del
             // personal entrara en el push, toda la inserción fallaría por RLS y la reserva
             // no mostraría la confirmación. El aviso del personal se queda solo en local.
-            // staffRole se lee en tiempo de llamada (diff/push), no en la definición,
-            // así que no hay problema de TDZ aunque se declare después del mapa.
+            // El aviso del cliente lleva el client_id de la ficha local ('cl-...'),
+            // que no existe en el servidor: la FK de notifications.client_id lo
+            // rechazaría y la inserción del aviso fallaría. Sin sesión del personal
+            // se envía null (el aviso llega al cliente por su código de cita, no por
+            // la ficha; igual que el trigger de citas en línea pone client_id a null
+            // cuando el nombre no coincide con una única ficha). Con sesión se envía
+            // el id real. staffRole se lee en tiempo de llamada (diff/push), como el
+            // filtro de arriba, así que no hay problema de TDZ.
             table: 'notifications', key: 'id', staffOnly: true,
             filter: n => staffRole ? true : n.audience === 'client',
-            toRow: n => ({ id: n.id, audience: n.audience || 'staff', barber_id: n.barberId || null, client_id: n.clientId || null, type: n.type || '', title: n.title || '', body: n.body || '', appointment_code: n.appointmentCode || null, read_at: toDate(n.readAt), created_at: toDate(n.createdAt) || new Date().toISOString() }),
+            toRow: n => ({ id: n.id, audience: n.audience || 'staff', barber_id: n.barberId || null, client_id: staffRole ? (n.clientId || null) : null, type: n.type || '', title: n.title || '', body: n.body || '', appointment_code: n.appointmentCode || null, read_at: toDate(n.readAt), created_at: toDate(n.createdAt) || new Date().toISOString() }),
             fromRow: r => ({ id: r.id, audience: r.audience, barberId: r.barber_id, clientId: r.client_id, type: r.type, title: r.title, body: r.body, appointmentCode: r.appointment_code, readAt: r.read_at, createdAt: r.created_at })
         },
         pushTokens: {
@@ -560,6 +574,30 @@
         }
     }
 
+    // Registra la ficha del cliente de una reserva en línea (RPC SECURITY
+    // DEFINER: el visitante no puede insertar en clients por sync — la política
+    // clients_staff_insert exige is_staff() — y la cita quedaría huérfana con
+    // client_id NULL. Se llama DESPUÉS de que la reserva se guardó bien, sin
+    // await y sin mensajes). Solo recibe el código: el nombre y el barbero
+    // los lee la RPC de la propia cita.
+    // Devuelve la ficha (jsonb) o null si no se pudo registrar. Nunca lanza:
+    // si falla, la cita ya está confirmada y la ficha se puede registrar
+    // después. Sin configuración de Supabase no hace nada.
+    async function registerClientForAppointment(code) {
+        try {
+            const cleanCode = String(code || '').trim().toUpperCase();
+            if (!cleanCode) return null;
+            const client = await getClient();
+            if (!client) return null;
+            const { data, error } = await client.rpc('register_client_for_appointment', { p_code: cleanCode });
+            if (error) throw error;
+            return (data && typeof data === 'object') ? data : null;
+        } catch (error) {
+            console.error('[GabyCloud] No se pudo registrar la ficha del cliente en el servidor:', error);
+            return null;
+        }
+    }
+
     // -------------------------------------------------------------------------
     let ready = Promise.resolve();
     if (enabled) {
@@ -587,6 +625,7 @@
         myNotifications,
         markNotificationsRead,
         registerPushToken,
+        registerClientForAppointment,
         myAppointmentCodes,
         transferClient,
         transferAppointment,
