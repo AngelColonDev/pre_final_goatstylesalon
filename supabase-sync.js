@@ -232,6 +232,11 @@
     // Descargar (pull)
     // -------------------------------------------------------------------------
     let staffRole = null; // { barber_id, is_admin } si el usuario es del personal
+    // PR #18 (super admin): true cuando profiles.role = 'super_admin'. El super
+    // admin nunca se bloquea por mantenimiento ni por permisos por área (eso lo
+    // aplica GabySuperAdmin). Si la tabla profiles aún no existe o RLS no deja
+    // leerla, queda en false y nada cambia.
+    let superAdmin = false;
 
     async function loadStaffRole(client, userId) {
         if (!userId) return null;
@@ -245,6 +250,14 @@
         const { data: { session } } = await client.auth.getSession();
         const userId = session && session.user ? session.user.id : null;
         staffRole = await loadStaffRole(client, userId);
+        superAdmin = false;
+        if (userId) {
+            try {
+                const { data: profile } = await client.from('profiles').select('role').eq('id', userId).maybeSingle();
+                superAdmin = Boolean(profile && profile.role === 'super_admin')
+                    || Boolean(staffRole && (staffRole.is_super_admin === true || staffRole.role === 'super_admin'));
+            } catch (_) { superAdmin = Boolean(staffRole && (staffRole.is_super_admin === true || staffRole.role === 'super_admin')); }
+        }
 
         const results = {};
         const { data: busySlots, error: busyError } = await client.rpc('booking_busy_slots');
@@ -434,6 +447,7 @@
         const client = await getClient();
         if (client) await client.auth.signOut();
         staffRole = null;
+        superAdmin = false;
         await pull();
     }
 
@@ -784,6 +798,8 @@
         enabled,
         get ready() { return ready; },
         get staffRole() { return staffRole; },
+        get isSuperAdmin() { return superAdmin; },
+        get superAdmin() { return superAdmin; },
         getClient,
         pull,
         signIn,

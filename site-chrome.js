@@ -32,7 +32,7 @@
             footerNews: 'Noticias de la barbería', footerSupport: 'Contacto y soporte', legal: 'Legal', cookiePrefs: 'Preferencias de cookies',
             development: 'Desarrollo', weAccept: 'Aceptamos:', rights: 'Todos los derechos reservados.',
             terms: 'Términos y Condiciones', privacy: 'Política de Privacidad', cookies: 'Política de Cookies', bookingPolicy: 'Política de Reservaciones', notices: 'Avisos legales', notifications: 'Notificaciones',
-            cash: 'Efectivo', visaMc: 'Visa y Mastercard'
+            cash: 'Efectivo', visaMc: 'Visa y Mastercard', reportProblem: 'Reportar un problema'
         },
         en: {
             home: 'Home', services: 'Services', book: 'Book', barbers: 'Barbers', news: 'News', contact: 'Contact',
@@ -42,7 +42,7 @@
             footerNews: 'Barbershop news', footerSupport: 'Contact and support', legal: 'Legal', cookiePrefs: 'Cookie preferences',
             development: 'Development', weAccept: 'We accept:', rights: 'All rights reserved.',
             terms: 'Terms and Conditions', privacy: 'Privacy Policy', cookies: 'Cookie Policy', bookingPolicy: 'Booking Policy', notices: 'Legal notices', notifications: 'Notifications',
-            cash: 'Cash', visaMc: 'Visa and Mastercard'
+            cash: 'Cash', visaMc: 'Visa and Mastercard', reportProblem: 'Report a problem'
         }
     };
     const t = key => TEXT[LANG][key] || TEXT.es[key] || key;
@@ -342,6 +342,7 @@
                         <p>Barranquitas, Puerto Rico</p>
                         <a href="news.html">${t('footerNews')}</a>
                         <a href="support.html#contacto">${t('footerSupport')}</a>
+                        <a href="support.html#reporte">${t('reportProblem')}</a>
                     </div>
                     <div class="site-footer-col">
                         <h4>${t('legal')}</h4>
@@ -396,6 +397,15 @@
             event.preventDefault();
             window.__gabyInstallPrompt = event;
         });
+        // Super admin (PR #18): mantenimiento por tabla, permisos por área y
+        // tickets. Se carga en todas las páginas públicas, como notifications.js.
+        if (!window.GabySuperAdmin && !document.querySelector('script[data-gaby-super-admin]')) {
+            const superAdmin = document.createElement('script');
+            superAdmin.src = `${SCRIPT_BASE}super-admin.js?v=20261124f`;
+            superAdmin.defer = true;
+            superAdmin.dataset.gabySuperAdmin = '1';
+            document.head.appendChild(superAdmin);
+        }
         // Campana, recordatorios y push (notifications.js). Las páginas de avisos ya lo cargan directo.
         if (!window.GabyNotifications && !document.querySelector('script[data-gaby-notifications]')) {
             const script = document.createElement('script');
