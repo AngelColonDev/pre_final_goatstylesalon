@@ -32,7 +32,7 @@
             footerNews: 'Noticias de la barbería', footerSupport: 'Contacto y soporte', legal: 'Legal', cookiePrefs: 'Preferencias de cookies',
             development: 'Desarrollo', weAccept: 'Aceptamos:', rights: 'Todos los derechos reservados.',
             terms: 'Términos y Condiciones', privacy: 'Política de Privacidad', cookies: 'Política de Cookies', bookingPolicy: 'Política de Reservaciones', notices: 'Avisos legales', notifications: 'Notificaciones',
-            cash: 'Efectivo', visaMc: 'Visa y Mastercard', reportProblem: 'Reportar un problema',
+            cash: 'Efectivo', visaMc: 'Visa y Mastercard',
             mainMenu: 'Menú principal', backShort: 'Volver', openingHours: 'Horario'
         },
         en: {
@@ -43,7 +43,7 @@
             footerNews: 'Barbershop news', footerSupport: 'Contact and support', legal: 'Legal', cookiePrefs: 'Cookie preferences',
             development: 'Development', weAccept: 'We accept:', rights: 'All rights reserved.',
             terms: 'Terms and Conditions', privacy: 'Privacy Policy', cookies: 'Cookie Policy', bookingPolicy: 'Booking Policy', notices: 'Legal notices', notifications: 'Notifications',
-            cash: 'Cash', visaMc: 'Visa and Mastercard', reportProblem: 'Report a problem',
+            cash: 'Cash', visaMc: 'Visa and Mastercard',
             mainMenu: 'Main menu', backShort: 'Back', openingHours: 'Opening hours'
         }
     };
@@ -345,7 +345,6 @@
                         <p>Barranquitas, Puerto Rico</p>
                         <a href="news.html">${t('footerNews')}</a>
                         <a href="support.html#contacto">${t('footerSupport')}</a>
-                        <a href="support.html#reporte">${t('reportProblem')}</a>
                     </div>
                     <div class="site-footer-col">
                         <h4>${t('legal')}</h4>
