@@ -34,20 +34,7 @@
                 </label>
                 <p id="sa-login-error" class="sa-error" hidden></p>
                 <button type="submit" class="btn btn-primary sa-block" id="sa-login-btn">Continuar</button>
-                <p class="sa-note">Tras 3 intentos fallidos la cuenta se bloquea. El código de verificación llega a este mismo correo.</p>
-            </form>
-
-            <!-- Paso 2: código OTP por email (2FA de Supabase Auth) -->
-            <form id="sa-otp-form" autocomplete="off" hidden>
-                <p class="sa-muted">Te enviamos un código de 6 dígitos a <strong id="sa-otp-email"></strong>. Escríbelo para completar el inicio de sesión.</p>
-                <label class="sa-field">
-                    <span>Código de verificación</span>
-                    <input type="text" id="sa-otp-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required placeholder="123456">
-                </label>
-                <p id="sa-otp-error" class="sa-error" hidden></p>
-                <button type="submit" class="btn btn-primary sa-block" id="sa-otp-btn">Verificar y entrar</button>
-                <button type="button" class="btn btn-ghost sa-block" id="sa-otp-resend">Reenviar código</button>
-                <button type="button" class="btn btn-ghost sa-block" id="sa-otp-back">Volver</button>
+                <p class="sa-note">Tras 3 intentos fallidos la cuenta se bloquea.</p>
             </form>
 
             <p class="sa-login-foot"><a href="index.html">← Volver a GOAT Style Salon</a></p>
@@ -123,6 +110,6 @@
 
     <script src="supabase-config.js?v=20261124f"></script>
     <script src="supabase-sync.js?v=20261124h"></script>
-    <script src="super-admin-panel.js?v=20261124h"></script>
+    <script src="super-admin-panel.js?v=20261125a"></script>
 </body>
 </html>

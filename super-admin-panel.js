@@ -206,11 +206,10 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* Sesión: login en 2 pasos (contraseña + OTP por email) y cierre a    */
-    /* los 30 min sin actividad.                                           */
+    /* Sesión: login solo con contraseña (sin código; decisión del dueño, */
+    /* 25 Nov 2026) y cierre a los 30 min sin actividad.                   */
     /* ------------------------------------------------------------------ */
     function showLoginError(msg) { var e = $('sa-login-error'); e.textContent = msg; e.hidden = false; }
-    function showOtpError(msg) { var e = $('sa-otp-error'); e.textContent = msg; e.hidden = false; }
 
     async function handleLoginSubmit(ev) {
         ev.preventDefault();
@@ -243,38 +242,13 @@
                 return;
             }
             try { await rpc('record_login_attempt', { p_email: email, p_exito: true, p_dispositivo: navigator.userAgent }); } catch (_) {}
-            // 4) 2FA: código OTP por email (Supabase Auth, no un 2FA inventado).
-            var otp = await c.auth.signInWithOtp({ email: email });
-            if (otp.error) { showLoginError('No se pudo enviar el código de verificación: ' + (otp.error.message || 'inténtalo de nuevo.')); return; }
-            state.pendingEmail = email;
-            state.pendingUserId = sign.data.user.id;
-            $('sa-otp-email').textContent = email;
-            $('sa-login-form').hidden = true;
-            $('sa-otp-form').hidden = false;
-            toast('Código de verificación enviado a tu correo.', 'success');
-        } catch (err) {
-            showLoginError(err && err.message ? err.message : 'No se pudo iniciar sesión.');
-        } finally { btn.disabled = false; }
-    }
-
-    async function handleOtpSubmit(ev) {
-        ev.preventDefault();
-        var code = $('sa-otp-code').value.trim();
-        var btn = $('sa-otp-btn');
-        btn.disabled = true;
-        try {
-            var c = await getClient();
-            var ver = await c.auth.verifyOtp({ email: state.pendingEmail, token: code, type: 'email' });
-            if (ver.error) {
-                try { await rpc('record_login_attempt', { p_email: state.pendingEmail, p_exito: false, p_dispositivo: navigator.userAgent }); } catch (_) {}
-                showOtpError('Código incorrecto o vencido. Revisa tu correo e inténtalo de nuevo.');
-                return;
-            }
-            startSession(state.pendingEmail, state.pendingUserId);
-            audit('login', 'Inicio de sesión de super admin (2FA por email).');
+            // 4) Sin código de verificación: la contraseña y el rol
+            // super_admin verificado en servidor son la entrada.
+            startSession(email, sign.data.user.id);
+            audit('login', 'Inicio de sesión de super admin (solo contraseña).');
             toast('Bienvenido al panel de Super Admin.', 'success');
         } catch (err) {
-            showOtpError(err && err.message ? err.message : 'No se pudo verificar el código.');
+            showLoginError(err && err.message ? err.message : 'No se pudo iniciar sesión.');
         } finally { btn.disabled = false; }
     }
 
@@ -317,9 +291,7 @@
         $('sa-app').hidden = true;
         $('sa-login').hidden = false;
         $('sa-login-form').hidden = false;
-        $('sa-otp-form').hidden = true;
         $('sa-password').value = '';
-        $('sa-otp-code').value = '';
     }
 
     /* ------------------------------------------------------------------ */
@@ -1126,18 +1098,6 @@
         if (inited) return;
         inited = true;
         $('sa-login-form').addEventListener('submit', handleLoginSubmit);
-        $('sa-otp-form').addEventListener('submit', handleOtpSubmit);
-        $('sa-otp-resend').addEventListener('click', async function () {
-            try {
-                var c = await getClient();
-                await c.auth.signInWithOtp({ email: state.pendingEmail });
-                toast('Código reenviado a tu correo.', 'success');
-            } catch (err) { showOtpError('No se pudo reenviar el código.'); }
-        });
-        $('sa-otp-back').addEventListener('click', function () {
-            $('sa-otp-form').hidden = true;
-            $('sa-login-form').hidden = false;
-        });
         var pwToggle = $('sa-password-toggle');
         if (pwToggle) pwToggle.addEventListener('click', function () {
             var pwInput = $('sa-password');
