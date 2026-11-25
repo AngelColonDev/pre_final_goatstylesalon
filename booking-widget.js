@@ -517,6 +517,15 @@
                     window.GabyNotifications.refreshPushToken();
                 }
             } catch (_) { /* el push del token no bloquea la confirmación */ }
+            // La ficha del cliente se registra en el servidor por RPC: el sync
+            // anónimo no puede insertar en clients por RLS (clients_staff_insert
+            // exige is_staff()). Sin await y sin mensajes: la cita ya está
+            // guardada y la pantalla no debe fallar ni demorarse por esto.
+            try {
+                if (window.GabyCloud && typeof window.GabyCloud.registerClientForAppointment === 'function') {
+                    window.GabyCloud.registerClientForAppointment(created.code);
+                }
+            } catch (_) { /* el registro del cliente nunca bloquea la confirmación */ }
             // El barbero también recibe la cita por correo (FormSpark, un
             // formulario por barbero). Nunca bloquea la confirmación.
             notifyBarberByEmail(created);
