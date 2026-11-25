@@ -151,7 +151,7 @@
           el.innerHTML =
             '<h3>🔒 Cuentas bloqueadas</h3>' +
             (locks.length ? locks.map(function (l) {
-              return '<div class="cs-row" style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee"><div><strong>' + E(l.email) + '</strong><br><small>Bloqueada: ' + api.fmtFechaHora(l.locked_at) + ' · Intentos: ' + (l.attempts || 0) + (l.user_agent ? '<br>' + E(l.user_agent) : '') + '</small></div>' +
+              return '<div class="cs-row" style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #26262b"><div><strong>' + E(l.email) + '</strong><br><small>Bloqueada: ' + api.fmtFechaHora(l.locked_at) + ' · Intentos: ' + (l.attempts || 0) + (l.user_agent ? '<br>' + E(l.user_agent) : '') + '</small></div>' +
                 '<button class="cs-btn" data-unlock="' + E(l.email) + '">Desbloquear</button></div>';
             }).join('') : '<p>No hay cuentas bloqueadas. 🎉</p>') +
             '<h3>⚠️ Intentos fallidos de inicio de sesión</h3>' +
@@ -159,7 +159,7 @@
             '<div id="cs-att-list">' + tablaIntentos(attempts) + '</div>' +
             '<h3>🖥️ Sesiones recientes</h3>' +
             sesiones.filter(function (p) { return p.ultimo_login_at; }).map(function (p) {
-              return '<div class="cs-row" style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee"><div><strong>' + E(p.nombre || '') + '</strong> · ' + E(p.email) + '<br><small>Último acceso: ' + api.fmtFechaHora(p.ultimo_login_at) + '</small></div>' +
+              return '<div class="cs-row" style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #26262b"><div><strong>' + E(p.nombre || '') + '</strong> · ' + E(p.email) + '<br><small>Último acceso: ' + api.fmtFechaHora(p.ultimo_login_at) + '</small></div>' +
                 '<button class="cs-btn" data-close-session="' + E(p.id) + '">Cerrar sesión</button></div>';
             }).join('') +
             '<h3>🔑 Restablecer contraseña</h3>' +
@@ -170,12 +170,12 @@
             '<div id="cs-aud-list">' + tablaAuditoria(auditoria) + '</div>';
           function tablaIntentos(rows) {
             return rows.length ? rows.map(function (a) {
-              return '<div style="padding:6px;border-bottom:1px solid #eee"><strong>' + E(a.email) + '</strong> · Intentos: ' + (a.count || 0) + '<br><small>Último: ' + api.fmtFechaHora(a.last_at) + (a.last_ip ? ' · IP: ' + E(a.last_ip) : '') + (a.last_device ? ' · ' + E(a.last_device) : '') + (a.blocked_until ? ' · Bloqueado hasta: ' + api.fmtFechaHora(a.blocked_until) : '') + '</small></div>';
+              return '<div style="padding:6px;border-bottom:1px solid #26262b"><strong>' + E(a.email) + '</strong> · Intentos: ' + (a.count || 0) + '<br><small>Último: ' + api.fmtFechaHora(a.last_at) + (a.last_ip ? ' · IP: ' + E(a.last_ip) : '') + (a.last_device ? ' · ' + E(a.last_device) : '') + (a.blocked_until ? ' · Bloqueado hasta: ' + api.fmtFechaHora(a.blocked_until) : '') + '</small></div>';
             }).join('') : '<p>Sin intentos fallidos registrados.</p>';
           }
           function tablaAuditoria(rows) {
             return rows.length ? rows.map(function (a) {
-              return '<div style="padding:6px;border-bottom:1px solid #eee"><small>' + api.fmtFechaHora(a.created_at) + '</small><br><strong>' + E(a.actor_email || '') + '</strong> · ' + E(a.action) + ' <small>(' + E(a.target_type || '') + ' ' + E(a.target_id || '') + ')</small></div>';
+              return '<div style="padding:6px;border-bottom:1px solid #26262b"><small>' + api.fmtFechaHora(a.created_at) + '</small><br><strong>' + E(a.actor_email || '') + '</strong> · ' + E(a.action) + ' <small>(' + E(a.target_type || '') + ' ' + E(a.target_id || '') + ')</small></div>';
             }).join('') : '<p>Sin registros de auditoría.</p>';
           }
           el.querySelectorAll('[data-unlock]').forEach(function (b) {
@@ -245,7 +245,7 @@
             '<p>Tipo de conexión: <strong>' + escLocal((navigator.connection && navigator.connection.effectiveType) || 'No disponible') + '</strong></p>' +
             '<p>Respuesta de la base de datos: <strong id="cs-ping">midiendo…</strong></p>' +
             '<h4>Caídas en esta sesión</h4>' + (caidas.length ? caidas.map(function (c) {
-              return '<div style="padding:6px;border-bottom:1px solid #eee">🔴 Cayó: ' + api.fmtHora(c.caida) + (c.regreso ? ' · 🟢 Volvió: ' + api.fmtHora(c.regreso) : ' · aún sin conexión') + '</div>';
+              return '<div style="padding:6px;border-bottom:1px solid #26262b">🔴 Cayó: ' + api.fmtHora(c.caida) + (c.regreso ? ' · 🟢 Volvió: ' + api.fmtHora(c.regreso) : ' · aún sin conexión') + '</div>';
             }).join('') : '<p>Sin caídas registradas en esta sesión.</p>');
         }
         pintar();
@@ -277,7 +277,7 @@
           try {
             var rows = await api.select('speed_tests', { order: 'created_at', ascending: false, limit: 10 });
             el.querySelector('#cs-speed-hist').innerHTML = '<h4>Historial (últimas 10)</h4>' + (rows.length ? rows.map(function (r) {
-              return '<div style="padding:6px;border-bottom:1px solid #eee">' + api.fmtFechaHora(r.created_at) + ' · <strong>' + r.descarga_mbps + ' Mbps</strong> · ' + (r.latencia_ms || '—') + ' ms · ' + E(r.veredicto || '') + '</div>';
+              return '<div style="padding:6px;border-bottom:1px solid #26262b">' + api.fmtFechaHora(r.created_at) + ' · <strong>' + r.descarga_mbps + ' Mbps</strong> · ' + (r.latencia_ms || '—') + ' ms · ' + E(r.veredicto || '') + '</div>';
             }).join('') : '<p>Todavía no hay pruebas guardadas.</p>');
           } catch (e) { el.querySelector('#cs-speed-hist').innerHTML = errBox(api, e, 'No se pudo cargar el historial.'); }
         }
@@ -296,7 +296,7 @@
               for (var i = 0; i < 5; i++) estabilidad.push(await pingSupabase(api));
               var veredicto = veredictoVelocidad(mbps, latencia);
               var pct = Math.min(100, mbps / 50 * 100);
-              box.innerHTML = '<div style="background:#eee;border-radius:8px;height:22px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#7e57c2"></div></div>' +
+              box.innerHTML = '<div style="background:#26262b;border-radius:8px;height:22px;overflow:hidden"><div style="height:100%;width:' + pct + '%;background:#7e57c2"></div></div>' +
                 '<p style="font-size:20px"><strong>' + mbps + ' Mbps</strong> · ' + veredicto + '</p>' +
                 '<p>Respuesta (ping): ' + latencia + ' ms · Estabilidad (5 mediciones): ' + estabilidad.join(', ') + ' ms</p>' +
                 '<p><small>25 Mbps o más es excelente para el panel. Si sale “Muy lenta”, revisa el wifi antes de culpar a la aplicación. 😉</small></p>';
@@ -370,7 +370,7 @@
           el.querySelector('#cs-diag-list').innerHTML = resultados.map(function (r, i) {
             var icono = r.estado === 'ok' ? '✓' : r.estado === 'warn' ? '⚠' : r.estado === 'run' ? '⏳' : '✗';
             var color = r.estado === 'ok' ? '#2e7d32' : r.estado === 'warn' ? '#ef6c00' : r.estado === 'run' ? '#666' : '#c62828';
-            return '<div class="cs-diag-row" data-prueba="' + r.id + '" style="padding:10px;border-bottom:1px solid #eee">' +
+            return '<div class="cs-diag-row" data-prueba="' + r.id + '" style="padding:10px;border-bottom:1px solid #26262b">' +
               '<span style="color:' + color + ';font-weight:bold">' + icono + ' ' + E(r.nombre) + '</span>' +
               (r.ms != null ? ' <small>(' + r.ms + ' ms)</small>' : '') +
               (r.detalle ? '<br><small>' + E(r.detalle) + '</small>' : '') +
@@ -435,11 +435,11 @@
             '<button class="cs-btn" id="cs-q-flush" style="padding:10px 18px">Subir todo ahora</button>' +
             '<div id="cs-q-progress" style="margin:10px 0"></div>' +
             (items.length ? items.map(function (it) {
-              return '<div class="cs-q-row" style="padding:8px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;gap:8px"><div><strong>' + E(it.tipo || it.tabla || '—') + '</strong><br><small>' + api.fmtFechaHora(it.created_at || it.queued_at || Date.now()) + (it.error ? '<br>Error: ' + E(typeof it.error === 'string' ? it.error : (it.error.message || '')) : '') + '</small></div>' +
+              return '<div class="cs-q-row" style="padding:8px;border-bottom:1px solid #26262b;display:flex;justify-content:space-between;gap:8px"><div><strong>' + E(it.tipo || it.tabla || '—') + '</strong><br><small>' + api.fmtFechaHora(it.created_at || it.queued_at || Date.now()) + (it.error ? '<br>Error: ' + E(typeof it.error === 'string' ? it.error : (it.error.message || '')) : '') + '</small></div>' +
                 '<span><button class="cs-btn" data-q-retry="' + E(it.id) + '">Reintentar este</button> <button class="cs-btn" data-q-drop="' + E(it.id) + '">Descartar</button></span></div>';
             }).join('') : '<p>La cola está vacía. Todo está subido. 🎉</p>') +
             '<h4>Historial (últimos 20)</h4>' + (hist.length ? hist.map(function (hh) {
-              return '<div style="padding:6px;border-bottom:1px solid #eee"><small>' + api.fmtFechaHora(hh.created_at) + '</small> · ' + E(hh.tipo || '') + ' · ' + E(hh.tabla || '') + ' · <strong>' + E(hh.resultado || '') + '</strong>' + (hh.motivo ? '<br><small>' + E(hh.motivo) + '</small>' : '') + '</div>';
+              return '<div style="padding:6px;border-bottom:1px solid #26262b"><small>' + api.fmtFechaHora(hh.created_at) + '</small> · ' + E(hh.tipo || '') + ' · ' + E(hh.tabla || '') + ' · <strong>' + E(hh.resultado || '') + '</strong>' + (hh.motivo ? '<br><small>' + E(hh.motivo) + '</small>' : '') + '</div>';
             }).join('') : '<p>Sin historial todavía.</p>');
           async function ejecutarItem(it) {
             var op = it.operacion || 'insert';
@@ -475,7 +475,7 @@
             conCarga(flushBtn, async function () {
               var antes = await api.queue.count();
               var prog = el.querySelector('#cs-q-progress');
-              try { await api.queue.flush(function (p, totalArg) { var done, total; if (p && typeof p === 'object') { done = (p.subidos || 0) + (p.fallidos || 0); total = p.total; } else { done = p; total = totalArg; } if (prog) prog.innerHTML = '<div style="background:#eee;border-radius:8px;height:18px;overflow:hidden"><div style="height:100%;background:#26a69a;width:' + (total ? Math.round(done / total * 100) : 100) + '%"></div></div><small>Subiendo ' + done + ' de ' + total + '…</small>'; }); }
+              try { await api.queue.flush(function (p, totalArg) { var done, total; if (p && typeof p === 'object') { done = (p.subidos || 0) + (p.fallidos || 0); total = p.total; } else { done = p; total = totalArg; } if (prog) prog.innerHTML = '<div style="background:#26262b;border-radius:8px;height:18px;overflow:hidden"><div style="height:100%;background:#26a69a;width:' + (total ? Math.round(done / total * 100) : 100) + '%"></div></div><small>Subiendo ' + done + ' de ' + total + '…</small>'; }); }
               catch (e) { api.toast('La subida se interrumpió.', 'error'); }
               var despues = await api.queue.count();
               if (prog) prog.innerHTML = '<p>✅ Subidos: <strong>' + (antes - despues) + '</strong> · ❌ Fallidos (siguen en cola): <strong>' + despues + '</strong></p>';
@@ -541,9 +541,9 @@
             var memos = await api.select('support_memos', { order: 'created_at', ascending: false, limit: 200 });
             var box = el.querySelector('#cs-memo-list');
             box.innerHTML = memos.length ? memos.map(function (m) {
-              return '<div class="cs-memo-row" style="padding:10px;border-bottom:1px solid #eee">' +
+              return '<div class="cs-memo-row" style="padding:10px;border-bottom:1px solid #26262b">' +
                 '<span style="background:' + (PRIO_COLOR[m.prioridad] || '#757575') + ';color:#fff;border-radius:10px;padding:2px 8px;font-size:12px">' + E(m.prioridad) + '</span> ' +
-                '<span style="background:#eee;border-radius:10px;padding:2px 8px;font-size:12px">' + E(m.estado) + '</span> ' +
+                '<span style="background:rgba(212,175,55,.16);color:#e9d189;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600">' + E(m.estado) + '</span> ' +
                 '<strong>' + E(m.titulo) + '</strong><br><small>Para: ' + E(m.destinatario_nombre || m.destinatario_tipo) + ' · ' + api.fmtFechaHora(m.created_at) + (m.etiquetas && m.etiquetas.length ? ' · 🏷️ ' + E(m.etiquetas.join(', ')) : '') + '</small>' +
                 '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">' +
                 '<button class="cs-btn" data-memo-edit="' + E(m.id) + '">Editar</button>' +
@@ -563,7 +563,7 @@
               var destino = box.querySelector('[data-memo-reads-box="' + idEsc + '"]') || box.querySelector('[data-memo-reads-box]');
               var m = buscarMemo(id);
               try { var reads = await api.select('memo_reads', { eq: [['memo_id', id]], order: 'leido_at', ascending: false, limit: 200 });
-                destino.innerHTML = reads.length ? '<div style="background:#fafafa;padding:8px;margin-top:6px">' + reads.map(function (r) { return '<div>👁️ ' + E(r.lector) + ' · ' + api.fmtFechaHora(r.leido_at) + '</div>'; }).join('') + '</div>'
+                destino.innerHTML = reads.length ? '<div style="background:#101012;padding:8px;margin-top:6px">' + reads.map(function (r) { return '<div>👁️ ' + E(r.lector) + ' · ' + api.fmtFechaHora(r.leido_at) + '</div>'; }).join('') + '</div>'
                   : '<p style="margin-top:6px"><small>' + (m && m.estado === 'enviado' ? 'Aún no lo ha leído nadie.' : 'Este memo todavía no se ha enviado.') + '</small></p>';
               } catch (e) { destino.innerHTML = errBox(api, e, 'No se pudieron cargar las lecturas.'); }
             }); });
@@ -693,8 +693,8 @@
             el.querySelector('#cs-bm-count').textContent = ultimos.length + ' resultado' + (ultimos.length === 1 ? '' : 's');
             el.querySelector('#cs-bm-list').innerHTML = ultimos.length ? ultimos.map(function (m) {
               var tit = resaltar(m.titulo, f.texto); var msg = resaltar(m.mensaje, f.texto);
-              return '<div class="cs-bm-row" style="padding:10px;border-bottom:1px solid #eee"><strong>' + (tit || E(m.titulo)) + '</strong> ' +
-                '<span style="background:#eee;border-radius:10px;padding:2px 8px;font-size:12px">' + E(m.prioridad) + ' · ' + E(m.estado) + '</span><br>' +
+              return '<div class="cs-bm-row" style="padding:10px;border-bottom:1px solid #26262b"><strong>' + (tit || E(m.titulo)) + '</strong> ' +
+                '<span style="background:rgba(212,175,55,.16);color:#e9d189;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600">' + E(m.prioridad) + ' · ' + E(m.estado) + '</span><br>' +
                 '<span>' + (msg || E(m.mensaje)) + '</span><br><small>Para: ' + E(m.destinatario_nombre || m.destinatario_tipo) + ' · ' + api.fmtFechaHora(m.created_at) + '</small></div>';
             }).join('') : '<p>No se encontraron memos con esos filtros.</p>';
           }
@@ -780,7 +780,7 @@
             '<p><small>⏰ El envío programado se envía cuando el panel está abierto a esa hora.</small></p>' +
             '<button class="cs-btn" id="cs-nt-enviar" style="font-weight:bold">Enviar / Programar</button></div>' +
             '<h3>🕘 Historial (últimas 30)</h3>' + (hist.length ? hist.map(function (hh) {
-              return '<div style="padding:8px;border-bottom:1px solid #eee"><strong>' + E(hh.titulo) + '</strong> <span style="background:#eee;border-radius:10px;padding:2px 8px;font-size:12px">' + E(hh.estado) + '</span><br><small>' + E(hh.cuerpo) + '</small><br><small>Audiencia: ' + E(hh.audiencia) + (hh.destinatario ? ' · ' + E(hh.destinatario) : '') + ' · ' + api.fmtFechaHora(hh.enviado_at || hh.programada_at || hh.created_at) + '</small></div>';
+              return '<div style="padding:8px;border-bottom:1px solid #26262b"><strong>' + E(hh.titulo) + '</strong> <span style="background:rgba(212,175,55,.16);color:#e9d189;border-radius:999px;padding:2px 9px;font-size:12px;font-weight:600">' + E(hh.estado) + '</span><br><small>' + E(hh.cuerpo) + '</small><br><small>Audiencia: ' + E(hh.audiencia) + (hh.destinatario ? ' · ' + E(hh.destinatario) : '') + ' · ' + api.fmtFechaHora(hh.enviado_at || hh.programada_at || hh.created_at) + '</small></div>';
             }).join('') : '<p>Sin notificaciones registradas todavía.</p>');
           function toggle() { var a = el.querySelector('#cs-nt-aud').value; el.querySelector('#cs-nt-persona-wrap').style.display = a === 'persona' ? '' : 'none'; el.querySelector('#cs-nt-fecha-wrap').style.display = el.querySelector('#cs-nt-prog').checked ? '' : 'none'; }
           el.querySelector('#cs-nt-aud').addEventListener('change', toggle);
@@ -838,7 +838,7 @@
             var rows = profiles.filter(function (p) { return !q || normalizarTexto((p.nombre || '') + ' ' + (p.email || '')).indexOf(q) !== -1; });
             el.querySelector('#cs-us-list').innerHTML = rows.length ? rows.map(function (p) {
               var b = p.barber_id ? barberPorId[p.barber_id] : null;
-              return '<div class="cs-us-row" style="padding:10px;border-bottom:1px solid #eee">' +
+              return '<div class="cs-us-row" style="padding:10px;border-bottom:1px solid #26262b">' +
                 '<strong>' + E(p.nombre || '(sin nombre)') + '</strong> · ' + E(p.email) + '<br>' +
                 '<small>Rol: ' + E(p.role) + ' · Estado: ' + E(p.estado) + (b ? ' · 💈 ' + E(b.name) : '') + '</small>' +
                 '<div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">' +
@@ -857,7 +857,7 @@
             el.querySelectorAll('[data-us-ver]').forEach(function (b) { b.addEventListener('click', function () {
               var p = buscarP(b.getAttribute('data-us-ver')); if (!p) return;
               var bb = p.barber_id ? barberPorId[p.barber_id] : null;
-              extra(p.id).innerHTML = '<div style="background:#fafafa;padding:10px;margin-top:6px;border:1px solid #eee">' +
+              extra(p.id).innerHTML = '<div style="background:#101012;padding:10px;margin-top:6px;border:1px solid #26262b">' +
                 Object.keys(p).map(function (k) { return '<div><small><strong>' + E(k) + ':</strong> ' + E(typeof p[k] === 'object' ? JSON.stringify(p[k]) : String(p[k])) + '</small></div>'; }).join('') +
                 (bb ? '<div><small><strong>Barbero:</strong> ' + E(bb.name) + ' · ' + E(bb.email || '') + ' · ' + E(bb.phone || '') + '</small></div>' : '') +
                 '<div><small>Último acceso: ' + (p.ultimo_login_at ? api.fmtFechaHora(p.ultimo_login_at) : 'nunca registrado') + '</small></div></div>';
@@ -877,7 +877,7 @@
               var ok1 = await api.confirm({ title: 'Cancelar cuenta', body: 'Vas a cancelar la cuenta de ' + (p ? p.email : id) + '. Esta acción es seria.', confirmText: 'Continuar', danger: true });
               if (!ok1) return;
               var modal = el.querySelector('#cs-us-modal');
-              modal.innerHTML = '<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9999"><div style="background:#fff;color:#222;padding:20px;border-radius:10px;max-width:420px;width:92%">' +
+              modal.innerHTML = '<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9999"><div style="background:#161618;color:#f4f1ea;padding:20px;border-radius:10px;max-width:420px;width:92%">' +
                 '<h3 style="margin-top:0">✍️ Confirmación final</h3><p>Escribe <strong>CANCELAR</strong> para confirmar y el motivo (obligatorio):</p>' +
                 '<input id="cs-cancel-word" placeholder="CANCELAR" style="width:100%;margin-bottom:8px">' +
                 '<input id="cs-cancel-motivo" placeholder="Motivo (obligatorio)" style="width:100%;margin-bottom:12px">' +
@@ -897,8 +897,8 @@
               try {
                 var perms = await api.select('area_permissions', { eq: [['barber_id', p.barber_id]], limit: 100 });
                 var mapa = {}; perms.forEach(function (x) { mapa[x.area] = !!x.permitido; });
-                box.innerHTML = '<div style="background:#fafafa;padding:10px;margin-top:6px"><strong>Permisos por área de ' + E(p.nombre || p.email) + '</strong>' +
-                  AREAS_PERMISOS.map(function (a) { return '<label style="display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #eee"><span>' + E(a) + '</span><input type="checkbox" data-perm-area="' + E(a) + '" ' + (mapa[a] ? 'checked' : '') + '></label>'; }).join('') + '</div>';
+                box.innerHTML = '<div style="background:#101012;padding:10px;margin-top:6px"><strong>Permisos por área de ' + E(p.nombre || p.email) + '</strong>' +
+                  AREAS_PERMISOS.map(function (a) { return '<label style="display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #26262b"><span>' + E(a) + '</span><input type="checkbox" data-perm-area="' + E(a) + '" ' + (mapa[a] ? 'checked' : '') + '></label>'; }).join('') + '</div>';
                 box.querySelectorAll('[data-perm-area]').forEach(function (sw) { sw.addEventListener('change', async function () {
                   try { await api.rpc('set_area_permission', { p_barber_id: p.barber_id, p_area: sw.getAttribute('data-perm-area'), p_permitido: sw.checked }); api.toast('Permiso actualizado ✅', 'success'); }
                   catch (e) { sw.checked = !sw.checked; api.toast('No se pudo guardar el permiso.', 'error'); }
@@ -912,10 +912,10 @@
               try {
                 var citas = p.barber_id ? await api.select('appointments', { eq: [['barber_id', p.barber_id]], order: 'created_at', ascending: false, limit: 30 }) : [];
                 var notifs = p.barber_id ? await api.select('notifications', { eq: [['barber_id', p.barber_id]], order: 'created_at', ascending: false, limit: 30 }) : [];
-                modal.innerHTML = '<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);overflow:auto;z-index:9999"><div style="background:#fff;color:#222;max-width:720px;margin:24px auto;border-radius:10px;overflow:hidden">' +
+                modal.innerHTML = '<div style="position:fixed;inset:0;background:rgba(0,0,0,.55);overflow:auto;z-index:9999"><div style="background:#161618;color:#f4f1ea;max-width:720px;margin:24px auto;border-radius:10px;overflow:hidden">' +
                   '<div style="background:#c62828;color:#fff;padding:12px 16px"><strong>Modo soporte — estás viendo como ' + E(p.nombre || p.email) + ' (solo lectura)</strong><br><small>Esto NO es la sesión real de esta persona: es una vista de solo lectura para ayudarle.</small></div>' +
-                  '<div style="padding:16px"><h4>📅 Sus citas</h4>' + (citas.length ? citas.map(function (c) { return '<div style="padding:6px;border-bottom:1px solid #eee">' + E(c.client_name || '') + ' · ' + E(c.service || '') + ' · ' + E(c.status || '') + ' · ' + (c.date_time ? api.fmtFechaHora(c.date_time) : '') + '</div>'; }).join('') : '<p>Sin citas.</p>') +
-                  '<h4>🔔 Sus notificaciones</h4>' + (notifs.length ? notifs.map(function (n) { return '<div style="padding:6px;border-bottom:1px solid #eee"><strong>' + E(n.title) + '</strong><br><small>' + E(n.body) + ' · ' + api.fmtFechaHora(n.created_at) + '</small></div>'; }).join('') : '<p>Sin notificaciones.</p>') +
+                  '<div style="padding:16px"><h4>📅 Sus citas</h4>' + (citas.length ? citas.map(function (c) { return '<div style="padding:6px;border-bottom:1px solid #26262b">' + E(c.client_name || '') + ' · ' + E(c.service || '') + ' · ' + E(c.status || '') + ' · ' + (c.date_time ? api.fmtFechaHora(c.date_time) : '') + '</div>'; }).join('') : '<p>Sin citas.</p>') +
+                  '<h4>🔔 Sus notificaciones</h4>' + (notifs.length ? notifs.map(function (n) { return '<div style="padding:6px;border-bottom:1px solid #26262b"><strong>' + E(n.title) + '</strong><br><small>' + E(n.body) + ' · ' + api.fmtFechaHora(n.created_at) + '</small></div>'; }).join('') : '<p>Sin notificaciones.</p>') +
                   '<button class="cs-btn" id="cs-support-close" style="margin-top:12px">Cerrar vista de soporte</button></div></div></div>';
                 modal.querySelector('#cs-support-close').addEventListener('click', function () { modal.innerHTML = ''; });
               } catch (e) { modal.innerHTML = errBox(api, e, 'No se pudo abrir la vista de soporte.'); }
@@ -953,7 +953,7 @@
             areas.map(function (a) {
               var r = porArea[a] || { area: a, activa: false, mensaje: '', termina_at: null };
               var terminaVal = r.termina_at ? new Date(r.termina_at).toISOString().slice(0, 16) : '';
-              return '<div class="cs-mant-row" data-area="' + E(a) + '" style="padding:12px;border-bottom:1px solid #eee">' +
+              return '<div class="cs-mant-row" data-area="' + E(a) + '" style="padding:12px;border-bottom:1px solid #26262b">' +
                 '<label style="display:flex;justify-content:space-between;align-items:center"><strong>' + E(a) + '</strong><input type="checkbox" data-mant-activa ' + (r.activa ? 'checked' : '') + '></label>' +
                 '<div style="display:grid;gap:6px;margin-top:8px"><input data-mant-mensaje placeholder="Mensaje para los usuarios…" value="' + E(r.mensaje || '') + '">' +
                 '<label>Termina: <input type="datetime-local" data-mant-termina value="' + terminaVal + '"></label>' +
@@ -994,7 +994,7 @@
             '<div id="cs-err-list" style="margin-top:10px"></div>';
           function pintar(rows) {
             el.querySelector('#cs-err-list').innerHTML = rows.length ? rows.map(function (r) {
-              return '<div class="cs-err-row" style="padding:10px;border-bottom:1px solid #eee;opacity:' + (r.resuelto ? '.55' : '1') + '">' +
+              return '<div class="cs-err-row" style="padding:10px;border-bottom:1px solid #26262b;opacity:' + (r.resuelto ? '.55' : '1') + '">' +
                 '<small>' + api.fmtFechaHora(r.created_at) + '</small> · 👤 ' + E(r.usuario || '—') + ' · 📄 ' + E(r.pagina || '—') + '<br>' +
                 '<strong>' + E(r.mensaje) + '</strong>' + (r.stack ? detalles({ message: r.stack }) : '') + '<br>' +
                 '<button class="cs-btn" data-err-toggle="' + E(r.id) + '" data-resuelto="' + (r.resuelto ? '1' : '0') + '">' + (r.resuelto ? 'Reabrir' : 'Marcar como resuelto') + '</button></div>';
@@ -1105,12 +1105,12 @@
           var acept = await api.select('legal_acceptances', { order: 'created_at', ascending: false, limit: 20 });
           var requireReaccept = settings.length ? !!settings[0].require_reaccept : false;
           el.innerHTML = '<h3>⚖️ Términos y políticas</h3>' +
-            '<label style="display:flex;gap:8px;align-items:flex-start;background:#fff8e1;padding:12px;border-radius:8px"><input type="checkbox" id="cs-legal-reaccept" ' + (requireReaccept ? 'checked' : '') + '><span><strong>Exigir que todos acepten de nuevo</strong><br><small>Si está activo, todos los usuarios tendrán que aceptar los documentos de nuevo la próxima vez que entren.</small></span></label>' +
+            '<label style="display:flex;gap:8px;align-items:flex-start;background:rgba(212,175,55,.10);padding:12px;border-radius:8px"><input type="checkbox" id="cs-legal-reaccept" ' + (requireReaccept ? 'checked' : '') + '><span><strong>Exigir que todos acepten de nuevo</strong><br><small>Si está activo, todos los usuarios tendrán que aceptar los documentos de nuevo la próxima vez que entren.</small></span></label>' +
             '<h4>📄 Documentos</h4>' + (docs.length ? docs.map(function (d) {
-              return '<div class="cs-legal-row" style="padding:10px;border-bottom:1px solid #eee"><strong>' + E(d.titulo) + '</strong> <small>(' + E(d.slug) + ')</small><br><small>Versión ' + d.version + ' · Actualizado: ' + api.fmtFechaHora(d.updated_at) + '</small> <button class="cs-btn" data-legal-edit="' + E(d.slug) + '">Editar</button><div data-legal-editor="' + E(d.slug) + '"></div></div>';
+              return '<div class="cs-legal-row" style="padding:10px;border-bottom:1px solid #26262b"><strong>' + E(d.titulo) + '</strong> <small>(' + E(d.slug) + ')</small><br><small>Versión ' + d.version + ' · Actualizado: ' + api.fmtFechaHora(d.updated_at) + '</small> <button class="cs-btn" data-legal-edit="' + E(d.slug) + '">Editar</button><div data-legal-editor="' + E(d.slug) + '"></div></div>';
             }).join('') : '<p>No hay documentos legales todavía.</p>') +
             '<h4>✍️ Aceptaciones recientes</h4>' + (acept.length ? acept.map(function (a) {
-              return '<div style="padding:6px;border-bottom:1px solid #eee"><small>Versión ' + E(a.version) + ' · ' + api.fmtFechaHora(a.created_at) + ' · ' + E(String(a.user_agent || '').slice(0, 60)) + '</small></div>';
+              return '<div style="padding:6px;border-bottom:1px solid #26262b"><small>Versión ' + E(a.version) + ' · ' + api.fmtFechaHora(a.created_at) + ' · ' + E(String(a.user_agent || '').slice(0, 60)) + '</small></div>';
             }).join('') : '<p>Sin aceptaciones registradas.</p>');
           var sw = el.querySelector('#cs-legal-reaccept');
           if (sw) sw.addEventListener('change', async function () {
