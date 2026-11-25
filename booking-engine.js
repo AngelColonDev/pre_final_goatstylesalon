@@ -22,6 +22,33 @@
     const DEFAULT_MINUTES = 40;
     const BLOCKED_MESSAGE = 'No es posible realizar una reservación online en este momento. Comunícate con la barbería para recibir asistencia.';
 
+    // Correo del cliente (PR #17, E): obligatorio en reservas en línea. La misma
+    // regla vive en el servidor (trigger guard_online_appointment): si el correo
+    // no es válido, la reserva no se guarda.
+    const EMAIL_MAX = 120;
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+    function cleanEmail(email) { return String(email || '').trim().toLowerCase().slice(0, EMAIL_MAX); }
+    function isValidEmail(email) { return EMAIL_RE.test(cleanEmail(email)); }
+
+    // Preferencias de avisos (PR #17, D): tabla notification_preferences, reflejada
+    // en state.notificationPreferences por supabase-sync.js. Sin fila, todo activo
+    // (los interruptores nacen encendidos). El aviso del barbero solo se apaga para
+    // reservas y cancelaciones de sus citas ('nueva', 'cancelada'); los demás avisos
+    // (reseñas, transferencias, alertas) siguen igual. El aviso del cliente se apaga
+    // entero cuando bookingAlerts es falso (recordatorios incluidos).
+    const BARBER_BOOKING_NOTICE_TYPES = ['nueva', 'cancelada'];
+    function barberPref(state, barberId) { return (state.notificationPreferences || []).find(p => p.barberId === barberId) || null; }
+    function clientPref(state, code) { return (state.notificationPreferences || []).find(p => p.appointmentCode === code) || null; }
+    function barberWantsBookingNotice(state, barberId) { const p = barberPref(state, barberId); return !p || p.bookingAlerts !== false; }
+    function clientWantsNotice(state, code, type) {
+        const p = clientPref(state, code);
+        if (!p) return true;
+        if (p.bookingAlerts === false) return false;
+        if ((type === 'recordatorio-24h' || type === 'recordatorio-1h') && p.reminders === false) return false;
+        if ((type === 'manual' || type === 'mensaje') && p.messages === false) return false;
+        return true;
+    }
+
     const db = () => window.GabyData.getState();
     const pad = n => String(n).padStart(2, '0');
     const toMin = hhmm => {
@@ -335,6 +362,11 @@
     // audience y siguen siendo avisos del personal.
     // ---------------------------------------------------------------------
     function notify(state, { barberId, clientId, audience, type, title, body, code }) {
+        // PR #17 (D): si el barbero apagó sus avisos de reservas/cancelaciones, o el
+        // cliente apagó los avisos de sus citas, el aviso no se crea. Devuelve null
+        // para que quien llama pueda saberlo; los avisos que ya existen no se borran.
+        if ((!audience || audience === 'staff') && barberId && BARBER_BOOKING_NOTICE_TYPES.includes(type) && !barberWantsBookingNotice(state, barberId)) return null;
+        if (audience === 'client' && code && !clientWantsNotice(state, code, type)) return null;
         state.notifications = state.notifications || [];
         const notice = {
             id: uid('ntf'), audience: audience || 'staff', barberId: barberId || null, clientId: clientId || null,
@@ -442,6 +474,10 @@
         const manual = source === 'manual';
         const typedName = cleanName(walkIn && walkIn.name);
         if (!manual && !client && typedName.length < 2) throw Object.assign(new Error('name'), { userMessage: 'Escribe tu nombre completo.' });
+        // PR #17 (E): en línea el correo es obligatorio y con formato válido. En
+        // citas manuales (personal) sigue siendo opcional: el personal puede no tenerlo.
+        const typedEmail = cleanEmail(walkIn && walkIn.email);
+        if (!manual && !isValidEmail(typedEmail)) throw Object.assign(new Error('email'), { userMessage: 'Escribe un correo electrónico válido para confirmar tu cita.' });
         let record = client || (!manual ? matchClientByName(state, typedName) : null);
         const error = validateBooking({ clientId: record && record.id, barberId, services, date, time, staff: manual }, state);
         if (error) throw Object.assign(new Error('booking'), { userMessage: error });
@@ -465,13 +501,15 @@
             state.clients = state.clients || [];
             state.clients.push(record);
         }
+        // PR #17 (E): la ficha que ya existía sin correo se completa con el de esta reserva.
+        if (record && typedEmail && !record.email) record.email = typedEmail;
         const code = uniqueCode(state);
         const status = manual || rules.autoConfirm ? 'APROBADA' : 'PENDIENTE';
         const appointment = {
             code,
             clientId: record ? record.id : null,
             client: typedName || (record && record.name) || 'Cliente',
-            clientEmail: record ? record.email || '' : '',
+            clientEmail: (!manual && typedEmail) ? typedEmail : (record ? record.email || '' : ''),
             clientPhone: record ? record.phone || '' : (walkIn && walkIn.phone) || '',
             service: services.map(s => s.name).join(' + '),
             services: services.map(s => s.name),
@@ -739,6 +777,10 @@
         return { moved, kept };
     }
 
+    // Transferencia INMEDIATA (v1, PR #15). El panel ya no la usa para citas:
+    // desde la v2 (PR #17) pedir una transferencia crea una solicitud que el
+    // receptor debe aceptar (requestTransfer/respondTransfer). Se conserva
+    // para compatibilidad; no borrar.
     // Transferir UNA cita a otro barbero (no al cliente entero): la cita pasa a
     // la lista del barbero nuevo a la misma fecha y hora, y ambos (barbero nuevo
     // y cliente) reciben un aviso. Es idempotente: si la cita ya está con ese
@@ -780,6 +822,184 @@
             });
         }
         return { appointment, staffNotice, clientNotice };
+    }
+
+
+    // ---------------------------------------------------------------------
+    // Transferencia v2 (PR #17): solicitud con aceptación del receptor.
+    // - requestTransfer: el barbero que transfiere CREA UNA SOLICITUD. La cita
+    //   NO cambia de barbero; queda "Transferencia pendiente" (ver
+    //   transferStatusFor) hasta que el receptor responda.
+    // - respondTransfer: al ACEPTAR, la cita cambia de barbero; al RECHAZAR,
+    //   todo queda como estaba. En ambos casos se avisa al barbero original
+    //   y al cliente.
+    // - `server`: cuando la llamada viene de la RPC (supabase-sync.js), trae
+    //   { request, appointment?, notifications } ya creados en el servidor.
+    //   El espejo local usa ESOS ids: si se generaran otros, el próximo pull
+    //   duplicaría los avisos. Sin `server` (sin nube) se genera todo en local.
+    // ---------------------------------------------------------------------
+    function transferRequestsOf(state) {
+        return (state || db()).transferRequests || [];
+    }
+
+    function transferRequestFromServer(row) {
+        return {
+            id: row.id, appointmentCode: row.appointment_code,
+            fromBarber: row.from_barber_id, toBarber: row.to_barber_id,
+            status: row.status, requestedBy: row.requested_by || '',
+            reason: row.reason || '', createdAt: row.created_at,
+            decidedAt: row.decided_at, decidedBy: row.decided_by || ''
+        };
+    }
+
+    function transferNoticeFromServer(row) {
+        return {
+            id: row.id, audience: row.audience, barberId: row.barber_id,
+            clientId: row.client_id, type: row.type, title: row.title,
+            body: row.body, appointmentCode: row.appointment_code,
+            readAt: row.read_at, createdAt: row.created_at
+        };
+    }
+
+    function mirrorTransferNotices(state, rows) {
+        state.notifications = state.notifications || [];
+        const notices = (rows || []).map(transferNoticeFromServer);
+        notices.forEach(n => {
+            if (!state.notifications.some(item => item.id === n.id)) state.notifications.unshift(n);
+        });
+        return notices;
+    }
+
+    function pendingTransferRequest(state, code) {
+        return transferRequestsOf(state).find(r => r.appointmentCode === code && r.status === 'pendiente') || null;
+    }
+
+    function acceptedTransferRequest(state, code) {
+        return transferRequestsOf(state).find(r => r.appointmentCode === code && r.status === 'aceptada') || null;
+    }
+
+    // Estado de transferencia de una cita, DERIVADO de transferRequests (sin
+    // columna en appointments: una sola fuente de verdad).
+    // 'pendiente' = hay solicitud sin responder; 'transferida' = hay una
+    // aceptada; null = nunca se pidió (o solo hay rechazadas).
+    function transferStatusFor(state, code) {
+        if (pendingTransferRequest(state, code)) return 'pendiente';
+        if (acceptedTransferRequest(state, code)) return 'transferida';
+        return null;
+    }
+
+    function incomingTransferRequests(state, barberId) {
+        return transferRequestsOf(state)
+            .filter(r => r.toBarber === barberId && r.status === 'pendiente')
+            .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+    }
+
+    function outgoingTransferRequests(state, barberId) {
+        return transferRequestsOf(state)
+            .filter(r => r.fromBarber === barberId && r.status === 'pendiente')
+            .sort((a, b) => String(a.createdAt).localeCompare(String(b.createdAt)));
+    }
+
+    function requestTransfer(state, code, { toBarberId, reason, by, server } = {}) {
+        const appointment = state.appointments.find(item => item.code === code);
+        if (!appointment) throw Object.assign(new Error('appt'), { userMessage: 'No encontramos esa cita.' });
+        const target = state.barbers.find(item => item.id === toBarberId && item.active !== false);
+        if (!target) throw Object.assign(new Error('barber'), { userMessage: 'Escoge el barbero que recibirá la cita.' });
+        if (server && server.request) {
+            const request = transferRequestFromServer(server.request);
+            state.transferRequests = state.transferRequests || [];
+            if (!state.transferRequests.some(r => r.id === request.id)) state.transferRequests.unshift(request);
+            const notifications = mirrorTransferNotices(state, server.notifications);
+            return { request, staffNotice: notifications.find(n => n.audience === 'staff') || null, notifications };
+        }
+        if (!ACTIVE.includes(appointment.status)) throw Object.assign(new Error('status'), { userMessage: 'Solo se puede transferir una cita pendiente o confirmada.' });
+        if (appointment.barber === toBarberId) throw Object.assign(new Error('same'), { userMessage: 'Esa cita ya es de ese barbero.' });
+        if (pendingTransferRequest(state, code)) throw Object.assign(new Error('dup'), { userMessage: 'Ya hay una solicitud de transferencia pendiente para esta cita.' });
+        const services = findServices(appointmentServiceNames(appointment), state);
+        if (!services.every(service => barberOffers(target, service))) throw Object.assign(new Error('service'), { userMessage: `${target.alias || target.name} no ofrece uno de los servicios de esta cita.` });
+        const date = String(appointment.dateTime).slice(0, 10);
+        const time = String(appointment.dateTime).slice(11, 16);
+        const error = validateBooking({ clientId: appointment.clientId, barberId: toBarberId, services, date, time, excludeCode: code, staff: true }, state);
+        if (error) throw Object.assign(new Error('slot'), { userMessage: error });
+        const request = {
+            id: uid('trf'), appointmentCode: code, fromBarber: appointment.barber, toBarber: toBarberId,
+            status: 'pendiente', requestedBy: by || '', reason: String(reason || '').trim().slice(0, 300),
+            createdAt: nowIso(), decidedAt: null, decidedBy: ''
+        };
+        state.transferRequests = state.transferRequests || [];
+        state.transferRequests.unshift(request);
+        const staffNotice = notify(state, {
+            barberId: toBarberId, type: 'transferencia-solicitud', code,
+            title: 'Solicitud de transferencia',
+            body: `${appointment.client}: ${describe(appointment)} — te la quiere pasar ${barberLabel(state, appointment.barber)}.${request.reason ? ` Motivo: ${request.reason}` : ''} Acéptala o recházala en Transferencias.`
+        });
+        return { request, staffNotice, notifications: [staffNotice] };
+    }
+
+    function respondTransfer(state, requestId, { accept, by, server } = {}) {
+        state.transferRequests = state.transferRequests || [];
+        const request = state.transferRequests.find(r => r.id === requestId);
+        if (!request) throw Object.assign(new Error('request'), { userMessage: 'No encontramos esa solicitud.' });
+        const appointment = state.appointments.find(item => item.code === request.appointmentCode);
+        if (server && server.request) {
+            const updated = transferRequestFromServer(server.request);
+            Object.assign(request, updated);
+            if (server.appointment && appointment) {
+                appointment.barber = server.appointment.barber_id;
+                appointment.barberName = server.appointment.barber_name;
+                if (Array.isArray(server.appointment.history)) appointment.history = server.appointment.history;
+            }
+            const notifications = mirrorTransferNotices(state, server.notifications);
+            return { request, appointment: appointment || null, notifications };
+        }
+        if (request.status !== 'pendiente') throw Object.assign(new Error('decided'), { userMessage: 'Esa solicitud ya fue respondida.' });
+        if (!appointment) throw Object.assign(new Error('appt'), { userMessage: 'No encontramos esa cita.' });
+        if (!ACTIVE.includes(appointment.status)) throw Object.assign(new Error('status'), { userMessage: 'Esa cita ya no está activa.' });
+        const code = request.appointmentCode;
+        const fromLabel = barberLabel(state, request.fromBarber);
+        const toLabel = barberLabel(state, request.toBarber);
+        const notices = [];
+        if (accept) {
+            const target = state.barbers.find(item => item.id === request.toBarber && item.active !== false);
+            if (!target) throw Object.assign(new Error('barber'), { userMessage: 'Escoge el barbero que recibirá la cita.' });
+            const services = findServices(appointmentServiceNames(appointment), state);
+            if (!services.every(service => barberOffers(target, service))) throw Object.assign(new Error('service'), { userMessage: `${target.alias || target.name} no ofrece uno de los servicios de esta cita.` });
+            const date = String(appointment.dateTime).slice(0, 10);
+            const time = String(appointment.dateTime).slice(11, 16);
+            const error = validateBooking({ clientId: appointment.clientId, barberId: request.toBarber, services, date, time, excludeCode: code, staff: true }, state);
+            if (error) throw Object.assign(new Error('slot'), { userMessage: error });
+            appointment.barber = request.toBarber;
+            appointment.barberName = toLabel;
+            pushHistory(appointment, 'Transferida', by, `Antes: ${fromLabel} · Ahora: ${toLabel} (solicitud aceptada)`);
+            request.status = 'aceptada';
+            request.decidedAt = nowIso();
+            request.decidedBy = by || '';
+            notices.push(notify(state, {
+                barberId: request.fromBarber, type: 'transferencia-aceptada', code,
+                title: 'Transferencia aceptada',
+                body: `${toLabel} aceptó tu cita ${code} (${appointment.client}, ${describe(appointment)}). Ya está en su lista.`
+            }));
+            notices.push(notify(state, {
+                audience: 'client', clientId: appointment.clientId, code, type: 'transferencia',
+                title: clientText(state, 'Tu cita cambió de barbero', 'Your appointment changed barber'),
+                body: clientText(state, `Tu cita ${describe(appointment)} ahora es con ${toLabel}. La fecha y la hora no cambian.`, `Your appointment ${describe(appointment)} is now with ${toLabel}. The date and time stay the same.`)
+            }));
+        } else {
+            request.status = 'rechazada';
+            request.decidedAt = nowIso();
+            request.decidedBy = by || '';
+            notices.push(notify(state, {
+                barberId: request.fromBarber, type: 'transferencia-rechazada', code,
+                title: 'Transferencia rechazada',
+                body: `${toLabel} rechazó recibir tu cita ${code} (${appointment.client}, ${describe(appointment)}). Sigue contigo a la misma hora.`
+            }));
+            notices.push(notify(state, {
+                audience: 'client', clientId: appointment.clientId, code, type: 'transferencia',
+                title: clientText(state, 'Tu cita sigue con el mismo barbero', 'Your appointment stays with the same barber'),
+                body: clientText(state, `La transferencia de tu cita ${describe(appointment)} no se hizo. Sigue con ${fromLabel} a la misma fecha y hora.`, `The transfer of your appointment ${describe(appointment)} did not go through. It stays with ${fromLabel} at the same date and time.`)
+            }));
+        }
+        return { request, appointment, notifications: notices };
     }
 
     function blockClient(state, clientId, { reason, by }) {
@@ -921,9 +1141,11 @@
         barberOffers, barbersForServices, weeklySchedule, scheduleSummary, blocksFor, dayWindow,
         getSlots, nextAvailable, availableDates,
         clientAppointments, clientStats, noShowLevel, activeBlock, blockClient, unblockClient, transferClient, transferAppointment,
+        requestTransfer, respondTransfer, pendingTransferRequest, acceptedTransferRequest, transferStatusFor, incomingTransferRequests, outgoingTransferRequests,
         validateBooking, createAppointment, cancelAppointment, rescheduleAppointment, setStatus, hoursUntil, matchClientByName, lookupByCode,
         rememberMyAppointment, forgetMyAppointment, myUpcomingAppointments, refreshMyAppointments,
         addPublicReview, setReviewStatus, publicReviews, isLegacyReview, reviewBarber, barberRating, reviewServiceLabel,
-        stats, notify, describe, barberLabel, googleCalendarUrl
+        stats, notify, describe, barberLabel, googleCalendarUrl,
+        isValidEmail, cleanEmail, barberWantsBookingNotice, clientWantsNotice, barberPref, clientPref
     };
 })();

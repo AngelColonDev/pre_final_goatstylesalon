@@ -245,6 +245,9 @@
         // Sistema de citas (booking-engine.js)
         timeBlocks: [],
         notifications: [],
+        transferRequests: [],
+        // PR #17 (D): preferencias de avisos (tabla notification_preferences).
+        notificationPreferences: [],
         pushTokens: [],
         inventory: [],
         clientNotes: [],
@@ -447,7 +450,7 @@
             merged.settings.booking.lateCancelFee = defaults.lateCancelFee;
         }
         merged.settings.serviceCategories = state?.settings?.serviceCategories?.length ? state.settings.serviceCategories : clone(defaultState.settings.serviceCategories);
-        ['timeBlocks', 'notifications', 'clientNotes', 'clientBlocks'].forEach(key => {
+        ['timeBlocks', 'notifications', 'transferRequests', 'notificationPreferences', 'clientNotes', 'clientBlocks'].forEach(key => {
             merged[key] = Array.isArray(state?.[key]) ? state[key] : [];
         });
         merged.inventory = Array.isArray(state?.inventory) ? state.inventory : clone(defaultState.inventory);

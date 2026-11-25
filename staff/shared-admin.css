@@ -1100,3 +1100,44 @@ body.light-mode .ap-switch-thumb { background: #fff; }
     .ap-switch { width: 100%; justify-content: space-between; }
     .ap-modal-actions .form-actions .action-btn { flex: 1 1 auto; }
 }
+
+/* ---------- PR #17: selector "Todos los paneles" + actividad reciente ---------- */
+/* Un solo botón en el pie del menú; el selector es el modal que ya usa el panel. */
+.ap-panels-btn { width: 100%; }
+.ap-panels-btn .ap-panels-chevron { margin-left: auto; font-size: .75rem; color: var(--muted); }
+.ap-panels-list { display: grid; gap: 8px; }
+.ap-panels-item { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; text-align: left; }
+.ap-panels-item span { display: grid; gap: 2px; min-width: 0; }
+.ap-panels-item strong { font-size: .95rem; }
+.ap-panels-item small { color: var(--muted); font-size: .78rem; }
+.ap-panels-item.active { background: var(--accent-soft); }
+.ap-panels-current { margin-left: auto; font-style: normal; font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); white-space: nowrap; }
+.ap-panels-modal .admin-modal-card { max-width: 480px; width: 100%; }
+/* Actividad reciente del inicio (admin-pro.js): fecha a la izquierda, cita a la derecha. */
+.ap-recent-list { display: grid; gap: 8px; }
+.ap-recent-row { display: grid; grid-template-columns: 118px minmax(0, 1fr); gap: 12px; align-items: start; }
+.ap-recent-row time { font-weight: 700; color: #f3d68a; padding-top: 10px; font-size: .82rem; line-height: 1.4; }
+@media (max-width: 640px) {
+    .ap-recent-row { grid-template-columns: 96px minmax(0, 1fr); }
+    .ap-recent-row time { font-size: .78rem; }
+}
+
+/* ---------- Transferencia v2 (PR #17): insignias y bandeja ---------- */
+/* Cita transferida: dorado llamativo, con pulso suave (se apaga si el
+   usuario prefiere menos movimiento). */
+.ap-badge-transferred { background: linear-gradient(135deg, #d4af37, #f3d68a); color: #171204; border: 1px solid #f3d68a; box-shadow: 0 0 0 1px rgba(212, 175, 55, .45), 0 2px 10px rgba(212, 175, 55, .35); animation: ap-transferred-glow 2.4s ease-in-out infinite; }
+@keyframes ap-transferred-glow { 0%, 100% { box-shadow: 0 0 0 1px rgba(212, 175, 55, .45), 0 2px 10px rgba(212, 175, 55, .25); } 50% { box-shadow: 0 0 0 2px rgba(212, 175, 55, .7), 0 2px 16px rgba(212, 175, 55, .5); } }
+@media (prefers-reduced-motion: reduce) { .ap-badge-transferred { animation: none; } }
+.ap-badge-transfer-pending { border: 1px dashed rgba(241, 190, 93, .7); }
+/* Fila de cita transferida en la lista de Citas: fondo dorado tenue + borde. */
+tr.ap-row-transferred { background: rgba(212, 175, 55, .10); box-shadow: inset 3px 0 0 #d4af37; }
+tr.ap-row-transferred:hover { background: rgba(212, 175, 55, .16); }
+/* Marca en el calendario (vista día/semana). */
+.ap-event-transfer { display: block; font-style: normal; font-size: .68rem; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: #f3d68a; }
+.ap-event-transfer.pending { color: #f1be5d; }
+/* Tarjeta de solicitud (bandeja de Transferencias y aviso en Citas). */
+.ap-transfer-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 14px; align-items: center; border: 1px solid rgba(212, 175, 55, .35); background: rgba(212, 175, 55, .05); border-radius: 16px; padding: 12px 14px; }
+.ap-transfer-card.accepted { border-color: rgba(212, 175, 55, .65); background: rgba(212, 175, 55, .09); }
+.ap-transfer-card strong { display: block; }
+.ap-transfer-card .item-meta { font-size: .82rem; margin-top: 2px; text-transform: none; }
+@media (max-width: 640px) { .ap-transfer-card { grid-template-columns: 1fr; } .ap-transfer-card .ap-request-actions { justify-content: flex-start; } }

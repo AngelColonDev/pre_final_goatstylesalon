@@ -499,6 +499,247 @@ comment on function public.delete_appointment(text) is 'Elimina una cita y sus a
 revoke all on function public.delete_appointment(text) from public;
 grant execute on function public.delete_appointment(text) to authenticated;
 
+-- Transferencia v2 (PR #17): solicitudes con aceptación. Ver
+-- supabase/migrations/20261124210000_transfer_requests.sql (contenido íntegro).
+create table if not exists public.transfer_requests (
+    id text primary key,
+    appointment_code text not null references public.appointments(code) on delete cascade,
+    from_barber_id text not null references public.barbers(id) on delete cascade,
+    to_barber_id text not null references public.barbers(id) on delete cascade,
+    status text not null default 'pendiente' check (status in ('pendiente', 'aceptada', 'rechazada')),
+    requested_by text not null default '',
+    reason text not null default '',
+    created_at timestamptz not null default now(),
+    decided_at timestamptz,
+    decided_by text not null default ''
+);
+create index if not exists transfer_requests_appointment_idx on public.transfer_requests(appointment_code);
+create index if not exists transfer_requests_to_idx on public.transfer_requests(to_barber_id, status);
+create index if not exists transfer_requests_from_idx on public.transfer_requests(from_barber_id, status);
+create unique index if not exists transfer_requests_one_pending_per_appointment
+    on public.transfer_requests(appointment_code) where status = 'pendiente';
+
+create or replace function public.transfer_barber_label(p_barber_id text) returns text
+language sql stable security definer set search_path = public as $$
+    select case when b.alias <> '' and b.alias is distinct from b.name
+        then b.name || ' (' || b.alias || ')' else b.name end
+    from public.barbers b where b.id = p_barber_id;
+$$;
+
+create or replace function public.request_transfer(
+    p_code text, p_to_barber_id text, p_reason text default ''
+) returns jsonb
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+    v_caller text := public.my_barber_id();
+    v_admin boolean := public.is_admin();
+    v_row public.appointments;
+    v_req public.transfer_requests;
+    v_from_label text;
+    v_to_label text;
+    v_notice_id text;
+    v_notice_ids text[] := '{}';
+begin
+    if not v_admin and v_caller is null then
+        raise exception 'Solo el personal puede pedir una transferencia.';
+    end if;
+    select * into v_row
+    from public.appointments a
+    where a.code = upper(trim(p_code))
+      and (v_admin or a.barber_id = v_caller)
+    for update;
+    if not found then
+        raise exception 'No encontramos esa cita o no es tuya.';
+    end if;
+    if v_row.status not in ('PENDIENTE', 'APROBADA') then
+        raise exception 'Solo se puede transferir una cita pendiente o confirmada.';
+    end if;
+    if v_row.barber_id is not distinct from p_to_barber_id then
+        raise exception 'Esa cita ya es de ese barbero.';
+    end if;
+    if not exists (
+        select 1 from public.barbers b where b.id = p_to_barber_id and b.active
+    ) then
+        raise exception 'Escoge otro barbero disponible.';
+    end if;
+    if exists (
+        select 1 from public.transfer_requests r
+        where r.appointment_code = v_row.code and r.status = 'pendiente'
+    ) then
+        raise exception 'Ya hay una solicitud de transferencia pendiente para esta cita.';
+    end if;
+    if exists (
+        select 1 from public.appointments a2
+        where a2.barber_id = p_to_barber_id
+          and a2.code <> v_row.code
+          and a2.status in ('PENDIENTE', 'APROBADA')
+          and a2.date_time is not null and v_row.date_time is not null
+          and tstzrange(a2.date_time, coalesce(a2.end_time, a2.date_time + make_interval(mins => coalesce(a2.duration, 40))), '[)')
+              && tstzrange(v_row.date_time, coalesce(v_row.end_time, v_row.date_time + make_interval(mins => coalesce(v_row.duration, 40))), '[)')
+    ) then
+        raise exception 'Ese barbero ya tiene una cita a esa hora.';
+    end if;
+    v_from_label := coalesce(public.transfer_barber_label(v_row.barber_id), v_row.barber_id);
+    v_to_label := coalesce(public.transfer_barber_label(p_to_barber_id), p_to_barber_id);
+    begin
+        insert into public.transfer_requests (id, appointment_code, from_barber_id, to_barber_id, status, requested_by, reason)
+        values ('trf-' || gen_random_uuid()::text, v_row.code, v_row.barber_id, p_to_barber_id, 'pendiente', coalesce(v_caller, ''), left(coalesce(p_reason, ''), 300))
+        returning * into v_req;
+    exception when unique_violation then
+        raise exception 'Ya hay una solicitud de transferencia pendiente para esta cita.';
+    end;
+    v_notice_id := 'ntf-' || gen_random_uuid()::text;
+    insert into public.notifications (id, audience, barber_id, client_id, type, title, body, appointment_code)
+    values (v_notice_id, 'staff', p_to_barber_id, null, 'transferencia-solicitud',
+        'Solicitud de transferencia',
+        v_row.client_name || ': ' || v_row.service || ' · ' || to_char(v_row.date_time, 'DD/MM/YYYY HH24:MI')
+            || ' — te la quiere pasar ' || v_from_label || '. Acéptala o recházala en Transferencias.'
+            || case when length(trim(coalesce(p_reason, ''))) > 0 then ' Motivo: ' || left(trim(p_reason), 200) else '' end,
+        v_row.code);
+    v_notice_ids := array_append(v_notice_ids, v_notice_id);
+    return jsonb_build_object(
+        'request', to_jsonb(v_req),
+        'notifications', (select coalesce(jsonb_agg(to_jsonb(n)), '[]'::jsonb)
+                          from public.notifications n where n.id = any (v_notice_ids))
+    );
+end;
+$$;
+comment on function public.request_transfer(text, text, text) is 'Crea una solicitud de transferencia (v2): la cita queda con el barbero original hasta que el receptor la acepte. SECURITY DEFINER porque solo el personal escribe en transfer_requests (sin políticas de escritura) y porque crea el aviso al receptor. Devuelve la solicitud y sus avisos para reflejarlos en local sin duplicarlos por sync.';
+revoke all on function public.request_transfer(text, text, text) from public;
+grant execute on function public.request_transfer(text, text, text) to authenticated;
+
+create or replace function public.respond_transfer(
+    p_request_id text, p_accept boolean
+) returns jsonb
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+    v_caller text := public.my_barber_id();
+    v_admin boolean := public.is_admin();
+    v_req public.transfer_requests;
+    v_row public.appointments;
+    v_from_label text;
+    v_to_label text;
+    v_notice_ids text[] := '{}';
+    v_id text;
+    v_date text;
+begin
+    if not v_admin and v_caller is null then
+        raise exception 'Solo el personal puede responder una transferencia.';
+    end if;
+    select * into v_req
+    from public.transfer_requests r
+    where r.id = p_request_id
+      and (v_admin or r.to_barber_id = v_caller)
+    for update;
+    if not found then
+        raise exception 'No encontramos esa solicitud o no es para ti.';
+    end if;
+    if v_req.status <> 'pendiente' then
+        raise exception 'Esa solicitud ya fue respondida.';
+    end if;
+    select * into v_row
+    from public.appointments a
+    where a.code = v_req.appointment_code
+    for update;
+    if not found then
+        raise exception 'No encontramos esa cita.';
+    end if;
+    v_from_label := coalesce(public.transfer_barber_label(v_req.from_barber_id), v_req.from_barber_id);
+    v_to_label := coalesce(public.transfer_barber_label(v_req.to_barber_id), v_req.to_barber_id);
+    v_date := to_char(v_row.date_time, 'DD/MM/YYYY HH24:MI');
+    if v_row.status not in ('PENDIENTE', 'APROBADA') then
+        update public.transfer_requests set status = 'rechazada', decided_at = now(), decided_by = 'Sistema'
+        where id = v_req.id returning * into v_req;
+        v_id := 'ntf-' || gen_random_uuid()::text;
+        insert into public.notifications (id, audience, barber_id, client_id, type, title, body, appointment_code)
+        values (v_id, 'staff', v_req.from_barber_id, null, 'transferencia-rechazada',
+            'Transferencia cancelada',
+            'La transferencia de tu cita ' || v_row.code || ' (' || v_row.client_name || ', ' || v_row.service || ' ' || v_date
+                || ') no se hizo porque la cita ya no está activa. Sigue en tu lista como estaba.',
+            v_row.code);
+        v_notice_ids := array_append(v_notice_ids, v_id);
+        v_id := 'ntf-' || gen_random_uuid()::text;
+        insert into public.notifications (id, audience, barber_id, client_id, type, title, body, appointment_code)
+        values (v_id, 'client', null, v_row.client_id, 'transferencia',
+            'Tu cita sigue con el mismo barbero',
+            'La transferencia de tu cita ' || v_row.service || ' · ' || v_date || ' no se hizo. Sigue con ' || v_from_label || ' a la misma fecha y hora.',
+            v_row.code);
+        v_notice_ids := array_append(v_notice_ids, v_id);
+        return jsonb_build_object(
+            'request', to_jsonb(v_req),
+            'appointment', to_jsonb(v_row),
+            'notifications', (select coalesce(jsonb_agg(to_jsonb(n)), '[]'::jsonb)
+                              from public.notifications n where n.id = any (v_notice_ids))
+        );
+    end if;
+    if p_accept then
+        if exists (
+            select 1 from public.appointments a2
+            where a2.barber_id = v_req.to_barber_id
+              and a2.code <> v_row.code
+              and a2.status in ('PENDIENTE', 'APROBADA')
+              and a2.date_time is not null and v_row.date_time is not null
+              and tstzrange(a2.date_time, coalesce(a2.end_time, a2.date_time + make_interval(mins => coalesce(a2.duration, 40))), '[)')
+                  && tstzrange(v_row.date_time, coalesce(v_row.end_time, v_row.date_time + make_interval(mins => coalesce(v_row.duration, 40))), '[)')
+        ) then
+            raise exception 'Ese barbero ya tiene una cita a esa hora.';
+        end if;
+        update public.appointments set
+            barber_id = v_req.to_barber_id,
+            barber_name = v_to_label,
+            history = coalesce(history, '[]'::jsonb) || jsonb_build_array(jsonb_build_object(
+                'at', now(), 'action', 'Transferida', 'by', coalesce(v_caller, 'Personal'),
+                'detail', 'Antes: ' || v_from_label || ' · Ahora: ' || v_to_label || ' (solicitud aceptada)'
+            ))
+        where code = v_row.code
+        returning * into v_row;
+        update public.transfer_requests set status = 'aceptada', decided_at = now(), decided_by = coalesce(v_caller, '')
+        where id = v_req.id returning * into v_req;
+        v_id := 'ntf-' || gen_random_uuid()::text;
+        insert into public.notifications (id, audience, barber_id, client_id, type, title, body, appointment_code)
+        values (v_id, 'staff', v_req.from_barber_id, null, 'transferencia-aceptada',
+            'Transferencia aceptada',
+            v_to_label || ' aceptó tu cita ' || v_row.code || ' (' || v_row.client_name || ', ' || v_row.service || ' ' || v_date || '). Ya está en su lista.',
+            v_row.code);
+        v_notice_ids := array_append(v_notice_ids, v_id);
+        v_id := 'ntf-' || gen_random_uuid()::text;
+        insert into public.notifications (id, audience, barber_id, client_id, type, title, body, appointment_code)
+        values (v_id, 'client', null, v_row.client_id, 'transferencia',
+            'Tu cita cambió de barbero',
+            'Tu cita ' || v_row.service || ' · ' || v_date || ' ahora es con ' || v_to_label || '. La fecha y la hora no cambian.',
+            v_row.code);
+        v_notice_ids := array_append(v_notice_ids, v_id);
+    else
+        update public.transfer_requests set status = 'rechazada', decided_at = now(), decided_by = coalesce(v_caller, '')
+        where id = v_req.id returning * into v_req;
+        v_id := 'ntf-' || gen_random_uuid()::text;
+        insert into public.notifications (id, audience, barber_id, client_id, type, title, body, appointment_code)
+        values (v_id, 'staff', v_req.from_barber_id, null, 'transferencia-rechazada',
+            'Transferencia rechazada',
+            v_to_label || ' rechazó recibir tu cita ' || v_row.code || ' (' || v_row.client_name || ', ' || v_row.service || ' ' || v_date || '). Sigue contigo a la misma hora.',
+            v_row.code);
+        v_notice_ids := array_append(v_notice_ids, v_id);
+        v_id := 'ntf-' || gen_random_uuid()::text;
+        insert into public.notifications (id, audience, barber_id, client_id, type, title, body, appointment_code)
+        values (v_id, 'client', null, v_row.client_id, 'transferencia',
+            'Tu cita sigue con el mismo barbero',
+            'La transferencia de tu cita ' || v_row.service || ' · ' || v_date || ' no se hizo. Sigue con ' || v_from_label || ' a la misma fecha y hora.',
+            v_row.code);
+        v_notice_ids := array_append(v_notice_ids, v_id);
+    end if;
+    return jsonb_build_object(
+        'request', to_jsonb(v_req),
+        'appointment', to_jsonb(v_row),
+        'notifications', (select coalesce(jsonb_agg(to_jsonb(n)), '[]'::jsonb)
+                          from public.notifications n where n.id = any (v_notice_ids))
+    );
+end;
+$$;
+comment on function public.respond_transfer(text, boolean) is 'Acepta o rechaza una solicitud de transferencia (v2). Solo al aceptar cambia la cita de barbero. SECURITY DEFINER porque solo el personal escribe en transfer_requests y porque crea los avisos al barbero original y al cliente. Si la cita ya no está activa, cierra la solicitud como rechazada por el sistema.';
+revoke all on function public.respond_transfer(text, boolean) from public;
+grant execute on function public.respond_transfer(text, boolean) to authenticated;
+
+
 -- -----------------------------------------------------------------------------
 -- Ficha CRM (memos, pagos, descuentos). El contenido va en jsonb con la misma forma que crm/src/types.ts.
 -- -----------------------------------------------------------------------------
@@ -678,6 +919,19 @@ create policy notifications_client_update on public.notifications for update
     using (audience = 'client') with check (audience = 'client');
 create policy notifications_staff_update on public.notifications for update using (public.is_staff()) with check (public.is_staff());
 create policy notifications_staff_delete on public.notifications for delete using (public.is_staff());
+
+
+-- Solicitudes de transferencia: solo lectura con ámbito. El admin las ve
+-- todas (igual que appointments_staff_read); cada barbero solo las que lo
+-- tienen como origen o destino. Sin políticas de escritura: solo las RPCs.
+alter table public.transfer_requests enable row level security;
+drop policy if exists transfer_requests_staff_read on public.transfer_requests;
+create policy transfer_requests_staff_read on public.transfer_requests for select using (
+    public.is_admin()
+    or from_barber_id = public.my_barber_id()
+    or to_barber_id = public.my_barber_id()
+);
+
 
 -- Suscripciones push: cada dispositivo registra la suya; solo el personal las lee y limpia.
 create policy push_tokens_anon_insert on public.push_tokens for insert with check (true);
@@ -1169,3 +1423,221 @@ grant execute on function public.register_client_for_appointment(text) to anon, 
 -- insert into public.staff_roles (user_id, barber_id, is_admin, is_developer)
 -- select id, null, false, true from auth.users where email = 'TU-CORREO@ejemplo.com'
 -- on conflict (user_id) do update set is_developer = true;
+
+-- =============================================================================
+-- PR #17 (D + E) — BLOQUE PARA supabase/schema.sql (pegar al final del archivo).
+-- Es el MISMO contenido que 20261124220000_notification_preferences.sql: aplica
+-- UNO de los dos, no los dos (la migración es la vía recomendada; este bloque es
+-- para que schema.sql, que es el esquema completo del repo, no quede desactualizado).
+-- Si ya aplicaste la migración, pegar este bloque es seguro: todo es IF NOT EXISTS /
+-- CREATE OR REPLACE / DROP POLICY IF EXISTS.
+-- =============================================================================
+-- -----------------------------------------------------------------------------
+-- 1. Tabla de preferencias
+--    booking_alerts: barbero = avisos de reserva/cancelación de SUS citas;
+--                    cliente = avisos de SUS citas (recordatorios incluidos).
+--    reminders: recordatorios (cliente 24 h / 1 h; barbero 1 h).
+--    messages: mensajes manuales de la barbería al cliente.
+--    Sin fila, todo activo (los interruptores nacen encendidos).
+-- -----------------------------------------------------------------------------
+create table if not exists public.notification_preferences (
+    id text primary key,
+    barber_id text references public.barbers(id) on delete cascade,
+    appointment_code text references public.appointments(code) on delete cascade,
+    booking_alerts boolean not null default true,
+    reminders boolean not null default true,
+    messages boolean not null default true,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now(),
+    constraint notification_preferences_scope_check check (
+        (barber_id is not null and appointment_code is null) or
+        (barber_id is null and appointment_code is not null)
+    ),
+    constraint notification_preferences_barber_unique unique (barber_id),
+    constraint notification_preferences_code_unique unique (appointment_code)
+);
+create index if not exists notification_preferences_barber_idx on public.notification_preferences(barber_id);
+create index if not exists notification_preferences_code_idx on public.notification_preferences(appointment_code);
+
+alter table public.notification_preferences enable row level security;
+
+-- El personal lee su propia fila (el admin, todas); el cliente NO lee la tabla
+-- directamente: sus preferencias se leen por RPC (my_notification_preferences).
+drop policy if exists notification_preferences_staff_read on public.notification_preferences;
+create policy notification_preferences_staff_read on public.notification_preferences for select
+    using (public.is_admin() or barber_id = public.my_barber_id());
+
+-- El personal escribe solo su propia fila (el admin, cualquiera). Sin política
+-- de escritura para anon: el cliente escribe solo por RPC
+-- (set_my_notification_preference, SECURITY DEFINER).
+drop policy if exists notification_preferences_staff_insert on public.notification_preferences;
+create policy notification_preferences_staff_insert on public.notification_preferences for insert
+    with check (public.is_admin() or barber_id = public.my_barber_id());
+drop policy if exists notification_preferences_staff_update on public.notification_preferences;
+create policy notification_preferences_staff_update on public.notification_preferences for update
+    using (public.is_admin() or barber_id = public.my_barber_id())
+    with check (public.is_admin() or barber_id = public.my_barber_id());
+drop policy if exists notification_preferences_staff_delete on public.notification_preferences;
+create policy notification_preferences_staff_delete on public.notification_preferences for delete
+    using (public.is_admin() or barber_id = public.my_barber_id());
+
+-- -----------------------------------------------------------------------------
+-- 2. RPCs del cliente (sin cuenta): lee/escribe solo por sus códigos de cita,
+--    igual que my_notifications() / mark_my_notifications_read().
+-- -----------------------------------------------------------------------------
+create or replace function public.my_notification_preferences(p_codes text[])
+returns setof public.notification_preferences
+language sql security definer set search_path = public, pg_temp as $$
+    select * from public.notification_preferences where appointment_code = any(p_codes);
+$$;
+comment on function public.my_notification_preferences(text[]) is 'Preferencias de avisos del cliente por sus códigos de cita. SECURITY DEFINER porque anon no puede leer notification_preferences bajo RLS.';
+revoke all on function public.my_notification_preferences(text[]) from public;
+grant execute on function public.my_notification_preferences(text[]) to anon, authenticated;
+
+create or replace function public.set_my_notification_preference(
+    p_code text, p_booking_alerts boolean, p_reminders boolean, p_messages boolean
+)
+returns public.notification_preferences
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+    v_code text := upper(trim(p_code));
+    v_row public.notification_preferences;
+begin
+    if not exists (select 1 from public.appointments where code = v_code) then
+        raise exception 'No encontramos esa cita.';
+    end if;
+    insert into public.notification_preferences
+        (id, barber_id, appointment_code, booking_alerts, reminders, messages)
+    values
+        ('pref-' || v_code, null, v_code,
+         coalesce(p_booking_alerts, true), coalesce(p_reminders, true), coalesce(p_messages, true))
+    on conflict (appointment_code) do update set
+        booking_alerts = excluded.booking_alerts,
+        reminders = excluded.reminders,
+        messages = excluded.messages,
+        updated_at = now()
+    returning * into v_row;
+    return v_row;
+end;
+$$;
+comment on function public.set_my_notification_preference(text, boolean, boolean, boolean) is 'Guarda la preferencia de avisos del cliente para una cita. SECURITY DEFINER porque anon no puede escribir en notification_preferences bajo RLS. Solo acepta códigos de cita que existen.';
+revoke all on function public.set_my_notification_preference(text, boolean, boolean, boolean) from public;
+grant execute on function public.set_my_notification_preference(text, boolean, boolean, boolean) to anon, authenticated;
+
+-- -----------------------------------------------------------------------------
+-- 3. (E) Trigger guard_online_appointment: validar y CONSERVAR el correo.
+--    Antes: `new.client_email := '';` — el correo del formulario se perdía en
+--    el servidor aunque el navegador lo enviara. Ahora: se normaliza y, si no
+--    tiene formato válido, la reserva no se guarda (el formulario y el motor ya
+--    lo exigen antes, así que esto es la última defensa).
+-- -----------------------------------------------------------------------------
+create or replace function public.guard_online_appointment() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+    v_auto boolean;
+    v_count int;
+    v_match text;
+begin
+    if public.is_staff() then
+        return new;
+    end if;
+    new.client_name := left(regexp_replace(trim(coalesce(new.client_name, '')), '\s+', ' ', 'g'), 80);
+    if length(new.client_name) < 2 then
+        raise exception 'Escribe tu nombre completo.';
+    end if;
+    -- PR #17 (E): el correo es obligatorio en reservas en línea y se conserva.
+    new.client_email := lower(left(trim(coalesce(new.client_email, '')), 120));
+    if new.client_email !~ '^[^\s@]+@[^\s@]+\.[^\s@]{2,}$' then
+        raise exception 'Escribe un correo electrónico válido.';
+    end if;
+    select coalesce((booking->>'autoConfirm')::boolean, true) into v_auto from public.shop_settings where id = 1;
+    new.status := case when coalesce(v_auto, true) then 'APROBADA' else 'PENDIENTE' end;
+    new.source := 'online';
+    select count(*), min(id) into v_count, v_match from public.clients where lower(name) = lower(new.client_name);
+    new.client_id := case when v_count = 1 then v_match else null end;
+    new.client_phone := '';
+    new.completed_at := null;
+    new.no_show_at := null;
+    new.canceled_by_client := false;
+    new.canceled_at := null;
+    new.canceled_by := '';
+    new.cancel_reason := '';
+    new.created_at := now();
+    return new;
+end;
+$$;
+
+-- -----------------------------------------------------------------------------
+-- 4. (E) register_client_for_appointment: copiar el correo de la cita a la ficha.
+--    Antes creaba la ficha con email '' y nunca lo completaba.
+-- -----------------------------------------------------------------------------
+create or replace function public.register_client_for_appointment(p_code text)
+returns jsonb
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+    v_row public.appointments;
+    v_name text;
+    v_count int;
+    v_id text;
+    v_out jsonb;
+begin
+    select * into v_row
+    from public.appointments a
+    where a.code = upper(trim(p_code))
+    for update;
+
+    if not found then
+        raise exception 'No encontramos esa cita.';
+    end if;
+
+    if v_row.source is distinct from 'online' then
+        raise exception 'Esa cita no es una reserva en línea.';
+    end if;
+
+    -- Ya tiene ficha: devolverla sin hacer nada (idempotente).
+    if v_row.client_id is not null then
+        select to_jsonb(c) into v_out from public.clients c where c.id = v_row.client_id;
+        return v_out;
+    end if;
+
+    if v_row.created_at is null or v_row.created_at <= now() - interval '15 minutes' then
+        raise exception 'Esa cita ya no admite registro de cliente.';
+    end if;
+
+    -- El nombre ya viene limpio del trigger guard_online_appointment.
+    v_name := v_row.client_name;
+    if v_name is null or length(trim(v_name)) < 2 then
+        raise exception 'Escribe tu nombre completo.';
+    end if;
+
+    -- Que dos reservas simultáneas con el mismo nombre nuevo no creen dos fichas.
+    perform pg_advisory_xact_lock(hashtext(lower(v_name)));
+
+    -- Igual que el trigger: una coincidencia la enlaza, cero la crea, dos o
+    -- más no crean otra y la cita queda con client_id NULL.
+    select count(*), min(id) into v_count, v_id
+    from public.clients
+    where lower(name) = lower(v_name);
+
+    if v_count = 1 then
+        -- PR #17 (E): si la ficha existente no tenía correo, se completa con el de la cita.
+        update public.clients set email = v_row.client_email
+        where id = v_id and (email is null or email = '') and v_row.client_email <> '';
+    elsif v_count = 0 then
+        v_id := 'cl-' || gen_random_uuid()::text;
+        insert into public.clients (id, name, email, phone, birth_date, haircut, beard, preferred_barber, photo_url, consent, marketing_consent, registered_at, status, address, alt_phones, last_modified_at)
+        values (v_id, v_name, coalesce(nullif(v_row.client_email, ''), ''), '', null, '', '', v_row.barber_id, '', null, null, now(), 'Activo', '', '[]'::jsonb, null);
+    else
+        return null;
+    end if;
+
+    update public.appointments set client_id = v_id where code = v_row.code;
+    update public.notifications set client_id = v_id where appointment_code = v_row.code and client_id is null;
+
+    select to_jsonb(c) into v_out from public.clients c where c.id = v_id;
+    return v_out;
+end;
+$$;
+comment on function public.register_client_for_appointment(text) is 'Registra la ficha del cliente de una reserva en línea y la une a la cita y a sus avisos. SECURITY DEFINER porque el visitante anónimo no puede insertar en clients por sync (clients_staff_insert exige is_staff()). Solo recibe el código: el nombre, el correo y el barbero se leen de la cita.';
+revoke all on function public.register_client_for_appointment(text) from public;
+grant execute on function public.register_client_for_appointment(text) to anon, authenticated;

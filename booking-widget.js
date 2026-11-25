@@ -25,6 +25,10 @@
             if (!url || !appointment.code) return;
             const body = new URLSearchParams({
                 nombre: appointment.client || '',
+                // PR #17 (E): el correo del cliente va con el campo `email`: es el que
+                // FormSpark usa para la confirmación automática al remitente
+                // (autoresponder) y como reply-to del aviso al barbero.
+                email: appointment.clientEmail || '',
                 servicio: appointment.service || '',
                 barbero: appointment.barberName || appointment.barber || '',
                 fecha: String(appointment.dateTime || '').slice(0, 10),
@@ -166,6 +170,7 @@
             date: null,
             time: null,
             name: '',
+            email: '',
             notes: '',
             referencePhoto: '',
             result: null
@@ -358,6 +363,7 @@
             return `
                 <dl class="bw-summary">
                     ${appointment ? `<div><dt>Nombre</dt><dd>${escapeHtml(appointment.client)}</dd></div>` : ''}
+                    ${appointment && appointment.clientEmail ? `<div><dt>Correo</dt><dd>${escapeHtml(appointment.clientEmail)}</dd></div>` : ''}
                     <div><dt>Servicio${services.length > 1 ? 's' : ''}</dt><dd>${escapeHtml(services.map(s => s.name).join(' + '))}</dd></div>
                     <div><dt>Barbero</dt><dd>${escapeHtml(barber ? barber.name + (barber.alias ? ` (${barber.alias})` : '') : '')}</dd></div>
                     <div><dt>Fecha</dt><dd style="text-transform:capitalize;">${B().formatDate(date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</dd></div>
@@ -378,6 +384,7 @@
                 <h3 class="bw-title">Revisa tu cita</h3>
                 ${summaryRows()}
                 <label class="bw-field">Nombre completo *<input id="bw-name" type="text" maxlength="80" autocomplete="name" required placeholder="Tu nombre y apellido" value="${escapeHtml(view.name)}"></label>
+                <label class="bw-field">Correo electrónico *<input id="bw-email" type="email" maxlength="120" autocomplete="email" inputmode="email" required placeholder="tu@correo.com" value="${escapeHtml(view.email)}"><span class="bw-sub">Te enviaremos la confirmación de tu cita a este correo.</span></label>
                 <div class="bw-pay"><i class="fas fa-store" aria-hidden="true"></i><span><strong>Pago presencial en la barbería.</strong> No se cobra nada en esta página.</span></div>
                 ${vip ? `
                     <div class="bw-empty" style="justify-items:stretch;">
@@ -407,6 +414,7 @@
             `;
             root.querySelector('[data-back]').addEventListener('click', () => go(3));
             root.querySelector('#bw-name').addEventListener('input', event => { view.name = event.target.value; });
+            root.querySelector('#bw-email').addEventListener('input', event => { view.email = event.target.value; });
             root.querySelector('#bw-notes').addEventListener('input', event => { view.notes = event.target.value; });
             root.querySelector('#bw-photo').addEventListener('change', async event => {
                 const file = event.target.files && event.target.files[0];
@@ -432,6 +440,15 @@
                 nameInput.focus();
                 return;
             }
+            // PR #17 (E): el correo es obligatorio y con formato válido; sin él no
+            // se puede confirmar (el motor y el servidor lo exigen también).
+            const emailInput = root.querySelector('#bw-email');
+            view.email = emailInput ? emailInput.value.trim() : '';
+            if (!B().isValidEmail(view.email)) {
+                Data().toast('Escribe un correo electrónico válido para confirmar tu cita.', 'warning');
+                if (emailInput) emailInput.focus();
+                return;
+            }
             if (!root.querySelector('#bw-agree').checked) {
                 Data().toast('Marca la casilla de confirmación para continuar.', 'warning');
                 return;
@@ -450,7 +467,7 @@
             const ok = await Data().commit(state => {
                 try {
                     created = B().createAppointment(state, {
-                        walkIn: { name: view.name }, barberId: view.barberId, services: B().findServices(view.services, state),
+                        walkIn: { name: view.name, email: view.email }, barberId: view.barberId, services: B().findServices(view.services, state),
                         date: view.date, time: view.time, source: 'online',
                         notes: root.querySelector('#bw-notes').value.trim(),
                         referencePhoto: view.referencePhoto || '',
@@ -542,6 +559,7 @@
                     <span class="bw-check-icon"><i class="fas fa-check"></i></span>
                     <h3 class="bw-title">${confirmed ? '¡Tu cita fue confirmada!' : '¡Recibimos tu solicitud!'}</h3>
                     <p class="bw-sub">${confirmed ? '' : 'Tu barbero la confirmará pronto. '}Guarda tu código <strong>${escapeHtml(appointment.code)}</strong> para consultar el estado de tu cita. Para cambiarla o cancelarla, comunícate con la barbería.</p>
+                    ${appointment.clientEmail ? `<p class="bw-sub">Te enviaremos la confirmación a <strong>${escapeHtml(appointment.clientEmail)}</strong>.</p>` : ''}
                     ${summaryRows(appointment)}
                     <div class="bw-pay" style="width:100%;"><i class="fas fa-store"></i><span><strong>Pago:</strong> presencial en la barbería.</span></div>
                     <div class="bw-actions" style="justify-content:center;">
@@ -551,7 +569,7 @@
                 </div>
             `;
             root.querySelector('[data-again]').addEventListener('click', () => {
-                Object.assign(view, { step: 1, services: [], barberId: null, date: null, time: null, result: null, notes: '', referencePhoto: '' });
+                Object.assign(view, { step: 1, services: [], barberId: null, date: null, time: null, result: null, notes: '', referencePhoto: '', email: '' });
                 go(1);
             });
         }

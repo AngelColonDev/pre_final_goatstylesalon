@@ -107,11 +107,49 @@ async function tokensForNotification(
   return data || [];
 }
 
+// PR #17 (D): preferencias de avisos. Sin fila, todo activo. El aviso del
+// personal solo se apaga para reservas/cancelaciones de ese barbero; el del
+// cliente se apaga entero (recordatorios incluidos) cuando booking_alerts es
+// falso, y por tipo con reminders/messages.
+async function prefFor(
+  supabase: ReturnType<typeof createClient>,
+  note: { audience: string; barber_id: string | null; appointment_code: string | null },
+) {
+  if (note.audience === 'staff' && note.barber_id) {
+    const { data } = await supabase.from('notification_preferences').select('booking_alerts, reminders, messages').eq('barber_id', note.barber_id).maybeSingle();
+    return data || null;
+  }
+  if (note.audience === 'client' && note.appointment_code) {
+    const { data } = await supabase.from('notification_preferences').select('booking_alerts, reminders, messages').eq('appointment_code', note.appointment_code).maybeSingle();
+    return data || null;
+  }
+  return null;
+}
+
+function wantsNotice(
+  note: { audience: string; type: string | null },
+  pref: { booking_alerts: boolean; reminders: boolean; messages: boolean } | null,
+) {
+  if (!pref) return true;
+  if (note.audience === 'staff') {
+    if ((note.type === 'nueva' || note.type === 'cancelada') && pref.booking_alerts === false) return false;
+    return true;
+  }
+  if (pref.booking_alerts === false) return false;
+  if ((note.type === 'recordatorio-24h' || note.type === 'recordatorio-1h') && pref.reminders === false) return false;
+  if ((note.type === 'manual' || note.type === 'mensaje') && pref.messages === false) return false;
+  return true;
+}
+
 async function sendOne(supabase: ReturnType<typeof createClient>, body: Record<string, unknown>) {
   const id = body.notificationId;
   if (typeof id !== 'string' || !id) return json({ error: 'Falta notificationId.' }, 400);
   const { data: note, error } = await supabase.from('notifications').select('*').eq('id', id).maybeSingle();
   if (error || !note) return json({ error: 'Aviso no encontrado.' }, 404);
+  // PR #17 (D): si el destinatario apagó este aviso, no se envía el push
+  // (el aviso ya existe en la app, pero no suena el teléfono).
+  const pref = await prefFor(supabase, note);
+  if (!wantsNotice(note, pref)) return json({ sent: 0, skipped: 'preference' });
   const tokens = await tokensForNotification(supabase, note);
   if (!tokens.length) return json({ sent: 0, note: 'Sin dispositivos registrados para este aviso.' });
   const result = await sendToTokens(supabase, tokens, note.title, note.body, {
@@ -160,6 +198,14 @@ async function sendReminders(supabase: ReturnType<typeof createClient>) {
         .eq('type', job.type)
         .limit(1);
       if (existing && existing.length) continue;
+      // PR #17 (D): si el cliente apagó los recordatorios (o todos los avisos
+      // de sus citas), no se crea ni se envía el recordatorio.
+      const { data: pref } = await supabase
+        .from('notification_preferences')
+        .select('booking_alerts, reminders, messages')
+        .eq('appointment_code', appt.code)
+        .maybeSingle();
+      if (!wantsNotice({ audience: 'client', type: job.type }, pref || null)) continue;
       const body = `${appt.service} con ${appt.barber_name || ''} · ${new Date(appt.date_time).toLocaleString('es-PR', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}`;
       const { data: note, error: insertError } = await supabase
         .from('notifications')
