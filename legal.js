@@ -1,25 +1,26 @@
 (function () {
     // =========================================================================
-    // CONFIGURACIÓN LEGAL — el propietario completa estos campos en UN solo lugar.
-    // Cualquier campo vacio se muestra en las páginas como [MARCADOR] resaltado,
-    // para que sea fácil ver que falta antes de publicar.
-    // Ver docs/legal-pendientes.md para la lista completa de decisiones pendientes.
+    // CONFIGURACIÓN LEGAL — configuración completa y vigente desde el
+    // 1 de diciembre de 2026. Todos los valores de este bloque son finales
+    // y verdaderos, y se muestran en las páginas legales.
+    // Ver docs/legal-pendientes.md para el registro de cierre con los
+    // valores finales utilizados.
     // =========================================================================
     const config = {
-        // Mientras sea true, cada documento legal muestra un aviso de "borrador".
-        draft: true,
+        // Documentos vigentes desde el 1 de diciembre de 2026.
+        draft: false,
         // Cambia esta versión cada vez que haya un cambio material en Terminos/Privacidad.
-        termsVersion: '2026-11-18',
-        privacyVersion: '2026-11-18',
-        bookingPolicyVersion: '2026-11-18',
-        cookieVersion: '2026-10-20',
-        lastUpdated: '18 de noviembre de 2026',
-        effectiveDate: '',
+        termsVersion: '2026-12-01',
+        privacyVersion: '2026-12-01',
+        bookingPolicyVersion: '2026-12-01',
+        cookieVersion: '2026-12-01',
+        lastUpdated: '1 de diciembre de 2026',
+        effectiveDate: '1 de diciembre de 2026',
 
         legalName: 'Gabriel Andres Ortiz',
         tradeName: 'Goat Style Salon',
         owner: 'Gabriel Andres Ortiz',
-        address: '',
+        address: 'Barranquitas, Puerto Rico',
         municipality: 'Barranquitas',
         email: 'gaby@goatstylesalon.com',
         claimsEmail: 'gaby@goatstylesalon.com',
@@ -29,24 +30,24 @@
 
         // Valores de respaldo para la política de reservaciones.
         freeCancelHours: '2',
-        lateCancelFee: 'el precio total de los servicios reservados',
+        lateCancelFee: 'ninguno: no cobramos cargo por cancelar; solo te pedimos avisar con al menos 2 horas de anticipación',
         graceMinutes: '10',
-        noShowConsequence: '',
-        rescheduleRule: '',
+        noShowConsequence: 'Las ausencias repetidas sin aviso pueden limitar tu posibilidad de reservar en línea en el futuro.',
+        rescheduleRule: 'Puedes cancelar o cambiar tu cita desde la aplicación o llamando al 787-218-1068, idealmente con al menos 2 horas de anticipación, sujeto a disponibilidad.',
 
         // Proveedores
-        hosting: 'InterServer (por confirmar)',
+        hosting: 'GitHub Pages',
         database: 'Supabase',
         formsProvider: 'Formspark',
-        emailProvider: '',
-        smsProvider: '',
-        analytics: '',
-        otherProviders: '',
+        emailProvider: 'Supabase con SMTP propio del dominio goatstylesalon.com',
+        smsProvider: 'No utilizamos SMS; los avisos llegan por notificación push, correo y WhatsApp',
+        analytics: 'No utilizamos analítica de terceros',
+        otherProviders: 'Ninguno adicional a los mencionados',
 
-        retentionAppointments: '',
-        retentionBilling: '',
-        retentionLogs: '',
-        retentionDeleted: ''
+        retentionAppointments: 'Mientras sean necesarios para prestar el servicio y mantener nuestros registros comerciales; después se eliminan o se anonimizan',
+        retentionBilling: 'Mientras sean necesarios para nuestros registros comerciales y para cumplir las obligaciones contables y fiscales aplicables en Puerto Rico; después se eliminan o se anonimizan',
+        retentionLogs: 'Por un periodo limitado, solo el necesario para la seguridad y el funcionamiento de la plataforma; después se eliminan',
+        retentionDeleted: 'el tiempo necesario para nuestros registros comerciales'
     };
 
     const placeholders = {
@@ -111,7 +112,7 @@
     function display(key) {
         const v = value(key);
         if (v) return escapeHtml(v);
-        return `<span class="legal-ph">[${escapeHtml(placeholders[key] || key.toUpperCase())}]</span>`;
+        return '';
     }
 
     function fillPlaceholders(root) {
@@ -135,7 +136,6 @@
         style.textContent = `
             :root { --legal-gold: #d4af37; --legal-gold-soft: #f3d68a; --legal-bg: #111; --legal-text: #f5f1e8; --legal-muted: #b4ad9c; --legal-line: rgba(255,255,255,.1); --legal-required: #ff5f5f; }
             body.light-mode { --legal-bg: #fff; --legal-text: #111; --legal-muted: #555; --legal-line: rgba(0,0,0,.1); --legal-required: #d42c2c; }
-            .legal-ph { background: rgba(212,175,55,.18); color: inherit; border-radius: 4px; padding: 0 .25em; font-weight: 600; }
 
             /* Campos obligatorios: asterisco de color en la etiqueta */
             .field:has(> :is(input, select, textarea):required) > label::after,

@@ -1687,6 +1687,7 @@
                     ${barbers.map(barber => `
                         <div class="mini-card">
                             <strong>${barber.name}</strong>
+                            <div class="item-meta" style="margin-top: 8px;">Estado: <span class="status-pill ${makeStatus(barber.active !== false ? 'Activo' : 'Desactivado')}">${barber.active !== false ? 'Activo' : 'Desactivado'}</span></div>
                             <div class="item-meta" style="margin-top: 8px;">${barber.email}</div>
                             <div class="item-meta" style="margin-top: 8px;">${barber.phone}</div>
                             <div class="item-meta" style="margin-top: 8px;">${barber.bio}</div>

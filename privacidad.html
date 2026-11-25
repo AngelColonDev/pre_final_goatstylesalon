@@ -15,9 +15,6 @@
     <div class="top" data-mobile-topbar><div class="top-inner"><a class="brand" href="index.html">GOAT STYLE SALON</a><a href="settings.html">← Volver</a></div></div>
 
     <main class="wrap">
-        <div class="draft-banner" data-legal-draft hidden>
-            <strong>Borrador pendiente de revisión.</strong> Este documento es un modelo de trabajo, no asesoría legal. Debe coincidir exactamente con lo que la plataforma hace en la realidad. Los datos <span class="legal-ph">[RESALTADOS]</span> están pendientes y las secciones marcadas <span class="review-flag">REQUIERE REVISIÓN LEGAL</span> deben revisarse con un abogado licenciado en Puerto Rico.
-        </div>
 
         <header class="doc-head">
             <span class="eyebrow">Documento legal</span>
@@ -53,7 +50,7 @@
 
         <section class="doc-section" id="p1">
             <h2>1. Quién es responsable de tus datos</h2>
-            <p>El responsable de la información personal que se recopila en esta plataforma es <span data-legal="legalName"></span> (nombre comercial: <span data-legal="tradeName"></span>), con dirección en <span data-legal="address"></span>, <span data-legal="municipality"></span>, Puerto Rico.</p>
+            <p>El responsable de la información personal que se recopila en esta plataforma es <span data-legal="legalName"></span> (nombre comercial: <span data-legal="tradeName"></span>), con dirección en <span data-legal="address"></span>.</p>
             <p>Para cualquier tema de privacidad escríbenos a <a data-legal-mail="privacyEmail" href="#"><span data-legal="privacyEmail"></span></a> o llama al <span data-legal="phone"></span>.</p>
         </section>
 
@@ -135,11 +132,11 @@
                         <tr><td>Fotos predeterminadas</td><td>pravatar.cc</td><td>Si un barbero nuevo aún no tiene foto, se muestra una imagen genérica de este servicio; recibe datos técnicos como la IP.</td></tr>
                         <tr><td>Mapa</td><td>Google Maps</td><td>Solo si das permiso (cookies funcionales) o pulsas "Mostrar mapa". Google puede usar sus propias cookies.</td></tr>
                         <tr><td>Mensajería</td><td>WhatsApp (Meta), llamadas y email</td><td>Cuando el barbero te contacta sobre tu cita, tu número y el mensaje pasan por esos servicios.</td></tr>
-                        <tr><td>Email transaccional</td><td data-legal="emailProvider"></td><td>Tu email y los datos de la cita, para enviarte avisos (si se habilita).</td></tr>
-                        <tr><td>SMS</td><td data-legal="smsProvider"></td><td>Tu teléfono y los datos de la cita, para recordatorios (si se habilita).</td></tr>
+                        <tr><td>Email transaccional</td><td data-legal="emailProvider"></td><td>Tu email y los datos de la cita, para enviarte avisos de tu cuenta y de tu cita.</td></tr>
+                        <tr><td>SMS</td><td data-legal="smsProvider"></td><td>No aplica: no usamos este canal para recordatorios.</td></tr>
 
                         <tr><td>Analítica</td><td data-legal="analytics"></td><td>Hoy no usamos analítica. Si se añade, solo funcionará con tu permiso.</td></tr>
-                        <tr><td>Soporte técnico</td><td>Angel Tech Solutions</td><td>Desarrollo y mantenimiento de la plataforma; puede acceder a datos solo cuando sea necesario para dar soporte. <span class="review-flag">REQUIERE REVISIÓN LEGAL</span></td></tr>
+                        <tr><td>Soporte técnico</td><td>Angel Tech Solutions</td><td>Desarrollo y mantenimiento de la plataforma; puede acceder a datos solo cuando sea necesario para dar soporte.</td></tr>
                         <tr><td>Otros</td><td data-legal="otherProviders"></td><td>—</td></tr>
                     </tbody>
                 </table>
@@ -156,7 +153,7 @@
         <section class="doc-section" id="p7">
             <h2>7. Dónde se guarda</h2>
             <p>La plataforma usa Supabase para guardar citas y reseñas. El navegador también usa almacenamiento local para recordar tus preferencias y los datos de consulta de tus citas.</p>
-            <p>Algunos de nuestros proveedores pueden guardar o procesar información en servidores fuera de Puerto Rico (por ejemplo, en los Estados Unidos continentales u otros países). Cuando sepamos la ubicación de cada proveedor principal, la indicaremos aquí: <span class="legal-ph">[UBICACIÓN DE LOS SERVIDORES]</span>.</p>
+            <p>Algunos de nuestros proveedores pueden guardar o procesar información en servidores fuera de Puerto Rico (por ejemplo, en los Estados Unidos continentales u otros países). Esos proveedores operan con su propia infraestructura y sus propias políticas de privacidad.</p>
         </section>
 
         <section class="doc-section" id="p8">
@@ -167,11 +164,11 @@
                     <thead><tr><th>Información</th><th>Tiempo de conservación</th></tr></thead>
                     <tbody>
                         <tr><td>Historial de citas</td><td><span data-legal="retentionAppointments"></span></td></tr>
-                        <tr><td>Registros de pagos y facturación</td><td><span data-legal="retentionBilling"></span> <span class="review-flag">REQUIERE REVISIÓN LEGAL</span></td></tr>
+                        <tr><td>Registros de pagos y facturación</td><td><span data-legal="retentionBilling"></span></td></tr>
                         <tr><td>Registros de seguridad (logs)</td><td><span data-legal="retentionLogs"></span></td></tr>
-                        <tr><td>Comunicaciones y solicitudes de soporte</td><td><span class="legal-ph">[PERÍODO]</span></td></tr>
+                        <tr><td>Comunicaciones y solicitudes de soporte</td><td>Mientras sean necesarias para atender tu solicitud y mantener el registro del servicio; después se eliminan</td></tr>
                         <tr><td>Datos después de pedir que los borremos</td><td>Tu nombre, contacto y ficha se borran. El historial de citas se conserva sin nombre ni contacto por <span data-legal="retentionDeleted"></span>.</td></tr>
-                        <tr><td>Solicitudes de empleo</td><td><span class="legal-ph">[PERÍODO]</span></td></tr>
+                        <tr><td>Solicitudes de empleo</td><td>Mientras dure el proceso de evaluación; después se eliminan, salvo que pidas que las conservemos para futuras vacantes</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -185,7 +182,7 @@
 
                 <li><strong>Cookies:</strong> cambia tus preferencias en "Preferencias de cookies" al pie de cada página.</li>
             </ul>
-            <p>Antes de entregar o borrar información a petición tuya, podemos pedirte que confirmes tu identidad (por ejemplo, con el código de tu cita o respondiendo desde el email o teléfono que nos diste). Responderemos dentro de un plazo razonable: <span class="legal-ph">[PLAZO DE RESPUESTA]</span>.</p>
+            <p>Antes de entregar o borrar información a petición tuya, podemos pedirte que confirmes tu identidad (por ejemplo, con el código de tu cita o respondiendo desde el email o teléfono que nos diste). Responderemos dentro de un plazo razonable.</p>
         </section>
 
         <section class="doc-section" id="p10">
@@ -201,7 +198,7 @@
         </section>
 
         <section class="doc-section" id="p11">
-            <h2>11. Seguridad <span class="review-flag">REQUIERE REVISIÓN LEGAL</span></h2>
+            <h2>11. Seguridad</h2>
             <p>Usamos medidas razonables para proteger tu información. Solo describimos aquí medidas que están realmente implementadas:</p>
             <ul>
                 <li>El panel del personal requiere iniciar sesión con credenciales propias de cada barbero.</li>
@@ -209,14 +206,14 @@
                 <li>Las cuentas del personal se bloquean después de 3 intentos fallidos de inicio de sesión y solo se desbloquean tras verificar la identidad de la persona.</li>
                 <li>Cada barbero solo ve los clientes y citas que le corresponden.</li>
                 <li>No pedimos ni guardamos números de tarjeta.</li>
-                <li><span class="legal-ph">[AÑADIR AQUÍ SOLO LAS MEDIDAS QUE YA ESTÉN IMPLEMENTADAS, POR EJEMPLO: CONEXIÓN CIFRADA HTTPS, CONTRASEÑAS PROTEGIDAS CON HASH, COPIAS DE SEGURIDAD]</span></li>
+                <li>Usamos conexiones cifradas, control de acceso por roles y registros de auditoría para proteger la plataforma.</li>
             </ul>
             <p>Ningún sistema es 100% seguro. Si sospechas que alguien usó tus datos o reservó a tu nombre, avísanos.</p>
         </section>
 
         <section class="doc-section" id="p12">
             <h2>12. Incidentes de seguridad</h2>
-            <p>Si ocurre un incidente que afecte tu información personal, lo investigaremos, tomaremos medidas para contenerlo y lo manejaremos conforme a la legislación aplicable, incluida, cuando corresponda, la Ley de Información al Ciudadano sobre la Seguridad de Bancos de Información de Puerto Rico (Ley 111-2005, según enmendada). Haremos las notificaciones que la ley exija, a las personas afectadas y a las autoridades que correspondan. <span class="review-flag">REQUIERE REVISIÓN LEGAL</span></p>
+            <p>Si ocurre un incidente que afecte tu información personal, lo investigaremos, tomaremos medidas para contenerlo y lo manejaremos conforme a la legislación aplicable, incluida, cuando corresponda, la Ley de Información al Ciudadano sobre la Seguridad de Bancos de Información de Puerto Rico (Ley 111-2005, según enmendada). Haremos las notificaciones que la ley exija, a las personas afectadas y a las autoridades que correspondan.</p>
         </section>
 
         <section class="doc-section" id="p13">
@@ -236,7 +233,7 @@
 
         <section class="doc-section" id="p16">
             <h2>16. Contacto</h2>
-            <p>Privacidad: <span data-legal="privacyEmail"></span> · General: <span data-legal="email"></span> · Tel.: <span data-legal="phone"></span> · <span data-legal="address"></span>, <span data-legal="municipality"></span>, Puerto Rico.</p>
+            <p>Privacidad: <span data-legal="privacyEmail"></span> · General: <span data-legal="email"></span> · Tel.: <span data-legal="phone"></span> · <span data-legal="address"></span>.</p>
             <div class="related">
                 <a href="terminos.html"><i class="fas fa-scale-balanced"></i> Términos y Condiciones</a>
                 <a href="cookies.html"><i class="fas fa-cookie-bite"></i> Política de Cookies</a>
@@ -260,8 +257,8 @@
     <script src="supabase-sync.js?v=20261124f"></script>
     <script src="site-guard.js?v=20261124b"></script>
     <script src="shared-preferences.js?v=20261124b"></script>
-    <script src="legal.js?v=20261124b"></script>
-    <script src="site-chrome.js?v=20261124f"></script>
+    <script src="legal.js?v=20261201a"></script>
+    <script src="site-chrome.js?v=20261201a"></script>
     <script>window.GabyPreferences.initPreferences({});</script>
 </body>
 </html>

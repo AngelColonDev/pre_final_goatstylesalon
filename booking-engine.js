@@ -18,9 +18,23 @@
         NO_SHOW: 'No-Show',
         RECHAZADA: 'Rechazada'
     };
+    const STATUS_LABELS_EN = {
+        PENDIENTE: 'Pending',
+        APROBADA: 'Confirmed',
+        COMPLETADA: 'Completed',
+        CANCELADA: 'Cancelled',
+        NO_SHOW: 'No-Show',
+        RECHAZADA: 'Rejected'
+    };
+    // Idioma activo de la app (Configuración → Idioma). Solo cambia textos
+    // mostrados; los valores internos de estado nunca cambian.
+    function lang() {
+        try { return (window.GabyData && window.GabyData.getState().settings.defaultLanguage) === 'en' ? 'en' : 'es'; } catch (_) { return 'es'; }
+    }
     const DAY_NAMES = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     const DEFAULT_MINUTES = 40;
     const BLOCKED_MESSAGE = 'No es posible realizar una reservación online en este momento. Comunícate con la barbería para recibir asistencia.';
+    const BLOCKED_MESSAGE_EN = 'Online booking is not available right now. Please contact the barbershop for assistance.';
 
     // Correo del cliente (PR #17, E): obligatorio en reservas en línea. La misma
     // regla vive en el servidor (trigger guard_online_appointment): si el correo
@@ -91,25 +105,31 @@
 
     function formatDate(key, options) {
         const date = typeof key === 'string' ? parseKey(key) : key;
-        return date.toLocaleDateString('es-PR', options || { weekday: 'long', day: 'numeric', month: 'long' });
+        return date.toLocaleDateString(lang() === 'en' ? 'en-US' : 'es-PR', options || { weekday: 'long', day: 'numeric', month: 'long' });
     }
 
     function relativeDay(key) {
         const today = dateKey(new Date());
-        if (key === today) return 'Hoy';
-        if (key === dateKey(addDays(new Date(), 1))) return 'Mañana';
+        if (key === today) return lang() === 'en' ? 'Today' : 'Hoy';
+        if (key === dateKey(addDays(new Date(), 1))) return lang() === 'en' ? 'Tomorrow' : 'Mañana';
         return formatDate(key, { weekday: 'short', day: 'numeric', month: 'short' });
     }
 
     function formatDuration(minutes) {
         const m = Number(minutes) || 0;
+        if (lang() === 'en') {
+            if (m < 60) return `${m} minutes`;
+            const hEn = Math.floor(m / 60);
+            const restEn = m % 60;
+            return `${hEn} hour${hEn === 1 ? '' : 's'}${restEn ? ` ${restEn} min` : ''}`;
+        }
         if (m < 60) return `${m} minutos`;
         const h = Math.floor(m / 60);
         const rest = m % 60;
         return `${h} hora${h === 1 ? '' : 's'}${rest ? ` ${rest} min` : ''}`;
     }
 
-    const statusLabel = status => STATUS_LABELS[status] || status || '—';
+    const statusLabel = status => (lang() === 'en' ? STATUS_LABELS_EN[status] : STATUS_LABELS[status]) || status || '—';
 
     // ---------------------------------------------------------------------
     // Servicios y duracion
@@ -127,8 +147,8 @@
         return {
             id: 'unknown-cut', name: UNKNOWN_CUT, category: 'Cortes', barbers: [], active: true, unknownCut: true,
             minutes: Number(settings(state).booking.unknownCutMinutes) || DEFAULT_MINUTES,
-            price: 'A consultar', duration: 'El barbero te ayuda a escogerlo',
-            description: 'Escoge esta opción si no sabes el nombre del recorte. Puedes subir una foto de referencia.'
+            price: 'A consultar', duration: lang() === 'en' ? 'The barber helps you choose it' : 'El barbero te ayuda a escogerlo',
+            description: lang() === 'en' ? 'Pick this option if you do not know the name of the cut. You can upload a reference photo.' : 'Escoge esta opción si no sabes el nombre del recorte. Puedes subir una foto de referencia.'
         };
     }
 
@@ -173,6 +193,7 @@
     // Ninguna cita (en línea ni manual) puede quedar fuera de este horario.
     const SHOP_HOURS = [null, null, { open: '08:00', close: '18:00' }, { open: '08:00', close: '18:00' }, { open: '08:00', close: '18:00' }, { open: '08:00', close: '20:00' }, { open: '07:00', close: '17:00' }];
     const CLOSED_MESSAGE = 'La barbería está cerrada los domingos y lunes. Abrimos martes a jueves de 8:00 AM a 6:00 PM, viernes de 8:00 AM a 8:00 PM y sábado de 7:00 AM a 5:00 PM.';
+    const CLOSED_MESSAGE_EN = 'The barbershop is closed on Sundays and Mondays. We are open Tuesday to Thursday from 8:00 AM to 6:00 PM, Friday from 8:00 AM to 8:00 PM and Saturday from 7:00 AM to 5:00 PM.';
 
     function shopHoursFor(key) {
         return SHOP_HOURS[parseKey(key).getDay()] || null;
@@ -183,7 +204,9 @@
     }
 
     function shopHoursSummary() {
-        return 'Martes a jueves 8:00 AM – 6:00 PM · Viernes 8:00 AM – 8:00 PM · Sábado 7:00 AM – 5:00 PM';
+        return lang() === 'en'
+            ? 'Tuesday to Thursday 8:00 AM – 6:00 PM · Friday 8:00 AM – 8:00 PM · Saturday 7:00 AM – 5:00 PM'
+            : 'Martes a jueves 8:00 AM – 6:00 PM · Viernes 8:00 AM – 8:00 PM · Sábado 7:00 AM – 5:00 PM';
     }
 
     function defaultWeek() {
@@ -442,13 +465,13 @@
         const barber = s.barbers.find(item => item.id === barberId);
         if (!barber || barber.active === false) return 'Ese barbero no está disponible.';
         if (!services.every(service => barberOffers(barber, service))) return `${barber.alias || barber.name} no ofrece uno de los servicios escogidos.`;
-        if (!date || !isShopOpen(date)) return CLOSED_MESSAGE;
+        if (!date || !isShopOpen(date)) return lang() === 'en' ? CLOSED_MESSAGE_EN : CLOSED_MESSAGE;
         const hours = shopHoursFor(date);
         if (!time || toMin(time) < toMin(hours.open) || toMin(time) + totalMinutes(services) > toMin(hours.close)) {
             return `Ese horario está fuera del horario de la barbería. Ese día abrimos de ${formatTime(hours.open)} a ${formatTime(hours.close)}.`;
         }
         if (!staff && clientId) {
-            if (activeBlock(clientId, s)) return BLOCKED_MESSAGE;
+            if (activeBlock(clientId, s)) return lang() === 'en' ? BLOCKED_MESSAGE_EN : BLOCKED_MESSAGE;
             const rules = settings(s).booking;
             const future = clientStats(clientId, s).upcoming.filter(item => item.code !== excludeCode).length;
             if (!excludeCode && rules.maxFutureAppointments && future >= rules.maxFutureAppointments) {

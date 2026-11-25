@@ -113,8 +113,8 @@
             return list.filter(n => n.audience === 'staff' && (admin || !n.barberId || n.barberId === mine));
         }
         const codes = myCodes();
-        if (!codes.length) return [];
-        return list.filter(n => n.audience === 'client' && n.appointmentCode && codes.includes(n.appointmentCode));
+        if (!codes.length) return list.filter(n => n.audience === 'app');
+        return list.filter(n => n.audience === 'app' || (n.audience === 'client' && n.appointmentCode && codes.includes(n.appointmentCode)));
     }
 
     function unreadCount() {

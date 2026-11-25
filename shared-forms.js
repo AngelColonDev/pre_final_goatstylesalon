@@ -1,6 +1,11 @@
 (function () {
     // Componentes de formulario compartidos por las páginas del sitio y el panel del personal.
 
+    // Idioma activo de la app (Configuración → Idioma). Solo cambia textos mostrados.
+    function lang() {
+        try { return (window.GabyData && window.GabyData.getState().settings.defaultLanguage) === 'en' ? 'en' : 'es'; } catch (_) { return 'es'; }
+    }
+
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
     }
@@ -53,9 +58,10 @@
             hasQuote = hasQuote || price.isQuote;
         });
         const amount = `$${total % 1 ? total.toFixed(2) : total}`;
-        let label = hasMinimum ? `Desde ${amount}` : amount;
-        if (hasQuote) label += total ? ' + servicios a consultar' : 'A consultar';
-        if (hasQuote && !total) label = 'A consultar';
+        const en = lang() === 'en';
+        let label = hasMinimum ? `${en ? 'From' : 'Desde'} ${amount}` : amount;
+        if (hasQuote) label += total ? (en ? ' + services priced on request' : ' + servicios a consultar') : (en ? 'Priced on request' : 'A consultar');
+        if (hasQuote && !total) label = en ? 'Priced on request' : 'A consultar';
         return { total, label };
     }
 
@@ -86,8 +92,10 @@
         function renderTotal() {
             const selected = getSelected();
             totalBox.innerHTML = selected.length
-                ? `<span>${selected.length} servicio${selected.length === 1 ? '' : 's'} seleccionado${selected.length === 1 ? '' : 's'}</span><span>Total estimado: <strong>${escapeHtml(estimateTotal(selected).label)}</strong></span>`
-                : '<span>Puedes escoger uno o varios servicios.</span>';
+                ? (lang() === 'en'
+                    ? `<span>${selected.length} service${selected.length === 1 ? '' : 's'} selected</span><span>Estimated total: <strong>${escapeHtml(estimateTotal(selected).label)}</strong></span>`
+                    : `<span>${selected.length} servicio${selected.length === 1 ? '' : 's'} seleccionado${selected.length === 1 ? '' : 's'}</span><span>Total estimado: <strong>${escapeHtml(estimateTotal(selected).label)}</strong></span>`)
+                : `<span>${lang() === 'en' ? 'You can pick one or more services.' : 'Puedes escoger uno o varios servicios.'}</span>`;
         }
 
         function changed() {
@@ -101,7 +109,7 @@
             services = list;
             container.innerHTML = services.map((service, index) => `
                 <label class="service-option">
-                    <input type="checkbox" value="${index}" data-invalid-message="Escoge al menos un servicio." ${previouslyChecked.has(service.name) ? 'checked' : ''}>
+                    <input type="checkbox" value="${index}" data-invalid-message="${lang() === 'en' ? 'Pick at least one service.' : 'Escoge al menos un servicio.'}" ${previouslyChecked.has(service.name) ? 'checked' : ''}>
                     <span class="service-option-name">${escapeHtml(service.name)}${service.duration ? `<span class="service-option-meta">${escapeHtml(service.duration)}</span>` : ''}</span>
                     <span class="service-option-price">${escapeHtml(service.price)}</span>
                 </label>
