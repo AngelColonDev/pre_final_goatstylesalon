@@ -1138,6 +1138,15 @@
             $('sa-otp-form').hidden = true;
             $('sa-login-form').hidden = false;
         });
+        var pwToggle = $('sa-password-toggle');
+        if (pwToggle) pwToggle.addEventListener('click', function () {
+            var pwInput = $('sa-password');
+            var show = pwInput.type === 'password';
+            pwInput.type = show ? 'text' : 'password';
+            pwToggle.innerHTML = '<i class="fas ' + (show ? 'fa-eye-slash' : 'fa-eye') + '"></i>';
+            pwToggle.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+            pwInput.focus();
+        });
         document.querySelectorAll('#sa-nav .nav-btn').forEach(function (b) {
             b.addEventListener('click', function () { showModule(b.dataset.module); });
         });

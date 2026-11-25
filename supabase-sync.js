@@ -784,7 +784,11 @@
 
     // -------------------------------------------------------------------------
     let ready = Promise.resolve();
-    if (enabled) {
+    // Páginas independientes (p. ej. super-admin.html) no cargan shared-data.js:
+    // sin GabyData no hay sincronización local, pero GabyCloud debe existir
+    // igualmente para el login (getClient/auth). Antes este bloque lanzaba un
+    // error y window.GabyCloud nunca se asignaba ("Sin conexión con el servidor").
+    if (enabled && window.GabyData && typeof window.GabyData.addCommitHook === 'function') {
         window.GabyData.addCommitHook(push);
         ready = pull().catch(error => {
             console.error('[GabyCloud] Error al descargar datos:', error);
