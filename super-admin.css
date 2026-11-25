@@ -33,6 +33,11 @@ a { color: inherit; }
 .sa-muted { color: var(--muted); }
 
 /* ---------- Login ---------- */
+/* PR #19: el atributo hidden manda sobre cualquier display del panel
+   (sin esto, display:grid/flex de .sa-login-card form, .admin-shell, etc.
+   dejaba visible el paso OTP y el shell antes de entrar). */
+[hidden] { display: none !important; }
+
 .sa-login { min-height: 100vh; display: grid; place-items: center; padding: 1.5rem 1rem; }
 .sa-login-card {
     width: 100%; max-width: 420px; background: var(--panel);
