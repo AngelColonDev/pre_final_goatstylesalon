@@ -1880,6 +1880,7 @@
                 host.querySelector('[data-retry-section]')?.addEventListener('click', () => renderSection());
             }
         }
+        mountStaffPushCard();
         addRequiredLegends();
         renderCancellationAlertBanner();
         window.setTimeout(showCancellationAlertPopup, 80);
@@ -1946,6 +1947,186 @@
         return !isAdmin() && session.barberId === config.role;
     }
 
+    // ---------------------------------------------------------------------
+    // Notificaciones push en el teléfono del barbero.
+    // Hasta ahora la única pantalla que activaba el push era la de ajustes
+    // de la app pública (settings-notifications.html), pensada para el
+    // cliente: el barbero nunca pasaba por ahí con su sesión del personal,
+    // así que ningún token quedaba vinculado a un barbero (push_tokens con
+    // barber_id = 0) y los avisos dirigidos a barberos no tenían destino.
+    // Aquí se reusa el MISMO camino de la app pública: notifications.js
+    // (GabyNotifications.enablePush) y la RPC register_push_token. La RPC
+    // no recibe el barbero por parámetro a propósito: lo saca de la sesión
+    // (my_barber_id()), y start() ya validó con GabyCloud.requireStaff()
+    // que la sesión es la del barbero de ESTE panel, así que el token queda
+    // registrado como el teléfono de ese barbero y de ningún otro.
+    // ---------------------------------------------------------------------
+    const STAFF_PUSH_STAMP_KEY = 'gs_push_staff_at';
+    let staffNotificationsPromise = null;
+    let staffPushRefreshed = false;
+    let staffPushRefreshing = false;
+
+    // Carga notifications.js una sola vez (el mismo patrón con el que app.js
+    // carga este archivo). Si ya está en la página, no se vuelve a cargar.
+    function loadStaffNotifications() {
+        if (window.GabyNotifications) return Promise.resolve(window.GabyNotifications);
+        if (staffNotificationsPromise) return staffNotificationsPromise;
+        staffNotificationsPromise = new Promise(resolve => {
+            const script = document.createElement('script');
+            script.src = '../../notifications.js?v=20261124e';
+            script.onload = () => resolve(window.GabyNotifications || null);
+            script.onerror = () => { staffNotificationsPromise = null; resolve(null); };
+            document.head.appendChild(script);
+        });
+        return staffNotificationsPromise;
+    }
+
+    function staffPushStamp() {
+        try { return localStorage.getItem(STAFF_PUSH_STAMP_KEY) || null; } catch (_) { return null; }
+    }
+
+    function staffPushSetStamp() {
+        try { localStorage.setItem(STAFF_PUSH_STAMP_KEY, new Date().toISOString()); } catch (_) { /* almacenamiento bloqueado */ }
+    }
+
+    // Estado de la tarjeta sin cargar Firebase: bastan el API del navegador
+    // y el id del token guardado en este aparato (gs_push_token_id, la misma
+    // clave que usa notifications.js). La detección de iPhone replica la de
+    // notifications.js (isIOS/isStandalone) para poder pintar antes de que
+    // el módulo termine de cargar.
+    function staffPushState() {
+        const supported = ('Notification' in window) && ('serviceWorker' in navigator) && ('PushManager' in window);
+        const permission = ('Notification' in window) ? Notification.permission : 'unsupported';
+        let tokenId = null;
+        try { tokenId = localStorage.getItem('gs_push_token_id'); } catch (_) { /* almacenamiento bloqueado */ }
+        const ua = navigator.userAgent || '';
+        const isIOS = /iphone|ipad|ipod/i.test(ua) || (/Macintosh/i.test(ua) && navigator.maxTouchPoints > 1);
+        const standalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
+        return { supported, permission, enabled: Boolean(tokenId), isIOS, standalone, stamp: staffPushStamp() };
+    }
+
+    function staffPushStatusHtml(state) {
+        if (state.isIOS && !state.standalone) {
+            // Mismo aviso que la app pública: en iPhone el push exige la app
+            // instalada en la pantalla de inicio (guía de settings-notifications).
+            return 'En iPhone las notificaciones solo funcionan con la app instalada: abre esta página en Safari, toca el botón Compartir (el cuadrado con la flecha hacia arriba) y «Añadir a pantalla de inicio». Después abre el panel desde el icono y activa las notificaciones aquí.';
+        }
+        if (!state.supported) return 'Este navegador no soporta notificaciones push.';
+        if (state.permission === 'denied') {
+            return 'Permiso denegado. Puedes activarlo en los ajustes del navegador: permite las notificaciones para este sitio y vuelve aquí para tocar «Activar notificaciones».';
+        }
+        if (state.enabled) {
+            const when = state.stamp ? new Date(state.stamp) : null;
+            const stamp = when && !isNaN(when.getTime()) ? ` · Registrado: ${when.toLocaleString('es-PR', { dateStyle: 'medium', timeStyle: 'short' })}` : '';
+            return `<strong>Activadas ✓</strong>${stamp}`;
+        }
+        if (state.permission === 'granted') return 'El navegador ya dio el permiso, pero este teléfono aún no está registrado. Toca «Activar notificaciones» para registrarlo.';
+        return 'Sin activar. Toca el botón y acepta el permiso que pide el navegador.';
+    }
+
+    function paintStaffPushCard(card) {
+        const state = staffPushState();
+        const status = card.querySelector('[data-staff-push-status]');
+        if (status) status.innerHTML = staffPushStatusHtml(state);
+        const button = card.querySelector('[data-staff-push-activate]');
+        if (button) {
+            // En iPhone sin instalar o en un navegador sin soporte el botón
+            // no puede hacer nada: se oculta y el texto ya explica el paso.
+            button.hidden = (state.isIOS && !state.standalone) || !state.supported;
+            button.disabled = false;
+            const active = state.enabled && state.permission !== 'denied';
+            button.textContent = active ? 'Actualizar registro' : 'Activar notificaciones';
+            button.className = `btn ${active ? 'btn-ghost' : 'btn-primary'}`;
+        }
+    }
+
+    async function activateStaffPush(card) {
+        const button = card.querySelector('[data-staff-push-activate]');
+        const status = card.querySelector('[data-staff-push-status]');
+        if (button) { button.disabled = true; button.textContent = 'Activando…'; }
+        const N = await loadStaffNotifications();
+        if (!N || typeof N.enablePush !== 'function') {
+            if (status) status.textContent = 'No se pudo cargar el servicio de notificaciones. Revisa tu conexión e inténtalo de nuevo.';
+            if (button) { button.disabled = false; button.textContent = 'Activar notificaciones'; }
+            return;
+        }
+        const result = await N.enablePush().catch(() => null);
+        if (result && result.ok) {
+            staffPushRefreshed = true;
+            staffPushSetStamp();
+            window.GabyData.toast('Notificaciones activadas en este teléfono.', 'success');
+            paintStaffPushCard(card);
+            return;
+        }
+        // Los mismos textos por causa que usa la app pública en
+        // settings-notifications.html (denied / no-config / sdk / token).
+        const messages = {
+            denied: 'No diste permiso para las notificaciones. Puedes activarlo en los ajustes del navegador.',
+            'no-config': 'No se pudo cargar la configuración de Firebase. Revisa tu conexión e inténtalo de nuevo.',
+            sdk: 'No se pudo cargar el servicio de notificaciones. Revisa tu conexión e inténtalo de nuevo.',
+            token: 'El teléfono no pudo generar el código de las notificaciones. Inténtalo de nuevo.',
+            unsupported: 'Este navegador no soporta notificaciones push.'
+        };
+        if (status) status.textContent = messages[result && result.reason] || 'No se pudo activar el push. Inténtalo de nuevo.';
+        if (button) { button.disabled = false; button.textContent = 'Activar notificaciones'; }
+    }
+
+    // Monta la tarjeta: arriba en Notificaciones y al final de Inicio. Se
+    // llama en cada renderSection() porque la sección se redibuja seguido
+    // (la tarjeta se vuelve a montar sobre el contenido nuevo).
+    function mountStaffPushCard() {
+        if (currentSection !== 'notifications' && currentSection !== 'dashboard') return;
+        const host = document.getElementById('admin-section-content');
+        if (!host || host.querySelector('[data-staff-push-card]')) return;
+        const card = document.createElement('section');
+        card.className = 'card';
+        card.dataset.staffPushCard = '1';
+        card.innerHTML = `
+            <div class="section-title">Notificaciones en este teléfono</div>
+            <p class="item-meta">Recibe en este aparato los avisos de tus citas: reservas nuevas, cancelaciones y recordatorios. Al activarlas, este teléfono queda registrado como el teléfono de ${barberName(config.role)}, y los avisos dirigidos a ese barbero llegarán aquí aunque el panel esté cerrado.</p>
+            <p class="item-meta" data-staff-push-status></p>
+            <div class="form-actions"><button class="btn btn-primary" type="button" data-staff-push-activate>Activar notificaciones</button></div>
+        `;
+        if (currentSection === 'notifications') {
+            card.style.marginBottom = '18px';
+            host.prepend(card);
+        } else {
+            card.style.marginTop = '18px';
+            host.appendChild(card);
+        }
+        paintStaffPushCard(card);
+        card.querySelector('[data-staff-push-activate]')?.addEventListener('click', () => activateStaffPush(card));
+        staffPushSilentRefresh();
+    }
+
+    // Al cargar el panel: si el navegador ya dio el permiso, el token se
+    // vuelve a registrar en silencio con la sesión de este panel. Así, un
+    // teléfono que activó el push como cliente (sin barbero) queda vinculado
+    // a su barbero la primera vez que abre su panel, sin tocar nada. Pedir
+    // el permiso nunca se hace aquí: eso solo pasa al tocar el botón.
+    async function staffPushSilentRefresh() {
+        // La marca "en curso" se pone sincrónica: renderSection() y start()
+        // pueden llamarla casi a la vez y el registro debe salir una sola vez.
+        if (staffPushRefreshed || staffPushRefreshing) return;
+        if (!('Notification' in window) || Notification.permission !== 'granted') return;
+        staffPushRefreshing = true;
+        try {
+            const N = await loadStaffNotifications();
+            if (!N || typeof N.enablePush !== 'function') return;
+            // Con el permiso ya concedido, enablePush() no muestra ningún aviso:
+            // solo renueva el token y lo registra con el barbero de la sesión.
+            const result = await N.enablePush().catch(() => null);
+            if (result && result.ok) {
+                staffPushRefreshed = true;
+                staffPushSetStamp();
+                const card = document.querySelector('[data-staff-push-card]');
+                if (card) paintStaffPushCard(card);
+            }
+        } finally {
+            staffPushRefreshing = false;
+        }
+    }
+
     async function start() {
         if (window.GabyCloud && window.GabyCloud.enabled) {
             const allowed = await window.GabyCloud.requireStaff(config.role, isAdmin());
@@ -1959,6 +2140,7 @@
         }
         renderShell();
         renderSection();
+        staffPushSilentRefresh();
         const entry = new URLSearchParams(window.location.search);
         const requestedSection = entry.get('section');
         const section = ['products', 'providers', 'reports', 'news'].includes(requestedSection) ? 'inventory'
