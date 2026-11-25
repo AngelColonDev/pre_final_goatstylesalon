@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Soporte Técnico — GOAT Style Salon</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="stylesheet" href="centro-soporte.css?v=20261125a">
+    <script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+</head>
+<body>
+    <!-- ======================= LOGIN ======================= -->
+    <div id="cs-login" class="cs-login">
+        <div class="cs-login-card">
+            <div class="cs-login-logo" aria-hidden="true"><i data-lucide="life-buoy"></i></div>
+            <h1>Centro de Soporte Técnico</h1>
+            <p class="cs-subtitle">Panel de Super Admin · GOAT Style Salon</p>
+            <form id="cs-login-form" autocomplete="off">
+                <label class="cs-field">
+                    <span>Correo del super administrador</span>
+                    <input type="email" id="cs-email" required placeholder="tu correo" autocomplete="username">
+                </label>
+                <label class="cs-field">
+                    <span>Contraseña</span>
+                    <span class="cs-password-wrap">
+                        <input type="password" id="cs-password" required placeholder="tu contraseña" autocomplete="current-password">
+                        <button type="button" class="cs-password-toggle" id="cs-password-toggle" aria-label="Mostrar contraseña"><i data-lucide="eye"></i></button>
+                    </span>
+                </label>
+                <p id="cs-login-error" class="cs-error" hidden></p>
+                <button type="submit" class="cs-btn cs-btn-primary cs-block" id="cs-login-btn">Entrar</button>
+                <p class="cs-note">Tras 3 intentos fallidos la cuenta se bloquea.</p>
+            </form>
+        </div>
+    </div>
+
+    <!-- ======================= APP ======================= -->
+    <div id="cs-app" class="cs-app" hidden>
+        <header class="cs-topbar">
+            <div class="cs-topbar-user">
+                <strong id="cs-user-name">Super Admin</strong>
+                <span id="cs-user-email" class="cs-muted">—</span>
+            </div>
+            <div class="cs-topbar-search">
+                <div class="cs-search-wrap">
+                    <input type="search" id="cs-search-input" placeholder="Buscar en todo el panel…" aria-label="Búsqueda global" autocomplete="off">
+                    <button type="button" class="cs-btn cs-btn-ghost" id="cs-search-btn" aria-label="Buscar"><i data-lucide="search"></i></button>
+                    <div id="cs-search-panel" class="cs-search-panel" hidden></div>
+                </div>
+            </div>
+            <div class="cs-topbar-meta">
+                <span class="cs-conn" id="cs-conn"><span class="cs-conn-dot" id="cs-conn-dot"></span><span id="cs-conn-text">En línea</span></span>
+                <span class="cs-clock" id="cs-clock" aria-label="Hora actual">--:--:--</span>
+                <button type="button" class="cs-btn cs-btn-ghost" id="cs-logout-btn"><i data-lucide="log-out"></i> Cerrar sesión</button>
+            </div>
+        </header>
+
+        <main class="cs-main">
+            <div id="cs-home-view">
+                <div id="cs-statusbar" class="cs-statusbar ok" role="status">Todo funcionando</div>
+                <div id="cs-grid" class="cs-grid" aria-label="Secciones del centro de soporte"></div>
+            </div>
+
+            <section id="cs-section" class="cs-section" hidden>
+                <div class="cs-section-head">
+                    <button type="button" class="cs-btn cs-btn-ghost" id="cs-section-back"><i data-lucide="arrow-left"></i> Volver</button>
+                    <h2 id="cs-section-title">Sección</h2>
+                </div>
+                <div id="cs-section-body" class="cs-section-body"></div>
+            </section>
+        </main>
+    </div>
+
+    <div id="cs-toasts" class="cs-toasts" aria-live="polite"></div>
+    <div id="cs-modal-root"></div>
+
+    <script src="supabase-config.js?v=20261124f"></script>
+    <script src="supabase-sync.js?v=20261124h"></script>
+    <script src="soporte-core.js?v=20261125a"></script>
+    <script src="soporte-secciones.js?v=20261125a"></script>
+</body>
+</html>
