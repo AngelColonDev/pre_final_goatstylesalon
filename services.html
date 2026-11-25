@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -211,19 +211,19 @@
     <div class="topbar" data-mobile-topbar>
         <a class="brand" href="index.html">GOAT STYLE SALON</a>
         <div class="hero-actions">
-            <a class="btn btn-ghost" href="index.html">Inicio</a>
-            <a class="btn btn-primary" href="booking.html">Sacar cita</a>
+            <a class="btn btn-ghost" href="index.html" data-i18n="navHome">Inicio</a>
+            <a class="btn btn-primary" href="booking.html" data-i18n="navBook">Sacar cita</a>
         </div>
     </div>
 
     <main class="wrap">
         <section class="hero">
-            <span class="eyebrow">Servicios premium</span>
-            <h1>Nuestros cortes y experiencias en una página dedicada</h1>
-            <p class="sub">La portada se mantiene elegante y esta página concentra todos los servicios para que en teléfono la experiencia se sienta más limpia, directa y profesional.</p>
+            <span class="eyebrow" data-i18n="eyebrow">Servicios premium</span>
+            <h1 data-i18n="heroTitle">Nuestros cortes y experiencias en una página dedicada</h1>
+            <p class="sub" data-i18n="heroText">La portada se mantiene elegante y esta página concentra todos los servicios para que en teléfono la experiencia se sienta más limpia, directa y profesional.</p>
             <div class="hero-actions">
-                <a class="btn btn-primary" href="booking.html"><i class="fas fa-calendar-check"></i> Reservar ahora</a>
-                <a class="btn btn-ghost" href="settings.html"><i class="fas fa-gear"></i> Ir a configuración</a>
+                <a class="btn btn-primary" href="booking.html"><i class="fas fa-calendar-check"></i> <span data-i18n="bookNow">Reservar ahora</span></a>
+                <a class="btn btn-ghost" href="settings.html"><i class="fas fa-gear"></i> <span data-i18n="goSettings">Ir a configuración</span></a>
             </div>
         </section>
 
@@ -233,11 +233,11 @@
     <footer data-site-footer></footer>
 
     <div class="mobile-bottom-nav">
-        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
-        <a href="services.html" class="active"><i class="fas fa-scissors"></i><span>Servicios</span></a>
-        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
-        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
-        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+        <a href="index.html"><i class="fas fa-house"></i><span data-i18n="navHome">Inicio</span></a>
+        <a href="services.html" class="active"><i class="fas fa-scissors"></i><span data-i18n="navServices">Servicios</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span data-i18n="navBooking">Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span data-i18n="navNews">Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span data-i18n="navSettings">Config</span></a>
     </div>
 
     <div class="lightbox-overlay" id="lightbox" onclick="closeLightbox()">
@@ -247,7 +247,7 @@
                 <h2 id="lightbox-title"></h2>
                 <p id="lightbox-desc"></p>
                 <div class="vip-includes" id="lightbox-vip-includes" hidden>
-                    <h4>Incluye</h4>
+                    <h4 data-i18n="includes">Incluye</h4>
                     <ul id="lightbox-vip-list"></ul>
                 </div>
                 <div class="service-meta">
@@ -255,8 +255,8 @@
                     <span id="lightbox-duration"></span>
                 </div>
                 <div class="service-actions">
-                    <a class="btn btn-primary" id="lightbox-reserve-link" href="booking.html">Reservar este servicio</a>
-                    <a class="btn btn-ghost" href="settings.html">Configuración</a>
+                    <a class="btn btn-primary" id="lightbox-reserve-link" href="booking.html" data-i18n="bookThisService">Reservar este servicio</a>
+                    <a class="btn btn-ghost" href="settings.html" data-i18n="settings">Configuración</a>
                 </div>
             </div>
         </div>
@@ -267,9 +267,85 @@
     <script src="supabase-sync.js?v=20261124f"></script>
     <script src="site-guard.js?v=20261124b"></script>
     <script src="shared-preferences.js?v=20261124b"></script>
-    <script src="legal.js?v=20261124b"></script>
-    <script src="site-chrome.js?v=20261124f"></script>
+    <script src="legal.js?v=20261201a"></script>
+    <script src="site-chrome.js?v=20261201a"></script>
     <script>
+        const translations = {
+            es: {
+                navHome: 'Inicio', navBook: 'Sacar cita', navServices: 'Servicios', navBooking: 'Cita', navNews: 'Noticias', navSettings: 'Config',
+                eyebrow: 'Servicios premium',
+                heroTitle: 'Nuestros cortes y experiencias en una página dedicada',
+                heroText: 'La portada se mantiene elegante y esta página concentra todos los servicios para que en teléfono la experiencia se sienta más limpia, directa y profesional.',
+                bookNow: 'Reservar ahora', goSettings: 'Ir a configuración',
+                includes: 'Incluye', bookThisService: 'Reservar este servicio', settings: 'Configuración',
+                book: 'Reservar',
+                noServices: 'No hay servicios disponibles por el momento.'
+            },
+            en: {
+                navHome: 'Home', navBook: 'Book appointment', navServices: 'Services', navBooking: 'Booking', navNews: 'News', navSettings: 'Settings',
+                eyebrow: 'Premium services',
+                heroTitle: 'Our cuts and experiences on a dedicated page',
+                heroText: 'The home page stays elegant and this page brings together all the services so that on your phone the experience feels cleaner, more direct and professional.',
+                bookNow: 'Book now', goSettings: 'Go to settings',
+                includes: 'Includes', bookThisService: 'Book this service', settings: 'Settings',
+                book: 'Book',
+                noServices: 'There are no services available at the moment.'
+            }
+        };
+
+        // Textos EN por id para el catálogo sembrado (shared-data.js): precio mostrado, duración y descripción.
+        // Los nombres de los servicios son nombres de la casa y NO se traducen. Respaldo: el texto original.
+        const SERVICE_EN = {
+            'service-1': { price: '$35', duration: 'Includes a drink and a hair wash', description: 'Every cut includes a drink of your choice and a hair wash.' },
+            'service-2': { price: '$40', duration: 'Premium cut', description: 'Premium Fade with a clean, professional finish.' },
+            'service-3': { price: '$45', duration: 'Traditional Hot Towel Shave', description: 'Signature Cut with Traditional Hot Towel Shave.' },
+            'service-4': { price: '$35', duration: 'Up to 12 years old', description: 'Kids Premium for children up to 12 years old.' },
+            'service-5': { price: 'Ask us', duration: 'Prior consultation', description: 'Baby Cut subject to prior consultation.' },
+            'service-6': { price: '$65', duration: 'Color', description: 'Hair Light for a more defined, modern look.' },
+            'service-7': { price: '$120', duration: 'Cut not included', description: 'Full platinum. Cut not included.' },
+            'service-8': { price: 'From $30', duration: 'Treatment', description: 'Hair hydration treatment.' },
+            'service-9': { price: 'From $45', duration: 'Treatment', description: 'Keratin to improve texture and control frizz.' },
+            'service-10': { price: '$50', duration: 'Facial', description: 'Deep facial cleansing.' },
+            'service-11': { price: '$100', duration: 'Complete experience', description: 'Includes Signature Cut, beard design, hair wash, hot towels, scalp massage, express facial cleansing, a courtesy drink and premium finishing products.' }
+        };
+
+        const VIP_INCLUDES_EN = {
+            'Diseño de barba': 'Beard design',
+            'Lavado': 'Hair wash',
+            'Toallas calientes': 'Hot towels',
+            'Masaje capilar': 'Scalp massage',
+            'Limpieza facial express': 'Express facial cleansing',
+            'Bebida de cortesía': 'Courtesy drink',
+            'Productos premium para finalizar': 'Premium finishing products'
+        };
+
+        const FALLBACK_DESC_EN = [
+            'Classic, precise cut tailored to your style.',
+            'The perfect combination of cut and beard.',
+            'Thorough detail for long or demanding beards.',
+            'Wash, cut and styling with premium products.',
+            'Facial treatments and a luxury experience.'
+        ];
+
+        function currentLang() {
+            return (window.GabyPreferences && window.GabyPreferences.getPreferredLanguage()) || 'es';
+        }
+
+        function t(key) {
+            const lang = currentLang();
+            return (translations[lang] && translations[lang][key]) || translations.es[key] || key;
+        }
+
+        function serviceText(service, field) {
+            if (currentLang() === 'en' && SERVICE_EN[service.id] && SERVICE_EN[service.id][field]) return SERVICE_EN[service.id][field];
+            return service[field] || '';
+        }
+
+        function fallbackDesc(index) {
+            if (currentLang() === 'en') return FALLBACK_DESC_EN[index % FALLBACK_DESC_EN.length];
+            return fallbackServices[index % fallbackServices.length].desc;
+        }
+
         const vipExperienceIncludes = [
             "Signature Cut",
             "Diseño de barba",
@@ -294,18 +370,21 @@
         const container = document.getElementById('services-container');
 
         function renderServices() {
+            if (!services.length) {
+                container.innerHTML = `<p class="sub">${t('noServices')}</p>`;
+                return;
+            }
             container.innerHTML = services.map((service, index) => {
-                const fallback = fallbackServices[index % fallbackServices.length];
                 return `
                     <article class="service-card">
                         <div class="service-info">
                             <h3 onclick="openLightbox(${index})">${service.name}</h3>
-                            <p onclick="openLightbox(${index})">${service.description || fallback.desc}</p>
+                            <p onclick="openLightbox(${index})">${serviceText(service, 'description') || fallbackDesc(index)}</p>
                             <div class="service-meta" onclick="openLightbox(${index})">
-                                <span>${service.price}</span>
-                                <span>${service.duration}</span>
+                                <span>${serviceText(service, 'price')}</span>
+                                <span>${serviceText(service, 'duration')}</span>
                             </div>
-                            <a class="btn btn-primary service-reserve-btn" href="booking.html?service=${encodeURIComponent(service.name)}">Reservar</a>
+                            <a class="btn btn-primary service-reserve-btn" href="booking.html?service=${encodeURIComponent(service.name)}">${t('book')}</a>
                         </div>
                     </article>
                 `;
@@ -314,16 +393,15 @@
 
         function openLightbox(index) {
             const service = services[index];
-            const fallback = fallbackServices[index % fallbackServices.length];
             const vipBox = document.getElementById('lightbox-vip-includes');
             const vipList = document.getElementById('lightbox-vip-list');
             document.getElementById('lightbox-title').innerText = service.name;
-            document.getElementById('lightbox-desc').innerText = service.description || fallback.desc;
-            document.getElementById('lightbox-price').innerText = service.price;
-            document.getElementById('lightbox-duration').innerText = service.duration;
+            document.getElementById('lightbox-desc').innerText = serviceText(service, 'description') || fallbackDesc(index);
+            document.getElementById('lightbox-price').innerText = serviceText(service, 'price');
+            document.getElementById('lightbox-duration').innerText = serviceText(service, 'duration');
             document.getElementById('lightbox-reserve-link').href = `booking.html?service=${encodeURIComponent(service.name)}`;
             if (service.name === 'GOAT VIP Experience') {
-                vipList.innerHTML = vipExperienceIncludes.map(item => `<li>${item}</li>`).join('');
+                vipList.innerHTML = vipExperienceIncludes.map(item => `<li>${currentLang() === 'en' ? (VIP_INCLUDES_EN[item] || item) : item}</li>`).join('');
                 vipBox.hidden = false;
             } else {
                 vipList.innerHTML = '';
@@ -337,7 +415,7 @@
         }
 
         renderServices();
-        window.GabyPreferences.initPreferences({});
+        window.GabyPreferences.initPreferences({ translations });
     </script>
 </body>
 </html>

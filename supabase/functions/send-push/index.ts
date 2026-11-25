@@ -8,7 +8,9 @@
 //       Envía un aviso que ya existe en public.notifications a los dispositivos
 //       que le corresponden: si es de cliente, a los tokens con su código de
 //       cita; si es del personal, a los tokens de ese barbero (o a todos los del
-//       personal si no tiene barbero asignado).
+//       personal si no tiene barbero asignado); si es de audiencia 'app'
+//       (aviso general a toda la app), a TODOS los tokens registrados en
+//       public.push_tokens, aunque el dispositivo nunca haya sacado una cita.
 //   { "mode": "reminders" }
 //       Barrido de recordatorios (para pg_cron cada 15 minutos): crea el aviso
 //       de 24 h y el de 1 h para las citas APROBADA/PENDIENTE que los necesiten
@@ -93,6 +95,14 @@ async function tokensForNotification(
   supabase: ReturnType<typeof createClient>,
   note: { audience: string; barber_id: string | null; appointment_code: string | null },
 ) {
+  if (note.audience === 'app') {
+    // Aviso general a toda la app: todos los dispositivos registrados,
+    // tengan o no códigos de cita y sean o no del personal.
+    const { data } = await supabase
+      .from('push_tokens')
+      .select('id, endpoint');
+    return data || [];
+  }
   if (note.audience === 'client' && note.appointment_code) {
     const { data } = await supabase
       .from('push_tokens')

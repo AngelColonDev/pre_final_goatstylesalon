@@ -493,7 +493,7 @@
 
   /* ============ Envío push compartido (memos / notificaciones) ============ */
   async function enviarPushMasivo(api, titulo, cuerpo, audiencia, persona) {
-    // audiencia: 'barberos' | 'clientes' | 'todos' | 'persona'
+    // audiencia: 'barberos' | 'clientes' | 'todos' | 'persona' | 'app'
     // persona: {tipo:'barber'|'client'|'profile', id, nombre}
     if (audiencia === 'barberos' || audiencia === 'todos') {
       await api.rpc('send_mass_notification', { p_title: titulo, p_body: cuerpo, p_audience: 'staff', p_client_ids: [], p_barber_ids: [] });
@@ -505,6 +505,11 @@
         await api.insert('notifications', { id: nid, audience: 'client', client_id: clientes[i].id, type: 'masiva', title: titulo, body: cuerpo });
         try { await api.client().functions.invoke('send-push', { body: { mode: 'send', notificationId: nid } }); } catch (e) {}
       }
+    }
+    if (audiencia === 'app') {
+      var idApp = uid('nt');
+      await api.insert('notifications', { id: idApp, audience: 'app', type: 'masiva', title: titulo, body: cuerpo });
+      try { await api.client().functions.invoke('send-push', { body: { mode: 'send', notificationId: idApp } }); } catch (e) {}
     }
     if (audiencia === 'persona' && persona) {
       var id2 = uid('nt');
@@ -756,7 +761,7 @@
             for (var i = 0; i < vencidas.length; i++) {
               var v = vencidas[i];
               try {
-                var aud = v.audiencia === 'todos' ? 'todos' : v.audiencia === 'barberos' ? 'barberos' : v.audiencia === 'clientes' ? 'clientes' : 'persona';
+                var aud = v.audiencia === 'todos' ? 'todos' : v.audiencia === 'barberos' ? 'barberos' : v.audiencia === 'clientes' ? 'clientes' : v.audiencia === 'app' ? 'app' : 'persona';
                 await enviarPushMasivo(api, v.titulo, v.cuerpo, aud, null);
                 await api.update('notifications_log', { estado: 'enviado', enviado_at: new Date().toISOString() }, [['id', v.id]]);
                 api.toast('Notificación programada enviada: ' + v.titulo + ' ✅', 'success');
@@ -773,7 +778,7 @@
             '<div style="display:grid;gap:8px;max-width:640px">' +
             '<input id="cs-nt-titulo" placeholder="Título">' +
             '<textarea id="cs-nt-cuerpo" rows="3" placeholder="Mensaje…"></textarea>' +
-            '<label>Audiencia: <select id="cs-nt-aud"><option value="todos">Todos</option><option value="barberos">Barberos</option><option value="clientes">Clientes</option><option value="persona">Una persona</option></select></label>' +
+            '<label>Audiencia: <select id="cs-nt-aud"><option value="todos">Todos</option><option value="barberos">Barberos</option><option value="clientes">Clientes</option><option value="persona">Una persona</option><option value="app">Toda la app (todos los instalados)</option></select></label>' +
             '<label id="cs-nt-persona-wrap" style="display:none">Persona: <select id="cs-nt-persona">' + opcionesPersona + '</select></label>' +
             '<label><input type="checkbox" id="cs-nt-prog"> Programar envío</label>' +
             '<label id="cs-nt-fecha-wrap" style="display:none">Fecha y hora: <input type="datetime-local" id="cs-nt-fecha"></label>' +

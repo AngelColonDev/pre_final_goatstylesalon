@@ -719,15 +719,16 @@
     <nav>
         <div class="nav-logo text-gold" onclick="window.location.href='#hero'">GOAT STYLE SALON</div>
         <ul class="nav-links">
-            <li><a onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth'})">Servicios</a></li>
-            <li><a onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">Reservar</a></li>
-            <li><a onclick="document.getElementById('barberos').scrollIntoView({behavior:'smooth'})">Barberos</a></li>
-            <li><a onclick="document.getElementById('quick-links').scrollIntoView({behavior:'smooth'})">Explorar</a></li>
+            <li><a onclick="document.getElementById('servicios').scrollIntoView({behavior:'smooth'})" data-i18n="navServices">Servicios</a></li>
+            <li><a onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})" data-i18n="navBook">Reservar</a></li>
+            <li><a onclick="document.getElementById('barberos').scrollIntoView({behavior:'smooth'})" data-i18n="navBarbers">Barberos</a></li>
+            <li><a onclick="document.getElementById('quick-links').scrollIntoView({behavior:'smooth'})" data-i18n="navExplore">Explorar</a></li>
         </ul>
         <div class="nav-actions">
-            <a class="icon-btn site-header-bell" href="notificaciones.html" title="Avisos" aria-label="Avisos"><i class="fas fa-bell"></i><span class="site-bell-badge" data-bell-badge hidden></span></a>
-            <button class="icon-btn flag-btn" id="language-toggle" onclick="toggleLanguage()" title="Cambiar idioma" aria-label="Cambiar idioma"></button>
-            <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Cambiar tema"><i class="fas fa-moon"></i></button>
+            <a class="icon-btn site-header-bell" href="notificaciones.html" title="Avisos" aria-label="Avisos" data-i18n-title="notices"><i class="fas fa-bell"></i><span class="site-bell-badge" data-bell-badge hidden></span></a>
+            <a class="icon-btn" id="settings-nav-btn" href="settings.html" title="Configuración" aria-label="Configuración" data-i18n-title="settings"><i class="fas fa-gear"></i></a>
+            <button class="icon-btn flag-btn" id="language-toggle" onclick="toggleLanguage()" title="Cambiar idioma" aria-label="Cambiar idioma" data-i18n-title="changeLanguage"></button>
+            <button class="icon-btn" id="theme-toggle" onclick="toggleTheme()" title="Cambiar tema" data-i18n-title="changeTheme"><i class="fas fa-moon"></i></button>
             <button class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.75rem;" onclick="openDashboard()" data-i18n="staffPortal">Portal del personal</button>
         </div>
     </nav>
@@ -735,23 +736,23 @@
     <div class="mobile-bottom-nav">
         <a href="#hero">
             <i class="fas fa-house"></i>
-            <span>Inicio</span>
+            <span data-i18n="navHome">Inicio</span>
         </a>
         <a href="services.html">
             <i class="fas fa-scissors"></i>
-            <span>Servicios</span>
+            <span data-i18n="navServices">Servicios</span>
         </a>
         <a href="booking.html">
             <i class="fas fa-calendar-check"></i>
-            <span>Cita</span>
+            <span data-i18n="navBookShort">Cita</span>
         </a>
         <a href="news.html">
             <i class="fas fa-newspaper"></i>
-            <span>Noticias</span>
+            <span data-i18n="mobileNews">Noticias</span>
         </a>
         <a href="settings.html">
             <i class="fas fa-gear"></i>
-            <span>Config</span>
+            <span data-i18n="settingsShort">Config</span>
         </a>
     </div>
 
@@ -785,17 +786,17 @@
                 </div>
             </div>
         </header>
-        <section id="quick-links" class="quick-nav" aria-label="Accesos rapidos del sitio">
+        <section id="quick-links" class="quick-nav" aria-label="Accesos rapidos del sitio" data-i18n-aria="quickAccess">
             <div class="container">
                 <div class="quick-nav-inner reveal">
-                    <a class="quick-link-card" href="#servicios"><span>Servicios</span><small>Menú premium y experiencias</small></a>
-                    <a class="quick-link-card" href="#reserva"><span>Reservar</span><small>Cita rápida con tu barbero</small></a>
-                    <a class="quick-link-card" href="#pagos"><span>Pagos</span><small>Métodos aceptados</small></a>
-                    <a class="quick-link-card" href="#barberos"><span>Barberos</span><small>Especialidades y perfiles</small></a>
-                    <a class="quick-link-card" href="#nosotros"><span>Nosotros</span><small>Historia y esencia del estudio</small></a>
-                    <a class="quick-link-card" href="#productos"><span>Productos</span><small>Mantenimiento después del corte</small></a>
-                    <a class="quick-link-card" href="#resenas"><span>Reseñas</span><small>Opiniones y noticias</small></a>
-                    <a class="quick-link-card" href="#info"><span>FAQ</span><small>Preguntas y ubicación</small></a>
+                    <a class="quick-link-card" href="#servicios"><span data-i18n="qServicesT">Servicios</span><small data-i18n="qServicesS">Menú premium y experiencias</small></a>
+                    <a class="quick-link-card" href="#reserva"><span data-i18n="qBookT">Reservar</span><small data-i18n="qBookS">Cita rápida con tu barbero</small></a>
+                    <a class="quick-link-card" href="#pagos"><span data-i18n="qPaymentsT">Pagos</span><small data-i18n="qPaymentsS">Métodos aceptados</small></a>
+                    <a class="quick-link-card" href="#barberos"><span data-i18n="qBarbersT">Barberos</span><small data-i18n="qBarbersS">Especialidades y perfiles</small></a>
+                    <a class="quick-link-card" href="#nosotros"><span data-i18n="qAboutT">Nosotros</span><small data-i18n="qAboutS">Historia y esencia del estudio</small></a>
+                    <a class="quick-link-card" href="#productos"><span data-i18n="qProductsT">Productos</span><small data-i18n="qProductsS">Mantenimiento después del corte</small></a>
+                    <a class="quick-link-card" href="#resenas"><span data-i18n="qReviewsT">Reseñas</span><small data-i18n="qReviewsS">Opiniones y noticias</small></a>
+                    <a class="quick-link-card" href="#info"><span data-i18n="qFaqT">FAQ</span><small data-i18n="qFaqS">Preguntas y ubicación</small></a>
                 </div>
             </div>
         </section>
@@ -807,7 +808,7 @@
             </video>
             <div class="video-overlay"></div>
             <div class="video-content reveal">
-                <h2>La Experiencia <span class="text-gold">GOAT STYLE</span></h2>
+                <h2><span data-i18n="videoTitle">La Experiencia</span> <span class="text-gold">GOAT STYLE</span></h2>
             </div>
         </section>
 
@@ -820,7 +821,7 @@
                 </div>
                 <div class="services-grid" id="services-container" data-maintenance-section="servicios"></div>
                 <div class="services-preview-actions reveal">
-                    <a class="btn btn-ghost" href="services.html">Ver Todos Los Servicios</a>
+                    <a class="btn btn-ghost" href="services.html" data-i18n="viewAllServices">Ver Todos Los Servicios</a>
                 </div>
             </div>
         </section>
@@ -852,15 +853,15 @@
         <section id="barberos">
             <div class="container section-shell">
                 <div class="section-header reveal">
-                    <h2>Nuestros <span class="text-gold">Maestros</span></h2>
-                    <p>Elige según especialidad, estilo y disponibilidad sin perderte en demasiada información.</p>
+                    <h2><span data-i18n="barbersTitleA">Nuestros</span> <span class="text-gold" data-i18n="barbersTitleB">Maestros</span></h2>
+                    <p data-i18n="barbersSub">Elige según especialidad, estilo y disponibilidad sin perderte en demasiada información.</p>
                 </div>
                 <!-- Carrusel con todos los barberos (se llena desde renderBarbersPublic) -->
-                <div class="barbers-marquee" id="barbers-marquee" data-maintenance-section="barberos" aria-label="Barberos del equipo">
+                <div class="barbers-marquee" id="barbers-marquee" data-maintenance-section="barberos" aria-label="Barberos del equipo" data-i18n-aria="teamBarbers">
                     <div class="barbers-marquee-track" id="barbers-marquee-track"></div>
                 </div>
                 <div class="barbers-preview-actions reveal">
-                    <a class="btn btn-ghost" href="barbers.html">Ver Todos Los Barberos</a>
+                    <a class="btn btn-ghost" href="barbers.html" data-i18n="viewAllBarbers">Ver Todos Los Barberos</a>
                 </div>
             </div>
         </section>
@@ -870,10 +871,10 @@
             <div class="container">
                 <div class="about-grid">
                     <div class="about-text reveal">
-                        <h2>Historia de <span class="text-gold">Excelencia</span></h2>
-                        <p>GOAT STYLE SALON no es solo una barbería; es un santuario para el caballero moderno. Fundada con la visión de elevar el estándar de la barbería en Puerto Rico, nos hemos convertido en el lugar de confianza para figuras públicas, influencers y clientes exigentes.</p>
-                        <p>Nuestra filosofía se basa en la precisión milimétrica, la atención al detalle y una experiencia VIP que comienza desde el momento en que cruzas nuestras puertas.</p>
-                        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})">Vive la Experiencia</button>
+                        <h2><span data-i18n="aboutTitleA">Historia de</span> <span class="text-gold" data-i18n="aboutTitleB">Excelencia</span></h2>
+                        <p data-i18n="aboutP1">GOAT STYLE SALON no es solo una barbería; es un santuario para el caballero moderno. Fundada con la visión de elevar el estándar de la barbería en Puerto Rico, nos hemos convertido en el lugar de confianza para figuras públicas, influencers y clientes exigentes.</p>
+                        <p data-i18n="aboutP2">Nuestra filosofía se basa en la precisión milimétrica, la atención al detalle y una experiencia VIP que comienza desde el momento en que cruzas nuestras puertas.</p>
+                        <button class="btn btn-primary" style="margin-top: 1rem;" onclick="document.getElementById('reserva').scrollIntoView({behavior:'smooth'})" data-i18n="aboutBtn">Vive la Experiencia</button>
                     </div>
                     <div class="about-img reveal" style="background-image: url('https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=800&q=80');"></div>
                 </div>
@@ -884,10 +885,10 @@
         <section id="productos">
             <div class="container section-shell">
                 <div class="section-header reveal">
-                    <h2>Productos <span class="text-gold">Selectos</span></h2>
-                    <p>Cada barbero vende sus propios productos para mantener el look después de cada visita.</p>
+                    <h2><span data-i18n="productsTitleA">Productos</span> <span class="text-gold" data-i18n="productsTitleB">Selectos</span></h2>
+                    <p data-i18n="productsSub">Cada barbero vende sus propios productos para mantener el look después de cada visita.</p>
                 </div>
-                <div class="product-filters" id="product-filters" data-maintenance-hide="tienda" role="group" aria-label="Filtrar productos por barbero" hidden></div>
+                <div class="product-filters" id="product-filters" data-maintenance-hide="tienda" role="group" aria-label="Filtrar productos por barbero" data-i18n-aria="filterByBarber" hidden></div>
                 <div class="products-grid" id="products-container" data-maintenance-section="tienda"></div>
             </div>
         </section>
@@ -895,11 +896,11 @@
         <!-- TESTIMONIOS -->
         <section id="testimonios">
             <div class="section-header reveal" style="padding: 0 2rem 4rem;">
-                <h2>Clientes <span class="text-gold">VIP</span></h2>
-                <p>Comentarios rápidos para que la confianza llegue antes de la reserva.</p>
-                <a class="btn btn-primary vip-review-link" href="resenas.html" data-maintenance-hide="resenas">Ver todas las reseñas</a>
+                <h2><span data-i18n="vipTitleA">Clientes</span> <span class="text-gold">VIP</span></h2>
+                <p data-i18n="vipSub">Comentarios rápidos para que la confianza llegue antes de la reserva.</p>
+                <a class="btn btn-primary vip-review-link" href="resenas.html" data-maintenance-hide="resenas" data-i18n="viewAllReviews">Ver todas las reseñas</a>
             </div>
-            <div class="marquee" role="region" aria-label="Reseñas recientes" tabindex="0" data-maintenance-section="resenas">
+            <div class="marquee" role="region" aria-label="Reseñas recientes" data-i18n-aria="recentReviews" tabindex="0" data-maintenance-section="resenas">
                 <div class="marquee-track" id="track-1"></div>
                 <div class="marquee-track" id="track-2" aria-hidden="true"></div>
             </div>
@@ -908,55 +909,55 @@
         <section id="resenas">
             <div class="container section-shell">
                 <div class="section-header reveal">
-                    <h2>Reseñas y <span class="text-gold">Actualizaciones</span></h2>
-                    <p>Comparte tu experiencia y visita la página dedicada de noticias de la barbería.</p>
+                    <h2><span data-i18n="reviewsTitleA">Reseñas y</span> <span class="text-gold" data-i18n="reviewsTitleB">Actualizaciones</span></h2>
+                    <p data-i18n="reviewsSub">Comparte tu experiencia y visita la página dedicada de noticias de la barbería.</p>
                 </div>
                 <div class="section-split">
                     <div class="stack">
                         <div class="panel-card glass reveal">
-                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;">Deja tu reseña</h3>
+                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;" data-i18n="reviewFormTitle">Deja tu reseña</h3>
                             <form id="review-form" class="stack" data-maintenance-hide="resenas" onsubmit="handleReviewSubmit(event)">
-                                <p class="review-form-note">Escribe tu nombre completo, el servicio que te hiciste y tu opinión. Tú decides si se publica en la página; la barbería la revisa antes de publicarla.</p>
-                                <div class="form-group"><label class="form-label" for="review-name">Nombre completo</label><input class="form-input" id="review-name" type="text" maxlength="80" autocomplete="name" placeholder="Tu nombre y apellido" required></div>
-                                <div class="form-group"><label class="form-label" for="review-service">Servicio</label><select class="form-input" id="review-service" required></select></div>
-                                <div class="form-group"><label class="form-label" for="review-barber">Barbero</label><select class="form-input" id="review-barber" required></select></div>
+                                <p class="review-form-note" data-i18n="reviewFormNote">Escribe tu nombre completo, el servicio que te hiciste y tu opinión. Tú decides si se publica en la página; la barbería la revisa antes de publicarla.</p>
+                                <div class="form-group"><label class="form-label" for="review-name" data-i18n="fullName">Nombre completo</label><input class="form-input" id="review-name" type="text" maxlength="80" autocomplete="name" placeholder="Tu nombre y apellido" data-i18n-placeholder="fullNamePh" required></div>
+                                <div class="form-group"><label class="form-label" for="review-service" data-i18n="formService">Servicio</label><select class="form-input" id="review-service" required></select></div>
+                                <div class="form-group"><label class="form-label" for="review-barber" data-i18n="barber">Barbero</label><select class="form-input" id="review-barber" required></select></div>
                                 <div class="form-group">
-                                    <span class="form-label">Calificación</span>
-                                    <div class="star-picker" id="review-star-picker" role="group" aria-label="Calificación de 1 a 5 estrellas">
-                                        <button type="button" class="star-btn" data-star="1" aria-label="1 estrella">★</button>
-                                        <button type="button" class="star-btn" data-star="2" aria-label="2 estrellas">★</button>
-                                        <button type="button" class="star-btn" data-star="3" aria-label="3 estrellas">★</button>
-                                        <button type="button" class="star-btn" data-star="4" aria-label="4 estrellas">★</button>
-                                        <button type="button" class="star-btn" data-star="5" aria-label="5 estrellas">★</button>
+                                    <span class="form-label" data-i18n="ratingLabel">Calificación</span>
+                                    <div class="star-picker" id="review-star-picker" role="group" aria-label="Calificación de 1 a 5 estrellas" data-i18n-aria="ratingGroup">
+                                        <button type="button" class="star-btn" data-star="1" aria-label="1 estrella" data-i18n-aria="star1">★</button>
+                                        <button type="button" class="star-btn" data-star="2" aria-label="2 estrellas" data-i18n-aria="star2">★</button>
+                                        <button type="button" class="star-btn" data-star="3" aria-label="3 estrellas" data-i18n-aria="star3">★</button>
+                                        <button type="button" class="star-btn" data-star="4" aria-label="4 estrellas" data-i18n-aria="star4">★</button>
+                                        <button type="button" class="star-btn" data-star="5" aria-label="5 estrellas" data-i18n-aria="star5">★</button>
                                     </div>
                                     <input type="hidden" id="review-rating" value="5">
                                 </div>
-                                <div class="form-group"><label class="form-label" for="review-text">Tu opinión</label><textarea class="form-input" id="review-text" rows="4" maxlength="600" placeholder="Cuéntanos cómo te fue"></textarea></div>
+                                <div class="form-group"><label class="form-label" for="review-text" data-i18n="yourOpinion">Tu opinión</label><textarea class="form-input" id="review-text" rows="4" maxlength="600" placeholder="Cuéntanos cómo te fue" data-i18n-placeholder="yourOpinionPh"></textarea></div>
                                 <fieldset class="form-group review-publish">
-                                    <legend class="form-label">¿Podemos publicar tu reseña en la página?</legend>
-                                    <label class="review-publish-option"><input type="radio" name="review-publish" value="yes" required><span>Sí, pueden publicarla con mi nombre</span></label>
-                                    <label class="review-publish-option"><input type="radio" name="review-publish" value="no"><span>No, solo para la barbería</span></label>
+                                    <legend class="form-label" data-i18n="publishLegend">¿Podemos publicar tu reseña en la página?</legend>
+                                    <label class="review-publish-option"><input type="radio" name="review-publish" value="yes" required><span data-i18n="publishYes">Sí, pueden publicarla con mi nombre</span></label>
+                                    <label class="review-publish-option"><input type="radio" name="review-publish" value="no"><span data-i18n="publishNo">No, solo para la barbería</span></label>
                                 </fieldset>
                                 <div class="form-group">
-                                    <label class="form-label" for="review-photo">Tu foto (opcional)</label>
+                                    <label class="form-label" for="review-photo" data-i18n="photoLabel">Tu foto (opcional)</label>
                                     <input class="form-input" id="review-photo" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="review-photo-help">
-                                    <p id="review-photo-help" class="review-form-note">JPG, PNG o WebP. Tu foto aparecerá junto a tu reseña si se publica.</p>
+                                    <p id="review-photo-help" class="review-form-note" data-i18n="photoHelp">JPG, PNG o WebP. Tu foto aparecerá junto a tu reseña si se publica.</p>
                                 </div>
-                                <button class="btn btn-primary" type="submit" style="justify-content: center;">Enviar reseña</button>
+                                <button class="btn btn-primary" type="submit" style="justify-content: center;" data-i18n="sendReview">Enviar reseña</button>
                                 <div id="review-status" class="review-form-note" role="status"></div>
                             </form>
                         </div>
                     </div>
                     <div class="stack">
                         <div class="panel-card glass reveal">
-                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;">Noticias de la barbería</h3>
-                            <p class="review-form-note" style="margin-bottom: 1rem;">Visita la página completa de noticias para ver avisos, publicaciones y novedades del staff.</p>
+                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;" data-i18n="shopNewsTitle">Noticias de la barbería</h3>
+                            <p class="review-form-note" style="margin-bottom: 1rem;" data-i18n="shopNewsNote">Visita la página completa de noticias para ver avisos, publicaciones y novedades del staff.</p>
                             <div id="public-shop-status"></div>
                             <div id="closure-notice" class="empty-state" style="margin-top: 1rem;"></div>
-                            <a class="btn btn-primary" href="news.html" style="margin-top: 1rem;">Ir a Noticias</a>
+                            <a class="btn btn-primary" href="news.html" style="margin-top: 1rem;" data-i18n="goToNews">Ir a Noticias</a>
                         </div>
                         <div class="panel-card glass reveal">
-                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;">Última actualización</h3>
+                            <h3 style="font-family: var(--font-display); font-size: 1.7rem; margin-bottom: 1rem;" data-i18n="latestUpdateTitle">Última actualización</h3>
                             <div id="news-feed" class="feed-list" data-maintenance-section="noticias"></div>
                         </div>
                     </div>
@@ -969,40 +970,40 @@
                 <div class="info-split">
                     <div class="reveal">
                         <div class="section-header" style="text-align: left; margin-bottom: 3rem;">
-                            <h2 style="font-size: 2.5rem;">Preguntas <span class="text-gold">Frecuentes</span></h2>
+                            <h2 style="font-size: 2.5rem;"><span data-i18n="faqTitleA">Preguntas</span> <span class="text-gold" data-i18n="faqTitleB">Frecuentes</span></h2>
                         </div>
                         <div class="faq-item active" onclick="toggleFaq(this)">
-                            <div class="faq-q">¿Necesito cita previa? <span class="faq-icon">+</span></div>
-                            <div class="faq-a">Sí, trabajamos exclusivamente con citas para garantizar la experiencia VIP de cada cliente.</div>
+                            <div class="faq-q"><span data-i18n="faqQ1">¿Necesito cita previa?</span> <span class="faq-icon">+</span></div>
+                            <div class="faq-a" data-i18n="faqA1">Sí, trabajamos exclusivamente con citas para garantizar la experiencia VIP de cada cliente.</div>
                         </div>
                         <div class="faq-item" onclick="toggleFaq(this)">
-                            <div class="faq-q">¿Manejan productos premium? <span class="faq-icon">+</span></div>
-                            <div class="faq-a">Vendemos productos seleccionados de la más alta calidad para el cuidado de tu cabello y barba.</div>
+                            <div class="faq-q"><span data-i18n="faqQ2">¿Manejan productos premium?</span> <span class="faq-icon">+</span></div>
+                            <div class="faq-a" data-i18n="faqA2">Vendemos productos seleccionados de la más alta calidad para el cuidado de tu cabello y barba.</div>
                         </div>
                         <div class="faq-item" onclick="toggleFaq(this)">
-                            <div class="faq-q">¿Dónde están ubicados? <span class="faq-icon">+</span></div>
-                            <div class="faq-a">Nos encontramos en Barranquitas, Puerto Rico.</div>
+                            <div class="faq-q"><span data-i18n="faqQ3">¿Dónde están ubicados?</span> <span class="faq-icon">+</span></div>
+                            <div class="faq-a" data-i18n="faqA3">Nos encontramos en Barranquitas, Puerto Rico.</div>
                         </div>
                         <div class="faq-item" onclick="toggleFaq(this)">
-                            <div class="faq-q">¿Puedo cancelar mi cita? <span class="faq-icon">+</span></div>
-                            <div class="faq-a">Sí. Comunícate con la barbería por teléfono o WhatsApp y te ayudamos a cancelarla o cambiarla.</div>
+                            <div class="faq-q"><span data-i18n="faqQ4">¿Puedo cancelar mi cita?</span> <span class="faq-icon">+</span></div>
+                            <div class="faq-a" data-i18n="faqA4">Sí. Comunícate con la barbería por teléfono o WhatsApp y te ayudamos a cancelarla o cambiarla.</div>
                         </div>
                         <div class="faq-item" onclick="toggleFaq(this)">
-                            <div class="faq-q">¿Cuánto tiempo dura un servicio VIP? <span class="faq-icon">+</span></div>
-                            <div class="faq-a">Depende de la opción elegida, pero los servicios VIP pueden durar desde 30 minutos hasta 2 horas y 45 minutos.</div>
+                            <div class="faq-q"><span data-i18n="faqQ5">¿Cuánto tiempo dura un servicio VIP?</span> <span class="faq-icon">+</span></div>
+                            <div class="faq-a" data-i18n="faqA5">Depende de la opción elegida, pero los servicios VIP pueden durar desde 30 minutos hasta 2 horas y 45 minutos.</div>
                         </div>
                         <div class="faq-item" onclick="toggleFaq(this)">
-                            <div class="faq-q">¿Puedo elegir mi barbero favorito? <span class="faq-icon">+</span></div>
-                            <div class="faq-a">Claro, escoges tu barbero al reservar tu cita.</div>
+                            <div class="faq-q"><span data-i18n="faqQ6">¿Puedo elegir mi barbero favorito?</span> <span class="faq-icon">+</span></div>
+                            <div class="faq-a" data-i18n="faqA6">Claro, escoges tu barbero al reservar tu cita.</div>
                         </div>
                         <div class="faq-item" onclick="toggleFaq(this)">
-                            <div class="faq-q">¿Publican avisos importantes? <span class="faq-icon">+</span></div>
-                            <div class="faq-a">Sí, contamos con una página de noticias para cierres, horarios especiales y anuncios del equipo.</div>
+                            <div class="faq-q"><span data-i18n="faqQ7">¿Publican avisos importantes?</span> <span class="faq-icon">+</span></div>
+                            <div class="faq-a" data-i18n="faqA7">Sí, contamos con una página de noticias para cierres, horarios especiales y anuncios del equipo.</div>
                         </div>
                     </div>
                     <div class="reveal">
                         <div class="section-header" style="text-align: left; margin-bottom: 3rem;">
-                            <h2 style="font-size: 2.5rem;">Visitanos en <span class="text-gold">Barranquitas</span></h2>
+                            <h2 style="font-size: 2.5rem;"><span data-i18n="visitTitleA">Visitanos en</span> <span class="text-gold">Barranquitas</span></h2>
                         </div>
                         <!-- El mapa solo se carga con consentimiento de cookies funcionales (lo maneja legal.js). -->
                         <div class="map-wrapper" id="shop-map" data-consent-embed="functional" data-title="Mapa de la barbería"></div>
@@ -1020,8 +1021,8 @@
         <div class="barbers-directory">
             <div class="client-modal-header">
                 <div class="section-header" style="margin-bottom: 0; text-align: left;">
-                    <h2>Todos Nuestros <span class="text-gold">Barberos</span></h2>
-                    <p>Conoce al equipo completo sin sobrecargar la portada.</p>
+                    <h2><span data-i18n="allBarbersTitleA">Todos Nuestros</span> <span class="text-gold" data-i18n="allBarbersTitleB">Barberos</span></h2>
+                    <p data-i18n="allBarbersSub">Conoce al equipo completo sin sobrecargar la portada.</p>
                 </div>
                 <button class="client-close" type="button" onclick="closeBarbersDirectory()"><i class="fas fa-times"></i></button>
             </div>
@@ -1037,19 +1038,19 @@
                 <div class="dash-brand">
                     <img src="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png" alt="Logo GOAT Style Salón">
                     <div class="dash-brand-copy">
-                        <h2 style="font-family: var(--font-display); color: var(--gold-2);">Panel de <span class="text-gold">Control</span></h2>
-                        <p>Acceso administrativo de GOAT Style Salón</p>
+                        <h2 style="font-family: var(--font-display); color: var(--gold-2);"><span data-i18n="dashTitleA">Panel de</span> <span class="text-gold" data-i18n="dashTitleB">Control</span></h2>
+                        <p data-i18n="dashSub">Acceso administrativo de GOAT Style Salón</p>
                     </div>
                 </div>
                 <div style="display: flex; gap: 1rem;">
-                    <button class="btn btn-ghost" onclick="closeDashboard()"><i class="fas fa-arrow-left"></i> Volver a la Web</button>
-                    <button class="btn btn-primary" onclick="logoutDashboard()">Cerrar Sesión</button>
+                    <button class="btn btn-ghost" onclick="closeDashboard()"><i class="fas fa-arrow-left"></i> <span data-i18n="backToWeb">Volver a la Web</span></button>
+                    <button class="btn btn-primary" onclick="logoutDashboard()" data-i18n="logout">Cerrar Sesión</button>
                 </div>
             </div>
             
             <div class="dash-tabs">
-                <button class="dash-tab active" onclick="switchDashTab('general', this)">General (Admin)</button>
-                <button class="dash-tab" onclick="switchDashTab('general', this)">Admin General</button>
+                <button class="dash-tab active" onclick="switchDashTab('general', this)" data-i18n="dashTabGeneral">General (Admin)</button>
+                <button class="dash-tab" onclick="switchDashTab('general', this)" data-i18n="dashTabAdmin">Admin General</button>
                 <button class="dash-tab" onclick="switchDashTab('darialex', this)">Panel Darialex</button>
             </div>
 
@@ -1065,14 +1066,14 @@
                 <h3 id="lightbox-title"></h3>
                 <p id="lightbox-desc"></p>
                 <div class="vip-includes" id="lightbox-vip-includes" hidden>
-                    <h4>Incluye</h4>
+                    <h4 data-i18n="includesLabel">Incluye</h4>
                     <ul id="lightbox-vip-list"></ul>
                 </div>
                 <div style="display: flex; gap: 2rem; margin-bottom: 2rem;">
-                    <div><strong style="color: var(--gold-2)">Precio:</strong> <span id="lightbox-price"></span></div>
-                    <div><strong style="color: var(--gold-2)">Duración:</strong> <span id="lightbox-duration"></span></div>
+                    <div><strong style="color: var(--gold-2)" data-i18n="priceLabel">Precio:</strong> <span id="lightbox-price"></span></div>
+                    <div><strong style="color: var(--gold-2)" data-i18n="durationLabel">Duración:</strong> <span id="lightbox-duration"></span></div>
                 </div>
-                <button class="btn btn-primary" onclick="closeLightbox(); reserveService(currentLightboxIndex)">Reservar este Servicio</button>
+                <button class="btn btn-primary" onclick="closeLightbox(); reserveService(currentLightboxIndex)" data-i18n="reserveServiceBtn">Reservar este Servicio</button>
             </div>
         </div>
     </div>
@@ -1081,19 +1082,19 @@
     <div class="login-overlay" id="login-overlay" style="display: none;" onclick="closeLoginOverlay(event)">
         <div class="login-box glass" onclick="event.stopPropagation()">
             <img src="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png" alt="Logo GOAT Style Salón" class="brand-logo-mini">
-            <h2>Acceso Staff</h2>
-            <p>Ingrese su correo y contrase&ntilde;a para entrar al panel del staff.</p>
+            <h2 data-i18n="staffAccess">Acceso Staff</h2>
+            <p data-i18n="staffLoginNote">Ingrese su correo y contrase&ntilde;a para entrar al panel del staff.</p>
             <form class="login-form" onsubmit="handleStaffLogin(event)">
                 <div class="form-group">
-                    <label class="form-label" for="staff-email">Correo electr&oacute;nico</label>
+                    <label class="form-label" for="staff-email" data-i18n="staffEmailLabel">Correo electr&oacute;nico</label>
                     <input class="form-input" type="email" id="staff-email" placeholder="tucorreo@goatstylesalon.com" autocomplete="username" required>
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="staff-password">Contrase&ntilde;a</label>
-                    <input class="form-input" type="password" id="staff-password" placeholder="Tu contraseña" autocomplete="current-password" required>
+                    <label class="form-label" for="staff-password" data-i18n="staffPasswordLabel">Contrase&ntilde;a</label>
+                    <input class="form-input" type="password" id="staff-password" placeholder="Tu contraseña" data-i18n-placeholder="staffPasswordPh" autocomplete="current-password" required>
                 </div>
                 <div class="login-error" id="login-error"></div>
-                <button class="btn btn-primary" type="submit" style="justify-content: center;">Entrar al Portal</button>
+                <button class="btn btn-primary" type="submit" style="justify-content: center;" data-i18n="enterPortal">Entrar al Portal</button>
             </form>
         </div>
     </div>
@@ -1104,22 +1105,74 @@
     <script src="site-guard.js?v=20261124b"></script>
     <script src="password-policy.js?v=20261124b"></script>
     <script src="security.js?v=20261124f"></script>
-    <script src="shared-forms.js?v=20261124b"></script>
-    <script src="booking-engine.js?v=20261124e"></script>
-    <script src="public-reviews.js?v=20261124b"></script>
-    <script src="booking-widget.js?v=20261124e"></script>
-    <script src="legal.js?v=20261124b"></script>
+    <script src="shared-forms.js?v=20261201a"></script>
+    <script src="booking-engine.js?v=20261201a"></script>
+    <script src="public-reviews.js?v=20261201a"></script>
+    <script src="booking-widget.js?v=20261201a"></script>
+    <script src="legal.js?v=20261201a"></script>
     <script src="legal-gate.js?v=20261125a"></script>
-    <script src="site-chrome.js?v=20261124f"></script>
+    <script src="site-chrome.js?v=20261201a"></script>
     <script>
         // =========================================
         // 1. DATA & I18N DICTIONARY
         // =========================================
         const translations = {
-            es: { staffPortal: "Portal del personal", brand: "GOAT STYLE SALON", tagline: "SALÓN & BARBERÍA", heroTitle: "Donde las celebridades confían su imagen", heroSubtitle: "Cortes premium, experiencia VIP y resultados impecables en Barranquitas, Puerto Rico.", bookNow: "Reservar Cita", viewServices: "Ver Servicios", badge1: "Barbería Premium", badge2: "Atención VIP", badge3: "Especialistas Certificados", badge4: "Clientes Reconocidos", servicesTitle: "Servicios Premium", servicesSub: "Experiencias diseñadas para caballeros exigentes", bookingTitle: "Sistema de Reservaciones", service: "Servicios", firstName: "Nombre", lastName: "Apellido", email: "Email", phone: "Teléfono", dob: "Fecha Nacimiento", barber: "Barbero", dateTime: "Fecha y Hora", confirmBooking: "Confirmar solicitud de cita", bookingSuccess: "✓ Solicitud Enviada Correctamente", bookingCodeMsg: "Tu código de reserva es:", bookingCodeWarning: "Guarda este código para consultar el estado de tu cita.", checkStatus: "Consultar Estado de Cita", search: "Buscar" },
-            en: { staffPortal: "Staff Portal", brand: "GOAT STYLE SALON", tagline: "SALON & BARBERSHOP", heroTitle: "Where celebrities trust their image", heroSubtitle: "Premium cuts, VIP experience and impeccable results in Barranquitas, Puerto Rico.", bookNow: "Book Appointment", viewServices: "View Services", badge1: "Premium Barbershop", badge2: "VIP Service", badge3: "Certified Specialists", badge4: "Recognized Clients", servicesTitle: "Premium Services", servicesSub: "Experiences designed for demanding gentlemen", bookingTitle: "Booking System", service: "Services", firstName: "First Name", lastName: "Last Name", email: "Email", phone: "Phone", dob: "Date of Birth", barber: "Barber", dateTime: "Date and Time", confirmBooking: "Confirm appointment request", bookingSuccess: "✓ Request Sent Successfully", bookingCodeMsg: "Your booking code is:", bookingCodeWarning: "Save this code to check your appointment status.", checkStatus: "Check Appointment Status", search: "Search" }
+            es: { staffPortal: "Portal del personal", brand: "GOAT STYLE SALON", tagline: "SALÓN & BARBERÍA", heroTitle: "Donde las celebridades confían su imagen", heroSubtitle: "Cortes premium, experiencia VIP y resultados impecables en Barranquitas, Puerto Rico.", bookNow: "Reservar Cita", viewServices: "Ver Servicios", badge1: "Barbería Premium", badge2: "Atención VIP", badge3: "Especialistas Certificados", badge4: "Clientes Reconocidos", servicesTitle: "Servicios Premium", servicesSub: "Experiencias diseñadas para caballeros exigentes", bookingTitle: "Sistema de Reservaciones", service: "Servicios", firstName: "Nombre", lastName: "Apellido", email: "Email", phone: "Teléfono", dob: "Fecha Nacimiento", barber: "Barbero", dateTime: "Fecha y Hora", confirmBooking: "Confirmar solicitud de cita", bookingSuccess: "✓ Solicitud Enviada Correctamente", bookingCodeMsg: "Tu código de reserva es:", bookingCodeWarning: "Guarda este código para consultar el estado de tu cita.", checkStatus: "Consultar Estado de Cita", search: "Buscar", notices: "Avisos", settings: "Configuración", settingsShort: "Config", changeLanguage: "Cambiar idioma", changeTheme: "Cambiar tema", navHome: "Inicio", navServices: "Servicios", navBook: "Reservar", navBookShort: "Cita", navBarbers: "Barberos", navExplore: "Explorar", mobileNews: "Noticias", quickAccess: "Accesos rapidos del sitio", teamBarbers: "Barberos del equipo", filterByBarber: "Filtrar productos por barbero", recentReviews: "Reseñas recientes",
+            qServicesT: "Servicios", qServicesS: "Menú premium y experiencias", qBookT: "Reservar", qBookS: "Cita rápida con tu barbero", qPaymentsT: "Pagos", qPaymentsS: "Métodos aceptados", qBarbersT: "Barberos", qBarbersS: "Especialidades y perfiles", qAboutT: "Nosotros", qAboutS: "Historia y esencia del estudio", qProductsT: "Productos", qProductsS: "Mantenimiento después del corte", qReviewsT: "Reseñas", qReviewsS: "Opiniones y noticias", qFaqT: "FAQ", qFaqS: "Preguntas y ubicación",
+            videoTitle: "La Experiencia", viewAllServices: "Ver Todos Los Servicios", viewAllBarbers: "Ver Todos Los Barberos", barbersTitleA: "Nuestros", barbersTitleB: "Maestros", barbersSub: "Elige según especialidad, estilo y disponibilidad sin perderte en demasiada información.",
+            aboutTitleA: "Historia de", aboutTitleB: "Excelencia", aboutP1: "GOAT STYLE SALON no es solo una barbería; es un santuario para el caballero moderno. Fundada con la visión de elevar el estándar de la barbería en Puerto Rico, nos hemos convertido en el lugar de confianza para figuras públicas, influencers y clientes exigentes.", aboutP2: "Nuestra filosofía se basa en la precisión milimétrica, la atención al detalle y una experiencia VIP que comienza desde el momento en que cruzas nuestras puertas.", aboutBtn: "Vive la Experiencia",
+            productsTitleA: "Productos", productsTitleB: "Selectos", productsSub: "Cada barbero vende sus propios productos para mantener el look después de cada visita.", vipTitleA: "Clientes", vipSub: "Comentarios rápidos para que la confianza llegue antes de la reserva.", viewAllReviews: "Ver todas las reseñas",
+            reviewsTitleA: "Reseñas y", reviewsTitleB: "Actualizaciones", reviewsSub: "Comparte tu experiencia y visita la página dedicada de noticias de la barbería.", reviewFormTitle: "Deja tu reseña", reviewFormNote: "Escribe tu nombre completo, el servicio que te hiciste y tu opinión. Tú decides si se publica en la página; la barbería la revisa antes de publicarla.", fullName: "Nombre completo", fullNamePh: "Tu nombre y apellido", formService: "Servicio", ratingLabel: "Calificación", ratingGroup: "Calificación de 1 a 5 estrellas", star1: "1 estrella", star2: "2 estrellas", star3: "3 estrellas", star4: "4 estrellas", star5: "5 estrellas", yourOpinion: "Tu opinión", yourOpinionPh: "Cuéntanos cómo te fue", publishLegend: "¿Podemos publicar tu reseña en la página?", publishYes: "Sí, pueden publicarla con mi nombre", publishNo: "No, solo para la barbería", photoLabel: "Tu foto (opcional)", photoHelp: "JPG, PNG o WebP. Tu foto aparecerá junto a tu reseña si se publica.", sendReview: "Enviar reseña",
+            shopNewsTitle: "Noticias de la barbería", shopNewsNote: "Visita la página completa de noticias para ver avisos, publicaciones y novedades del staff.", goToNews: "Ir a Noticias", latestUpdateTitle: "Última actualización",
+            faqTitleA: "Preguntas", faqTitleB: "Frecuentes", faqQ1: "¿Necesito cita previa?", faqA1: "Sí, trabajamos exclusivamente con citas para garantizar la experiencia VIP de cada cliente.", faqQ2: "¿Manejan productos premium?", faqA2: "Vendemos productos seleccionados de la más alta calidad para el cuidado de tu cabello y barba.", faqQ3: "¿Dónde están ubicados?", faqA3: "Nos encontramos en Barranquitas, Puerto Rico.", faqQ4: "¿Puedo cancelar mi cita?", faqA4: "Sí. Comunícate con la barbería por teléfono o WhatsApp y te ayudamos a cancelarla o cambiarla.", faqQ5: "¿Cuánto tiempo dura un servicio VIP?", faqA5: "Depende de la opción elegida, pero los servicios VIP pueden durar desde 30 minutos hasta 2 horas y 45 minutos.", faqQ6: "¿Puedo elegir mi barbero favorito?", faqA6: "Claro, escoges tu barbero al reservar tu cita.", faqQ7: "¿Publican avisos importantes?", faqA7: "Sí, contamos con una página de noticias para cierres, horarios especiales y anuncios del equipo.", visitTitleA: "Visitanos en",
+            allBarbersTitleA: "Todos Nuestros", allBarbersTitleB: "Barberos", allBarbersSub: "Conoce al equipo completo sin sobrecargar la portada.", dashTitleA: "Panel de", dashTitleB: "Control", dashSub: "Acceso administrativo de GOAT Style Salón", backToWeb: "Volver a la Web", logout: "Cerrar Sesión", dashTabGeneral: "General (Admin)", dashTabAdmin: "Admin General",
+            includesLabel: "Incluye", priceLabel: "Precio:", durationLabel: "Duración:", reserveServiceBtn: "Reservar este Servicio", staffAccess: "Acceso Staff", staffLoginNote: "Ingrese su correo y contraseña para entrar al panel del staff.", staffEmailLabel: "Correo electrónico", staffPasswordLabel: "Contraseña", staffPasswordPh: "Tu contraseña", enterPortal: "Entrar al Portal",
+            reserve: "Reservar", barberActive: "Activo", barberDeactivated: "Desactivado", yearsExp: "Años Exp.", vipClientsLabel: "Clientes VIP", viewProfile: "Ver Perfil", viewProfileOf: "Ver perfil de", soldBy: "Vendido por", allFilter: "Todos", inStock: "en stock", soldOut: "Agotado", noProducts: "No hay productos disponibles por ahora.", chooseService: "Escoge el servicio", chooseBarber: "Escoge tu barbero", reviewPublishChoice: "Indica si permites que publiquemos tu reseña en la página.", reviewSentPublic: "Reseña enviada. Se publicará cuando la barbería la apruebe.", reviewSentPrivate: "Reseña enviada. Solo la verá la barbería.", reviewThanksPublic: "Gracias. Tu reseña se envió y se publicará cuando la barbería la apruebe.", reviewThanksPrivate: "Gracias. Tu reseña se envió a la barbería y no se publicará en la página.", reviewSendError: "No se pudo enviar tu reseña.", reviewsEmpty: "Pronto verás aquí las reseñas de nuestros clientes.",
+            shopOpen: "Abiertos en línea", shopOffline: "Fuera de línea", noNotices: "Sin avisos especiales por el momento.", statusError: "No se pudo consultar ahora. Intenta de nuevo.", statusNotFound: "Código no encontrado.", statusLabelText: "Estado", loginSuccess: "Sesión iniciada. Entrando al panel...", pwdChangeTitle: "Crea tu contraseña personal", pwdChangeMsg: "Por seguridad, antes de entrar al panel debes crear una contraseña nueva que solo tú conozcas.", directionsGoogle: "Cómo llegar (Google Maps)", directionsWaze: "Abrir en Waze", directionsApple: "Apple Maps",
+            dashRevenue: "Ingresos del Día", dashNewClients: "Clientes Nuevos (Mes)", dashVipClients: "Clientes VIP", dashCompleted: "Citas Completadas", dashWeekly: "Rendimiento Semanal (Ingresos)", appointmentsMgmt: "Gestión de Citas", colCode: "Código", colClient: "Cliente", colService: "Servicio", colStatus: "Estado", colActions: "Acciones", dayMon: "Lun", dayTue: "Mar", dayWed: "Mié", dayThu: "Jue", dayFri: "Vie", daySat: "Sáb", daySun: "Dom" },
+            en: { staffPortal: "Staff Portal", brand: "GOAT STYLE SALON", tagline: "SALON & BARBERSHOP", heroTitle: "Where celebrities trust their image", heroSubtitle: "Premium cuts, VIP experience and impeccable results in Barranquitas, Puerto Rico.", bookNow: "Book Appointment", viewServices: "View Services", badge1: "Premium Barbershop", badge2: "VIP Service", badge3: "Certified Specialists", badge4: "Recognized Clients", servicesTitle: "Premium Services", servicesSub: "Experiences designed for demanding gentlemen", bookingTitle: "Booking System", service: "Services", firstName: "First Name", lastName: "Last Name", email: "Email", phone: "Phone", dob: "Date of Birth", barber: "Barber", dateTime: "Date and Time", confirmBooking: "Confirm appointment request", bookingSuccess: "✓ Request Sent Successfully", bookingCodeMsg: "Your booking code is:", bookingCodeWarning: "Save this code to check your appointment status.", checkStatus: "Check Appointment Status", search: "Search", notices: "Notices", settings: "Settings", settingsShort: "Settings", changeLanguage: "Change language", changeTheme: "Change theme", navHome: "Home", navServices: "Services", navBook: "Book", navBookShort: "Appt.", navBarbers: "Barbers", navExplore: "Explore", mobileNews: "News", quickAccess: "Quick site links", teamBarbers: "Team barbers", filterByBarber: "Filter products by barber", recentReviews: "Recent reviews",
+            qServicesT: "Services", qServicesS: "Premium menu and experiences", qBookT: "Book", qBookS: "Quick appointment with your barber", qPaymentsT: "Payments", qPaymentsS: "Accepted methods", qBarbersT: "Barbers", qBarbersS: "Specialties and profiles", qAboutT: "About Us", qAboutS: "History and essence of the studio", qProductsT: "Products", qProductsS: "Upkeep after your cut", qReviewsT: "Reviews", qReviewsS: "Opinions and news", qFaqT: "FAQ", qFaqS: "Questions and location",
+            videoTitle: "The Experience", viewAllServices: "View All Services", viewAllBarbers: "View All Barbers", barbersTitleA: "Our", barbersTitleB: "Masters", barbersSub: "Choose by specialty, style and availability without getting lost in too much information.",
+            aboutTitleA: "A History of", aboutTitleB: "Excellence", aboutP1: "GOAT STYLE SALON is not just a barbershop; it is a sanctuary for the modern gentleman. Founded with the vision of raising the standard of barbering in Puerto Rico, we have become the trusted place for public figures, influencers and demanding clients.", aboutP2: "Our philosophy is based on millimetric precision, attention to detail and a VIP experience that begins the moment you walk through our doors.", aboutBtn: "Live the Experience",
+            productsTitleA: "Selected", productsTitleB: "Products", productsSub: "Each barber sells his own products to keep your look after every visit.", vipTitleA: "VIP", vipSub: "Quick comments so trust arrives before you book.", viewAllReviews: "View all reviews",
+            reviewsTitleA: "Reviews &", reviewsTitleB: "Updates", reviewsSub: "Share your experience and visit the barbershop's dedicated news page.", reviewFormTitle: "Leave your review", reviewFormNote: "Write your full name, the service you got and your opinion. You decide whether it is published on the page; the barbershop reviews it before publishing.", fullName: "Full name", fullNamePh: "Your first and last name", formService: "Service", ratingLabel: "Rating", ratingGroup: "Rating from 1 to 5 stars", star1: "1 star", star2: "2 stars", star3: "3 stars", star4: "4 stars", star5: "5 stars", yourOpinion: "Your opinion", yourOpinionPh: "Tell us how it went", publishLegend: "May we publish your review on the page?", publishYes: "Yes, you may publish it with my name", publishNo: "No, just for the barbershop", photoLabel: "Your photo (optional)", photoHelp: "JPG, PNG or WebP. Your photo will appear next to your review if it is published.", sendReview: "Send review",
+            shopNewsTitle: "Barbershop news", shopNewsNote: "Visit the full news page to see notices, posts and staff updates.", goToNews: "Go to News", latestUpdateTitle: "Latest update",
+            faqTitleA: "Frequently Asked", faqTitleB: "Questions", faqQ1: "Do I need an appointment?", faqA1: "Yes, we work by appointment only to guarantee every client's VIP experience.", faqQ2: "Do you carry premium products?", faqA2: "We sell selected top-quality products for the care of your hair and beard.", faqQ3: "Where are you located?", faqA3: "We are located in Barranquitas, Puerto Rico.", faqQ4: "Can I cancel my appointment?", faqA4: "Yes. Contact the barbershop by phone or WhatsApp and we will help you cancel or reschedule it.", faqQ5: "How long does a VIP service take?", faqA5: "It depends on the option you choose, but VIP services can last from 30 minutes to 2 hours and 45 minutes.", faqQ6: "Can I choose my favorite barber?", faqA6: "Of course, you pick your barber when you book your appointment.", faqQ7: "Do you post important notices?", faqA7: "Yes, we have a news page for closures, special hours and team announcements.", visitTitleA: "Visit us in",
+            allBarbersTitleA: "All Our", allBarbersTitleB: "Barbers", allBarbersSub: "Meet the full team without overloading the home page.", dashTitleA: "Control", dashTitleB: "Panel", dashSub: "GOAT Style Salón administrative access", backToWeb: "Back to Website", logout: "Log Out", dashTabGeneral: "General (Admin)", dashTabAdmin: "General Admin",
+            includesLabel: "Includes", priceLabel: "Price:", durationLabel: "Duration:", reserveServiceBtn: "Book this Service", staffAccess: "Staff Access", staffLoginNote: "Enter your email and password to access the staff portal.", staffEmailLabel: "Email", staffPasswordLabel: "Password", staffPasswordPh: "Your password", enterPortal: "Enter the Portal",
+            reserve: "Book", barberActive: "Active", barberDeactivated: "Deactivated", yearsExp: "Years Exp.", vipClientsLabel: "VIP Clients", viewProfile: "View Profile", viewProfileOf: "View profile of", soldBy: "Sold by", allFilter: "All", inStock: "in stock", soldOut: "Sold out", noProducts: "No products available right now.", chooseService: "Choose the service", chooseBarber: "Choose your barber", reviewPublishChoice: "Please indicate whether we may publish your review on the page.", reviewSentPublic: "Review sent. It will be published once the barbershop approves it.", reviewSentPrivate: "Review sent. Only the barbershop will see it.", reviewThanksPublic: "Thank you. Your review was sent and will be published once the barbershop approves it.", reviewThanksPrivate: "Thank you. Your review was sent to the barbershop and will not be published on the page.", reviewSendError: "Your review could not be sent.", reviewsEmpty: "You will soon see our clients' reviews here.",
+            shopOpen: "Open online", shopOffline: "Offline", noNotices: "No special notices at the moment.", statusError: "Could not check right now. Please try again.", statusNotFound: "Code not found.", statusLabelText: "Status", loginSuccess: "Signed in. Opening the portal...", pwdChangeTitle: "Create your personal password", pwdChangeMsg: "For security, before entering the panel you must create a new password that only you know.", directionsGoogle: "Get directions (Google Maps)", directionsWaze: "Open in Waze", directionsApple: "Apple Maps",
+            dashRevenue: "Today's Income", dashNewClients: "New Clients (Month)", dashVipClients: "VIP Clients", dashCompleted: "Completed Appointments", dashWeekly: "Weekly Performance (Income)", appointmentsMgmt: "Appointment Management", colCode: "Code", colClient: "Client", colService: "Service", colStatus: "Status", colActions: "Actions", dayMon: "Mon", dayTue: "Tue", dayWed: "Wed", dayThu: "Thu", dayFri: "Fri", daySat: "Sat", daySun: "Sun" }
         };
         let currentLang = (window.GabyData && window.GabyData.getState ? window.GabyData.getState().settings.defaultLanguage : 'es') || 'es';
+        // Texto de la interfaz en el idioma activo (mismo patrón que applyTranslations).
+        const tr = key => (translations[currentLang] && translations[currentLang][key]) || translations.es[key] || key;
+        const dateLocale = () => currentLang === 'en' ? 'en-US' : 'es-PR';
+        // Textos EN por id para el catálogo sembrado (shared-data.js); si el id no está, se usa el texto guardado.
+        const serviceTextEn = {
+            'service-1': { name: 'Classic Cut', duration: 'Includes a drink and hair wash', description: 'Every cut includes a drink of your choice and a hair wash.', price: '' },
+            'service-2': { name: 'Premium Fade', duration: 'Premium cut', description: 'Premium Fade with a clean, professional finish.', price: '' },
+            'service-3': { name: 'Signature Cut', duration: 'Traditional Hot Towel Shave', description: 'Signature Cut with Traditional Hot Towel Shave.', price: '' },
+            'service-4': { name: 'Kids Premium', duration: 'Up to 12 years old', description: 'Kids Premium for children up to 12 years old.', price: '' },
+            'service-5': { name: 'Baby Cut', duration: 'Prior consultation required', description: 'Baby Cut subject to prior consultation.', price: 'Ask for price' },
+            'service-6': { name: 'Hair Light', duration: 'Color', description: 'Hair Light for a sharper, more modern look.', price: '' },
+            'service-7': { name: 'Platinado', duration: 'Haircut not included', description: 'Full platinum service. Haircut not included.', price: '' },
+            'service-8': { name: 'Hidratación Capilar', duration: 'Treatment', description: 'Hair hydration treatment.', price: 'From $30' },
+            'service-9': { name: 'Keratina', duration: 'Treatment', description: 'Keratin treatment to improve texture and control frizz.', price: 'From $45' },
+            'service-10': { name: 'Limpieza Facial Profunda', duration: 'Facial', description: 'Deep facial cleansing.', price: '' },
+            'service-11': { name: 'GOAT VIP Experience', duration: 'Full experience', description: 'Includes Signature Cut, beard design, hair wash, hot towels, scalp massage, express facial cleansing, a complimentary drink and premium finishing products.', price: '' }
+        };
+        const serviceTextEnByName = {};
+        Object.values(serviceTextEn).forEach(entry => { serviceTextEnByName[entry.name] = entry; });
+        const serviceEn = service => currentLang === 'en' && service ? (serviceTextEn[service.id] || serviceTextEnByName[service.name] || null) : null;
+        const barberTextEn = {
+            gabriel: { specialty: ['Premium Fade', 'Design', 'Celebrities'], bio: 'General manager and founder of the barbershop.' },
+            darialex: { specialty: ["Men's haircuts", 'Colorimetry', 'Long beards'], bio: "Barber and cosmetologist specializing in men's haircuts, colorimetry and long beards." },
+            wilo: { specialty: [], bio: '' }
+        };
+        const productDescEnById = { 'prod-1': 'Strong hold, matte finish.', 'prod-2': 'Hydrates and softens the beard.', 'prod-3': 'Deep cleansing, sulfate-free.', 'prod-4': 'For classic hairstyles with shine.' };
+        const productDescEnByText = { 'Fijación fuerte, acabado mate.': 'Strong hold, matte finish.', 'Hidrata y suaviza la barba.': 'Hydrates and softens the beard.', 'Limpieza profunda sin sulfatos.': 'Deep cleansing, sulfate-free.', 'Para peinados clásicos con brillo.': 'For classic hairstyles with shine.' };
+        const productDesc = product => currentLang === 'en' ? (productDescEnById[product.id] || productDescEnByText[product.desc] || product.desc) : product.desc;
 
         const vipExperienceIncludes = [
             "Signature Cut",
@@ -1130,6 +1183,16 @@
             "Limpieza facial express",
             "Bebida de cortesía",
             "Productos premium para finalizar"
+        ];
+        const vipExperienceIncludesEn = [
+            "Signature Cut",
+            "Beard design",
+            "Hair wash",
+            "Hot towels",
+            "Scalp massage",
+            "Express facial cleansing",
+            "Complimentary drink",
+            "Premium finishing products"
         ];
 
         const services = [
@@ -1192,11 +1255,11 @@
         }
         function formatDate(value) {
             if (!value) return '-';
-            return new Date(value).toLocaleDateString('es-PR', { year: 'numeric', month: 'long', day: 'numeric' });
+            return new Date(value).toLocaleDateString(dateLocale(), { year: 'numeric', month: 'long', day: 'numeric' });
         }
         function formatDateTime(value) {
             if (!value) return '-';
-            return new Date(value).toLocaleString('es-PR', { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+            return new Date(value).toLocaleString(dateLocale(), { year: 'numeric', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
         }
 
         // =========================================
@@ -1206,6 +1269,18 @@
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if (translations[currentLang][key]) el.innerText = translations[currentLang][key];
+            });
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) el.setAttribute('placeholder', translations[currentLang][key]);
+            });
+            document.querySelectorAll('[data-i18n-title]').forEach(el => {
+                const key = el.getAttribute('data-i18n-title');
+                if (translations[currentLang][key]) { el.setAttribute('title', translations[currentLang][key]); el.setAttribute('aria-label', translations[currentLang][key]); }
+            });
+            document.querySelectorAll('[data-i18n-aria]').forEach(el => {
+                const key = el.getAttribute('data-i18n-aria');
+                if (translations[currentLang][key]) el.setAttribute('aria-label', translations[currentLang][key]);
             });
             const languageButton = document.getElementById('language-toggle');
             if (languageButton) {
@@ -1263,10 +1338,10 @@
                         <div class="service-info">
                             <h3>${service.name}</h3>
                             <div class="service-details">
-                                <div class="service-price">${service.price}</div>
+                                <div class="service-price">${serviceEn(service)?.price || service.price}</div>
                                 <div class="service-duration">${window.GabyBooking.formatDuration(window.GabyBooking.serviceMinutes(service))}</div>
                             </div>
-                            <button type="button" class="btn btn-primary service-reserve-btn" onclick="event.stopPropagation(); reserveService(${i})">Reservar</button>
+                            <button type="button" class="btn btn-primary service-reserve-btn" onclick="event.stopPropagation(); reserveService(${i})">${tr('reserve')}</button>
                         </div>
                     </div>
                 `;
@@ -1286,7 +1361,7 @@
 
             if (productFilters) {
                 productFilters.hidden = sellers.length < 2;
-                productFilters.innerHTML = [{ id: '', label: 'Todos' }, ...sellers.map(barber => ({ id: barber.id, label: barber.alias || barber.name }))]
+                productFilters.innerHTML = [{ id: '', label: tr('allFilter') }, ...sellers.map(barber => ({ id: barber.id, label: barber.alias || barber.name }))]
                     .map(option => `<button type="button" class="product-filter-btn ${option.id === productBarberFilter ? 'active' : ''}" data-product-barber="${option.id}" aria-pressed="${option.id === productBarberFilter}">${option.label}</button>`)
                     .join('');
                 productFilters.querySelectorAll('[data-product-barber]').forEach(button => button.addEventListener('click', () => {
@@ -1303,17 +1378,17 @@
                     <div class="product-card">
                         <div class="product-img" style="background-image: url('${product.image}')"></div>
                         <div class="product-info">
-                            ${seller ? `<a class="product-seller" href="barber.html?id=${seller.id}"><i class="fas fa-user"></i> Vendido por ${sellerName}</a>` : ''}
+                            ${seller ? `<a class="product-seller" href="barber.html?id=${seller.id}"><i class="fas fa-user"></i> ${tr('soldBy')} ${sellerName}</a>` : ''}
                             <h4>${product.name}</h4>
-                            <p>${product.desc}</p>
+                            <p>${productDesc(product)}</p>
                             <div class="product-bottom">
                                 <span class="product-price">${product.price}</span>
-                                <span class="stock-badge">${Number(product.stock) > 0 ? `${product.stock} en stock` : 'Agotado'}</span>
+                                <span class="stock-badge">${Number(product.stock) > 0 ? `${product.stock} ${tr('inStock')}` : tr('soldOut')}</span>
                             </div>
                         </div>
                     </div>
                 `;
-            }).join('') : '<p class="product-empty">No hay productos disponibles por ahora.</p>';
+            }).join('') : `<p class="product-empty">${tr('noProducts')}</p>`;
         }
 
         function getDailyBarberPreview(barbers, count) {
@@ -1328,36 +1403,35 @@
             const directory = document.getElementById('barbers-directory-list');
             if (!track) return;
             const renderCard = (barber, copy) => `
-                <div class="barber-card" role="link" tabindex="${copy ? -1 : 0}" ${copy ? 'aria-hidden="true"' : `aria-label="Ver perfil de ${barber.name}"`} data-barber-link="${barber.id}">
+                <div class="barber-card" role="link" tabindex="${copy ? -1 : 0}" ${copy ? 'aria-hidden="true"' : `aria-label="${tr('viewProfileOf')} ${barber.name}"`} data-barber-link="${barber.id}">
                     <div class="barber-bg" style="background-image: url('${barber.avatar || barber.gallery?.[0] || 'https://images.unsplash.com/photo-1507838153414-b4b713384a76?auto=format&fit=crop&w=800&q=80'}');"></div>
                     <div class="barber-overlay"></div>
                     <div class="barber-content">
-                        <div class="barber-status ${barber.active !== false ? 'active' : 'offline'}"><span class="dot"></span>${barber.active !== false ? 'Activo' : 'No disponible'}</div>
+                        <div class="barber-status ${barber.active !== false ? 'active' : 'offline'}"><span class="dot"></span>${barber.active !== false ? tr('barberActive') : tr('barberDeactivated')}</div>
                         <h3 class="barber-name">${barber.name}</h3>
                         <span class="barber-alias">${barber.alias}</span>
                         <div class="barber-specialties">
-                            ${(barber.specialty || []).map(item => `<span class="specialty-tag">${item}</span>`).join('')}
+                            ${((currentLang === 'en' && barberTextEn[barber.id]?.specialty) || barber.specialty || []).map(item => `<span class="specialty-tag">${item}</span>`).join('')}
                         </div>
                         <div class="barber-stats">
-                            <div class="stat-pill"><h4>${barber.yearsExperience || 0}+</h4><p>Años Exp.</p></div>
-                            <div class="stat-pill"><h4>${barber.vipClients || 0}+</h4><p>Clientes VIP</p></div>
+                            <div class="stat-pill"><h4>${barber.yearsExperience || 0}+</h4><p>${tr('yearsExp')}</p></div>
+                            <div class="stat-pill"><h4>${barber.vipClients || 0}+</h4><p>${tr('vipClientsLabel')}</p></div>
                         </div>
                         <div style="color: #ddd; font-size: 0.9rem; margin-bottom: 1rem;">
                             <span><i class="fas fa-phone" style="color: var(--gold-2)"></i> ${barber.phone}</span>
-                            <div class="barber-hours"><span class="barber-hours-label"><i class="fas fa-clock" style="color: var(--gold-2)"></i> Horario</span>${window.GabySchedule.html({ compact: true })}</div>
                         </div>
                         <div class="barber-socials" style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
                             <div style="display: flex; gap: 1rem;">
                                 ${barber.socials?.instagram ? `<a href="${barber.socials.instagram}" target="_blank" class="icon-btn"><i class="fab fa-instagram"></i></a>` : ''}
                                 ${barber.socials?.facebook ? `<a href="${barber.socials.facebook}" target="_blank" class="icon-btn"><i class="fab fa-facebook-f"></i></a>` : ''}
                             </div>
-                            <a class="barber-view-btn" href="barber.html?id=${barber.id}">Ver Perfil <i class="fas fa-arrow-right"></i></a>
+                            <a class="barber-view-btn" href="barber.html?id=${barber.id}">${tr('viewProfile')} <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                 </div>
             `;
-            // Todos los barberos, repetidos una vez para que el giro sea continuo.
-            const barbers = db.barbers.filter(barber => barber.active !== false);
+            // Todos los barberos (también los desactivados, con su etiqueta), repetidos una vez para que el giro sea continuo.
+            const barbers = db.barbers;
             track.innerHTML = barbers.map(barber => renderCard(barber, false)).join('') + barbers.map(barber => renderCard(barber, true)).join('');
             track.style.setProperty('--marquee-duration', `${Math.max(24, barbers.length * 14)}s`);
             if (directory) directory.innerHTML = db.barbers.map(barber => renderCard(barber, false)).join('');
@@ -1396,9 +1470,9 @@
             const actions = document.getElementById('shop-directions');
             if (actions) {
                 actions.innerHTML = `
-                    <a class="primary" href="${links.google}" target="_blank" rel="noopener noreferrer"><i class="fas fa-diamond-turn-right"></i> Cómo llegar (Google Maps)</a>
-                    <a href="${links.waze}" target="_blank" rel="noopener noreferrer"><i class="fab fa-waze"></i> Abrir en Waze</a>
-                    <a href="${links.apple}" target="_blank" rel="noopener noreferrer"><i class="fab fa-apple"></i> Apple Maps</a>
+                    <a class="primary" href="${links.google}" target="_blank" rel="noopener noreferrer"><i class="fas fa-diamond-turn-right"></i> ${tr('directionsGoogle')}</a>
+                    <a href="${links.waze}" target="_blank" rel="noopener noreferrer"><i class="fab fa-waze"></i> ${tr('directionsWaze')}</a>
+                    <a href="${links.apple}" target="_blank" rel="noopener noreferrer"><i class="fab fa-apple"></i> ${tr('directionsApple')}</a>
                 `;
             }
         }
@@ -1418,18 +1492,19 @@
             const fallback = services[index % services.length];
             const vipBox = document.getElementById('lightbox-vip-includes');
             const vipList = document.getElementById('lightbox-vip-list');
+            const enText = currentLang === 'en' ? (serviceEn(activeService) || serviceTextEnByName[fallback.name] || null) : null;
             const s = {
                 name: activeService?.name || fallback.name,
-                desc: activeService?.description || fallback.desc,
-                price: activeService?.price || fallback.price,
-                duration: activeService?.duration || fallback.duration
+                desc: enText?.description || activeService?.description || fallback.desc,
+                price: enText?.price || activeService?.price || fallback.price,
+                duration: enText?.duration || activeService?.duration || fallback.duration
             };
             document.getElementById('lightbox-title').innerText = s.name;
             document.getElementById('lightbox-desc').innerText = s.desc;
             document.getElementById('lightbox-price').innerText = s.price;
             document.getElementById('lightbox-duration').innerText = s.duration;
             if (s.name === 'GOAT VIP Experience') {
-                vipList.innerHTML = vipExperienceIncludes.map(item => `<li>${item}</li>`).join('');
+                vipList.innerHTML = (currentLang === 'en' ? vipExperienceIncludesEn : vipExperienceIncludes).map(item => `<li>${item}</li>`).join('');
                 vipBox.hidden = false;
             } else {
                 vipList.innerHTML = '';
@@ -1452,7 +1527,7 @@
                 found = await window.GabyBooking.lookupByCode(code);
             } catch (error) {
                 result.style.color = '#dc3545';
-                result.innerText = 'No se pudo consultar ahora. Intenta de nuevo.';
+                result.innerText = tr('statusError');
                 return;
             }
             if(found) {
@@ -1460,10 +1535,10 @@
                 if(found.status === 'APROBADA' || found.status === 'COMPLETADA') color = '#28a745';
                 if(found.status === 'RECHAZADA') color = '#dc3545';
                 result.style.color = color;
-                result.innerText = `Estado: ${window.GabyBooking.statusLabel(found.status)} | ${found.service} | ${window.GabyBooking.relativeDay(String(found.dateTime).slice(0, 10))} ${window.GabyBooking.formatTime(String(found.dateTime).slice(11, 16))}`;
+                result.innerText = `${tr('statusLabelText')}: ${window.GabyBooking.statusLabel(found.status)} | ${found.service} | ${window.GabyBooking.relativeDay(String(found.dateTime).slice(0, 10))} ${window.GabyBooking.formatTime(String(found.dateTime).slice(11, 16))}`;
             } else {
                 result.style.color = '#dc3545';
-                result.innerText = 'Código no encontrado.';
+                result.innerText = tr('statusNotFound');
             }
         }
 
@@ -1533,11 +1608,11 @@
                 await window.GabySecurity.promptPasswordChange({
                     email,
                     name: result.account?.name,
-                    title: 'Crea tu contraseña personal',
-                    message: 'Por seguridad, antes de entrar al panel debes crear una contraseña nueva que solo tú conozcas.'
+                    title: tr('pwdChangeTitle'),
+                    message: tr('pwdChangeMsg')
                 });
             }
-            window.GabyData.toast('Sesión iniciada. Entrando al panel...', 'success');
+            window.GabyData.toast(tr('loginSuccess'), 'success');
             window.location.href = result.portal;
         }
 
@@ -1545,8 +1620,8 @@
         function renderShopStatus() {
             const db = getDb();
             const offline = db.settings.shopMode === 'offline';
-            document.getElementById('public-shop-status').innerHTML = `<div class="status-chip ${offline ? 'status-offline' : 'status-online'}">${offline ? 'Fuera de línea' : 'Abiertos en línea'}</div>`;
-            document.getElementById('closure-notice').innerText = db.settings.closureNotice || 'Sin avisos especiales por el momento.';
+            document.getElementById('public-shop-status').innerHTML = `<div class="status-chip ${offline ? 'status-offline' : 'status-online'}">${offline ? tr('shopOffline') : tr('shopOpen')}</div>`;
+            document.getElementById('closure-notice').innerText = db.settings.closureNotice || tr('noNotices');
         }
 
         // Opciones de servicio y barbero del formulario de reseñas (se conserva lo escogido al refrescar).
@@ -1559,8 +1634,8 @@
             const keepBarber = barberSelect.value;
             const serviceNames = db.services.filter(service => service.active).map(service => service.name);
             serviceNames.push(window.GabyBooking.unknownCutService(db).name);
-            serviceSelect.innerHTML = '<option value="">Escoge el servicio</option>' + serviceNames.map(name => `<option value="${escapeText(name)}">${escapeText(name)}</option>`).join('');
-            barberSelect.innerHTML = '<option value="">Escoge tu barbero</option>' + db.barbers.filter(barber => barber.active !== false)
+            serviceSelect.innerHTML = `<option value="">${tr('chooseService')}</option>` + serviceNames.map(name => `<option value="${escapeText(name)}">${escapeText(name)}</option>`).join('');
+            barberSelect.innerHTML = `<option value="">${tr('chooseBarber')}</option>` + db.barbers.filter(barber => barber.active !== false)
                 .map(barber => `<option value="${escapeText(barber.id)}">${escapeText(barber.alias ? `${barber.name} (${barber.alias})` : barber.name)}</option>`).join('');
             if (serviceNames.includes(keepService)) serviceSelect.value = keepService;
             if (db.barbers.some(barber => barber.id === keepBarber)) barberSelect.value = keepBarber;
@@ -1596,7 +1671,7 @@
             const button = form.querySelector('[type=submit]');
             const publishChoice = form.querySelector('input[name="review-publish"]:checked');
             if (!publishChoice) {
-                status.textContent = 'Indica si permites que publiquemos tu reseña en la página.';
+                status.textContent = tr('reviewPublishChoice');
                 window.GabyData.toast(status.textContent, 'warning');
                 return;
             }
@@ -1621,14 +1696,14 @@
                     clientPhoto,
                     publish
                 });
-            }, { success: publish ? 'Gracias. Tu reseña se envió y se publicará cuando la barbería la apruebe.' : 'Gracias. Tu reseña se envió a la barbería y no se publicará en la página.', error: 'No se pudo enviar tu reseña.' });
+            }, { success: publish ? tr('reviewThanksPublic') : tr('reviewThanksPrivate'), error: tr('reviewSendError') });
             button.disabled = false;
             if (!ok) return;
             form.reset();
             document.getElementById('review-rating').value = '5';
             paintStarPicker(5);
             fillReviewSelects();
-            status.innerText = publish ? 'Reseña enviada. Se publicará cuando la barbería la apruebe.' : 'Reseña enviada. Solo la verá la barbería.';
+            status.innerText = publish ? tr('reviewSentPublic') : tr('reviewSentPrivate');
         }
 
         function renderNews() {
@@ -1648,8 +1723,6 @@
                     <p style="line-height: 1.7;">${item.body}</p>
                     <div class="feed-actions">
                         <span><i class="fas fa-user"></i> ${item.authorName}</span>
-                        <span><i class="fas fa-heart"></i> ${item.likes}</span>
-                        <span><i class="fas fa-comment"></i> ${item.comments}</span>
                     </div>
                 </article>
             `).join('');
@@ -1670,7 +1743,7 @@
             firstTrack.classList.toggle('review-empty', !cards);
             firstTrack.innerHTML = cards
                 ? '<div class="review-set">' + cards + '</div>' + copies
-                : '<p class="review-card">Pronto verás aquí las reseñas de nuestros clientes.</p>';
+                : `<p class="review-card">${tr('reviewsEmpty')}</p>`;
             secondTrack.innerHTML = copies.repeat(2);
         }
 
@@ -1683,21 +1756,21 @@
             if(tab === 'admin' || tab === 'general') {
                 html += `
                     <div class="dash-grid">
-                        <div class="stat-card"><h3>Ingresos del Día</h3><div class="number">$1,250</div></div>
-                        <div class="stat-card"><h3>Clientes Nuevos (Mes)</h3><div class="number">45</div></div>
-                        <div class="stat-card"><h3>Clientes VIP</h3><div class="number">12</div></div>
-                        <div class="stat-card"><h3>Citas Completadas</h3><div class="number">320</div></div>
+                        <div class="stat-card"><h3>${tr('dashRevenue')}</h3><div class="number">$1,250</div></div>
+                        <div class="stat-card"><h3>${tr('dashNewClients')}</h3><div class="number">45</div></div>
+                        <div class="stat-card"><h3>${tr('dashVipClients')}</h3><div class="number">12</div></div>
+                        <div class="stat-card"><h3>${tr('dashCompleted')}</h3><div class="number">320</div></div>
                     </div>
                     <div class="chart-container">
-                        <h3 style="margin-bottom: 2rem; font-family: var(--font-display);">Rendimiento Semanal (Ingresos)</h3>
+                        <h3 style="margin-bottom: 2rem; font-family: var(--font-display);">${tr('dashWeekly')}</h3>
                         <div class="chart-bars">
-                            <div class="bar" style="height: 40%;"><span>Lun</span></div>
-                            <div class="bar" style="height: 60%;"><span>Mar</span></div>
-                            <div class="bar" style="height: 80%;"><span>Mié</span></div>
-                            <div class="bar" style="height: 50%;"><span>Jue</span></div>
-                            <div class="bar" style="height: 90%;"><span>Vie</span></div>
-                            <div class="bar" style="height: 100%;"><span>Sáb</span></div>
-                            <div class="bar" style="height: 30%;"><span>Dom</span></div>
+                            <div class="bar" style="height: 40%;"><span>${tr('dayMon')}</span></div>
+                            <div class="bar" style="height: 60%;"><span>${tr('dayTue')}</span></div>
+                            <div class="bar" style="height: 80%;"><span>${tr('dayWed')}</span></div>
+                            <div class="bar" style="height: 50%;"><span>${tr('dayThu')}</span></div>
+                            <div class="bar" style="height: 90%;"><span>${tr('dayFri')}</span></div>
+                            <div class="bar" style="height: 100%;"><span>${tr('daySat')}</span></div>
+                            <div class="bar" style="height: 30%;"><span>${tr('daySun')}</span></div>
                         </div>
                     </div>
                 `;
@@ -1705,9 +1778,9 @@
 
             html += `
                 <div class="chart-container">
-                    <h3 style="margin-bottom: 1rem; font-family: var(--font-display);">Gestión de Citas (${tab.charAt(0).toUpperCase() + tab.slice(1)})</h3>
+                    <h3 style="margin-bottom: 1rem; font-family: var(--font-display);">${tr('appointmentsMgmt')} (${tab.charAt(0).toUpperCase() + tab.slice(1)})</h3>
                     <table class="dash-table">
-                        <thead><tr><th>Código</th><th>Cliente</th><th>Servicio</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <thead><tr><th>${tr('colCode')}</th><th>${tr('colClient')}</th><th>${tr('colService')}</th><th>${tr('colStatus')}</th><th>${tr('colActions')}</th></tr></thead>
                         <tbody id="appointments-table"></tbody>
                     </table>
                 </div>
@@ -1790,6 +1863,10 @@
         // Las resenas se muestran desde renderReviews() con datos reales del sistema.
 
         function syncIndexFromSharedState() {
+            renderServicesPublic();
+            renderProductsPublic();
+            renderBarbersPublic();
+            renderShopDirections();
             renderShopStatus();
             fillReviewSelects();
             renderNews();

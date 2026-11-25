@@ -396,33 +396,33 @@
     <div class="wrap">
         <div class="top">
             <div>
-                <h1>Noticias de la Barbería</h1>
-                <p class="sub">Avisos oficiales, horarios especiales, anuncios del equipo y actualizaciones importantes de Goat Style Salon.</p>
+                <h1 data-i18n="pageTitle">Noticias de la Barbería</h1>
+                <p class="sub" data-i18n="pageSub">Avisos oficiales, horarios especiales, anuncios del equipo y actualizaciones importantes de Goat Style Salon.</p>
             </div>
-            <a class="btn btn-primary" href="index.html"><i class="fas fa-arrow-left"></i> Volver al sitio</a>
+            <a class="btn btn-primary" href="index.html"><i class="fas fa-arrow-left"></i> <span data-i18n="backToSite">Volver al sitio</span></a>
         </div>
 
         <div class="card" data-maintenance-hide="noticias">
             <div class="filters">
                 <div class="field">
-                    <label for="news-date">Buscar por fecha</label>
+                    <label for="news-date" data-i18n="filterDate">Buscar por fecha</label>
                     <input id="news-date" type="date">
                 </div>
                 <div class="field">
-                    <label for="news-time">Buscar por hora</label>
+                    <label for="news-time" data-i18n="filterTime">Buscar por hora</label>
                     <input id="news-time" type="time">
                 </div>
                 <div class="field">
-                    <label for="news-barber">Buscar por barbero</label>
+                    <label for="news-barber" data-i18n="filterBarber">Buscar por barbero</label>
                     <select id="news-barber">
-                        <option value="">Todos los barberos</option>
+                        <option value="" data-i18n="allBarbers">Todos los barberos</option>
                     </select>
                 </div>
                 <div class="field">
                     <label class="filter-spacer" aria-hidden="true">&nbsp;</label>
                     <div class="filter-actions">
-                        <button class="btn btn-primary" type="button" onclick="applyNewsFilters()">Buscar</button>
-                        <button class="btn btn-ghost" type="button" onclick="resetNewsFilters()">Limpiar</button>
+                        <button class="btn btn-primary" type="button" onclick="applyNewsFilters()" data-i18n="search">Buscar</button>
+                        <button class="btn btn-ghost" type="button" onclick="resetNewsFilters()" data-i18n="clear">Limpiar</button>
                     </div>
                 </div>
             </div>
@@ -435,11 +435,11 @@
     <footer data-site-footer></footer>
 
     <div class="mobile-bottom-nav">
-        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
-        <a href="services.html"><i class="fas fa-scissors"></i><span>Servicios</span></a>
-        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
-        <a href="news.html" class="active"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
-        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+        <a href="index.html"><i class="fas fa-house"></i><span data-i18n="navHome">Inicio</span></a>
+        <a href="services.html"><i class="fas fa-scissors"></i><span data-i18n="navServices">Servicios</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span data-i18n="navBooking">Cita</span></a>
+        <a href="news.html" class="active"><i class="fas fa-newspaper"></i><span data-i18n="navNews">Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span data-i18n="navSettings">Config</span></a>
     </div>
 
     <script src="supabase-config.js?v=20261124b"></script>
@@ -447,9 +447,51 @@
     <script src="supabase-sync.js?v=20261124f"></script>
     <script src="site-guard.js?v=20261124b"></script>
     <script src="shared-preferences.js?v=20261124b"></script>
-    <script src="legal.js?v=20261124b"></script>
-    <script src="site-chrome.js?v=20261124f"></script>
+    <script src="legal.js?v=20261201a"></script>
+    <script src="site-chrome.js?v=20261201a"></script>
     <script>
+        const translations = {
+            es: {
+                pageTitle: 'Noticias de la Barbería',
+                pageSub: 'Avisos oficiales, horarios especiales, anuncios del equipo y actualizaciones importantes de Goat Style Salon.',
+                backToSite: 'Volver al sitio',
+                filterDate: 'Buscar por fecha', filterTime: 'Buscar por hora', filterBarber: 'Buscar por barbero',
+                allBarbers: 'Todos los barberos',
+                search: 'Buscar', clear: 'Limpiar',
+                navHome: 'Inicio', navServices: 'Servicios', navBooking: 'Cita', navNews: 'Noticias', navSettings: 'Config',
+                resultsFound: 'noticia(s) encontrada(s).',
+                emptyTitle: 'No encontramos noticias con esos filtros',
+                emptyText: 'Prueba otra fecha, hora o barbero para ver más publicaciones.',
+                dateLabel: 'Fecha:', timeLabel: 'Hora:'
+            },
+            en: {
+                pageTitle: 'Barbershop News',
+                pageSub: 'Official notices, special hours, team announcements and important updates from Goat Style Salon.',
+                backToSite: 'Back to the site',
+                filterDate: 'Search by date', filterTime: 'Search by time', filterBarber: 'Search by barber',
+                allBarbers: 'All barbers',
+                search: 'Search', clear: 'Clear',
+                navHome: 'Home', navServices: 'Services', navBooking: 'Booking', navNews: 'News', navSettings: 'Settings',
+                resultsFound: 'news item(s) found.',
+                emptyTitle: 'We found no news with those filters',
+                emptyText: 'Try another date, time or barber to see more posts.',
+                dateLabel: 'Date:', timeLabel: 'Time:'
+            }
+        };
+
+        function currentLang() {
+            return (window.GabyPreferences && window.GabyPreferences.getPreferredLanguage()) || 'es';
+        }
+
+        function t(key) {
+            const lang = currentLang();
+            return (translations[lang] && translations[lang][key]) || translations.es[key] || key;
+        }
+
+        function locale() {
+            return currentLang() === 'en' ? 'en-US' : 'es-PR';
+        }
+
         const list = document.getElementById('news-list');
         const resultsMeta = document.getElementById('news-results-meta');
         const newsDate = document.getElementById('news-date');
@@ -459,7 +501,7 @@
         const allNews = [...db.news].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         function formatDate(dateString) {
-            return new Date(dateString).toLocaleString('es-PR', {
+            return new Date(dateString).toLocaleString(locale(), {
                 year: 'numeric',
                 month: 'long',
                 day: 'numeric',
@@ -493,17 +535,17 @@
                 const count = allNews.filter(item => item.authorId === barber.id).length;
                 return `<option value="${barber.id}">${barberLabel(barber)} (${count})</option>`;
             });
-            newsBarber.innerHTML = `<option value="">Todos los barberos (${allNews.length})</option>${options.join('')}`;
+            newsBarber.innerHTML = `<option value="">${t('allBarbers')} (${allNews.length})</option>${options.join('')}`;
         }
 
         function renderNews(newsItems) {
-            resultsMeta.textContent = `${newsItems.length} noticia(s) encontrada(s).`;
+            resultsMeta.textContent = `${newsItems.length} ${t('resultsFound')}`;
 
             if (!newsItems.length) {
                 list.innerHTML = `
                     <div class="card empty-state">
-                        <h3 style="margin-bottom: 0.8rem;">No encontramos noticias con esos filtros</h3>
-                        <p>Prueba otra fecha, hora o barbero para ver más publicaciones.</p>
+                        <h3 style="margin-bottom: 0.8rem;">${t('emptyTitle')}</h3>
+                        <p>${t('emptyText')}</p>
                     </div>
                 `;
                 return;
@@ -519,8 +561,8 @@
                         <div class="barber-chip"><i class="fas fa-user"></i> ${item.authorName}</div>
                     </div>
                     <div class="meta">
-                        <div><strong>Fecha:</strong> ${formatDate(item.createdAt)}</div>
-                        <div><strong>Hora:</strong> ${formatTimeValue(item.createdAt)}</div>
+                        <div><strong>${t('dateLabel')}</strong> ${formatDate(item.createdAt)}</div>
+                        <div><strong>${t('timeLabel')}</strong> ${formatTimeValue(item.createdAt)}</div>
                     </div>
                     ${item.image ? `<img class="news-img" src="${item.image}" alt="${item.title}">` : ''}
                     <p class="news-body">${item.body}</p>
@@ -553,7 +595,7 @@
         populateBarberFilter();
         newsBarber.addEventListener('change', applyNewsFilters);
         renderNews(allNews);
-        window.GabyPreferences.initPreferences({});
+        window.GabyPreferences.initPreferences({ translations });
     </script>
 </body>
 </html>

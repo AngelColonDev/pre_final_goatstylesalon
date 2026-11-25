@@ -32,7 +32,8 @@
             footerNews: 'Noticias de la barbería', footerSupport: 'Contacto y soporte', legal: 'Legal', cookiePrefs: 'Preferencias de cookies',
             development: 'Desarrollo', weAccept: 'Aceptamos:', rights: 'Todos los derechos reservados.',
             terms: 'Términos y Condiciones', privacy: 'Política de Privacidad', cookies: 'Política de Cookies', bookingPolicy: 'Política de Reservaciones', notices: 'Avisos legales', notifications: 'Notificaciones',
-            cash: 'Efectivo', visaMc: 'Visa y Mastercard', reportProblem: 'Reportar un problema'
+            cash: 'Efectivo', visaMc: 'Visa y Mastercard', reportProblem: 'Reportar un problema',
+            mainMenu: 'Menú principal', backShort: 'Volver', openingHours: 'Horario'
         },
         en: {
             home: 'Home', services: 'Services', book: 'Book', barbers: 'Barbers', news: 'News', contact: 'Contact',
@@ -42,7 +43,8 @@
             footerNews: 'Barbershop news', footerSupport: 'Contact and support', legal: 'Legal', cookiePrefs: 'Cookie preferences',
             development: 'Development', weAccept: 'We accept:', rights: 'All rights reserved.',
             terms: 'Terms and Conditions', privacy: 'Privacy Policy', cookies: 'Cookie Policy', bookingPolicy: 'Booking Policy', notices: 'Legal notices', notifications: 'Notifications',
-            cash: 'Cash', visaMc: 'Visa and Mastercard', reportProblem: 'Report a problem'
+            cash: 'Cash', visaMc: 'Visa and Mastercard', reportProblem: 'Report a problem',
+            mainMenu: 'Main menu', backShort: 'Back', openingHours: 'Opening hours'
         }
     };
     const t = key => TEXT[LANG][key] || TEXT.es[key] || key;
@@ -62,6 +64,7 @@
         { href: 'booking.html', label: t('book'), match: ['booking.html'] },
         { href: 'barbers.html', label: t('barbers'), match: ['barbers.html', 'barber.html'] },
         { href: 'news.html', label: t('news'), match: ['news.html'] },
+        { href: 'settings.html', label: t('settings'), match: ['settings.html', 'settings-app.html', 'settings-notifications.html'] },
         { href: 'support.html#contacto', label: t('contact'), match: ['support.html'] }
     ];
 
@@ -115,7 +118,7 @@
             .site-header-cta { display: inline-flex; align-items: center; gap: .5rem; padding: .7rem 1.4rem; border-radius: 999px; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; text-decoration: none; color: #111; background: linear-gradient(135deg, #f6dfa0 0%, #d4af37 62%, #87640f 100%); }
             .site-header-cta:hover { filter: brightness(1.06); color: #111; }
             .site-header a:focus-visible { outline: 2px solid #d4af37; outline-offset: 3px; }
-            @media (max-width: 1100px) { .site-header { padding: 1rem 1.5rem; } .site-header-links { gap: 1.1rem; } }
+            @media (max-width: 1100px) { .site-header { padding: 1rem 1.5rem; } .site-header-links { gap: .8rem; } }
             @media (max-width: 968px) { .site-header { display: none; } }
             [data-mobile-topbar] { display: none !important; }
             /* Que la barra fija de arriba no tape lo que se muestra al desplazarse (enlaces #, campos con error). */
@@ -208,7 +211,7 @@
         header.className = 'site-header';
         header.innerHTML = `
             <a class="site-header-logo" href="index.html">GOAT STYLE SALON</a>
-            <nav aria-label="Menú principal">
+            <nav aria-label="${t('mainMenu')}">
                 <ul class="site-header-links">
                     ${navLinks.map(link => `<li><a href="${link.href}" class="${link.match.includes(page) ? 'active' : ''}" ${link.match.includes(page) ? 'aria-current="page"' : ''}>${link.label}</a></li>`).join('')}
                 </ul>
@@ -243,7 +246,7 @@
         if (parent) {
             const crumb = document.createElement('nav');
             crumb.className = 'site-crumb';
-            crumb.setAttribute('aria-label', 'Volver');
+            crumb.setAttribute('aria-label', t('backShort'));
             crumb.innerHTML = `<a href="${parent.href}"><i class="fas fa-arrow-left"></i>${t('back')} ${parent.label}</a>`;
             bar.after(crumb);
         }
@@ -258,7 +261,7 @@
     function scheduleHtml(options) {
         const lang = (window.GabyData && window.GabyData.getState().settings.defaultLanguage) === 'en' ? 'en' : 'es';
         const compact = options && options.compact;
-        return `<dl class="gs-hours${compact ? ' compact' : ''}" aria-label="${lang === 'en' ? 'Opening hours' : 'Horario'}">${SCHEDULE_ROWS[lang]
+        return `<dl class="gs-hours${compact ? ' compact' : ''}" aria-label="${TEXT[lang].openingHours}">${SCHEDULE_ROWS[lang]
             .map(([days, hours, closed]) => `<div${closed ? ' class="gs-hours-closed"' : ''}><dt>${days}</dt><dd>${hours}</dd></div>`).join('')}</dl>`;
     }
 

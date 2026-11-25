@@ -462,7 +462,7 @@
             body { padding-bottom: 0; }
             .nav { display: none; }
         }
-        .meta-card-hours, .meta-card-wide { grid-column: 1 / -1; }
+        .meta-card-wide { grid-column: 1 / -1; }
         .meta-card-wide strong { overflow-wrap: anywhere; }
     </style>
 </head>
@@ -475,15 +475,15 @@
             <div class="top-actions">
                 <a class="btn-link" href="index.html">
                     <i class="fas fa-house"></i>
-                    <span>Inicio</span>
+                    <span data-i18n="navHome">Inicio</span>
                 </a>
                 <button class="btn-link" type="button" onclick="goBackToSite()">
                     <i class="fas fa-arrow-left"></i>
-                    <span>Regresar</span>
+                    <span data-i18n="navBack">Regresar</span>
                 </button>
                 <a class="btn-link btn-primary" href="booking.html">
                     <i class="fas fa-calendar-check"></i>
-                    <span>Reservar cita</span>
+                    <span data-i18n="navBook">Reservar cita</span>
                 </a>
             </div>
         </div>
@@ -493,15 +493,15 @@
         <section class="hero">
             <div class="hero-badge">
                 <i class="fas fa-scissors"></i>
-                <span>Equipo Profesional</span>
+                <span data-i18n="heroBadge">Equipo Profesional</span>
             </div>
             <div class="hero-grid">
                 <div class="hero-copy">
-                    <h1>Conoce a los artistas detrás de cada detalle.</h1>
-                    <p>Explora el perfil completo del equipo de Goat Style Salon con una presencia visual más limpia, elegante y lista para transmitir confianza desde el primer vistazo.</p>
+                    <h1 data-i18n="heroTitle">Conoce a los artistas detrás de cada detalle.</h1>
+                    <p data-i18n="heroText">Explora el perfil completo del equipo de Goat Style Salon con una presencia visual más limpia, elegante y lista para transmitir confianza desde el primer vistazo.</p>
                     <button class="btn-link quick-back" type="button" onclick="goBackToSite()">
                         <i class="fas fa-chevron-left"></i>
-                        <span>Volver a la página anterior</span>
+                        <span data-i18n="heroBack">Volver a la página anterior</span>
                     </button>
                 </div>
                 <div class="hero-stats" id="hero-stats"></div>
@@ -511,8 +511,8 @@
         <section>
             <div class="section-head">
                 <div>
-                    <h2>Todos los barberos</h2>
-                    <p>Cada perfil muestra experiencia, disponibilidad, especialidades y accesos directos para que el cliente encuentre rápidamente a su profesional ideal.</p>
+                    <h2 data-i18n="sectionTitle">Todos los barberos</h2>
+                    <p data-i18n="sectionText">Cada perfil muestra experiencia, disponibilidad, especialidades y accesos directos para que el cliente encuentre rápidamente a su profesional ideal.</p>
                 </div>
             </div>
             <div class="grid" id="barber-grid" data-maintenance-section="barberos"></div>
@@ -522,11 +522,11 @@
     <footer data-site-footer></footer>
 
     <div class="mobile-bottom-nav site-bottom-nav">
-        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
-        <a href="barbers.html" class="active"><i class="fas fa-users"></i><span>Barberos</span></a>
-        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
-        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
-        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+        <a href="index.html"><i class="fas fa-house"></i><span data-i18n="navHome">Inicio</span></a>
+        <a href="barbers.html" class="active"><i class="fas fa-users"></i><span data-i18n="navBarbers">Barberos</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span data-i18n="navBooking">Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span data-i18n="navNews">Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span data-i18n="navSettings">Config</span></a>
     </div>
 
     <script src="supabase-config.js?v=20261124b"></script>
@@ -534,9 +534,84 @@
     <script src="supabase-sync.js?v=20261124f"></script>
     <script src="site-guard.js?v=20261124b"></script>
     <script src="shared-preferences.js?v=20261124b"></script>
-    <script src="legal.js?v=20261124b"></script>
-    <script src="site-chrome.js?v=20261124f"></script>
+    <script src="legal.js?v=20261201a"></script>
+    <script src="site-chrome.js?v=20261201a"></script>
     <script>
+        const translations = {
+            es: {
+                navHome: 'Inicio', navBack: 'Regresar', navBook: 'Reservar cita',
+                navBarbers: 'Barberos', navBooking: 'Cita', navNews: 'Noticias', navSettings: 'Config',
+                heroBadge: 'Equipo Profesional',
+                heroTitle: 'Conoce a los artistas detrás de cada detalle.',
+                heroText: 'Explora el perfil completo del equipo de Goat Style Salon con una presencia visual más limpia, elegante y lista para transmitir confianza desde el primer vistazo.',
+                heroBack: 'Volver a la página anterior',
+                sectionTitle: 'Todos los barberos',
+                sectionText: 'Cada perfil muestra experiencia, disponibilidad, especialidades y accesos directos para que el cliente encuentre rápidamente a su profesional ideal.',
+                statTeam: 'barberos en el equipo',
+                statAvailable: 'disponibles actualmente',
+                statExperience: 'años promedio de experiencia',
+                statClients: 'clientes atendidos',
+                statusActive: 'Activo', statusDeactivated: 'Desactivado',
+                yearsSuffix: 'años',
+                bioFallback: 'Perfil profesional en actualización.',
+                contact: 'Contacto', clients: 'Clientes', servedSuffix: 'atendidos',
+                email: 'Correo', notAvailable: 'No disponible',
+                viewProfile: 'Ver perfil', bookWith: 'Reservar con',
+                ariaInstagram: 'Instagram de', ariaFacebook: 'Facebook de'
+            },
+            en: {
+                navHome: 'Home', navBack: 'Back', navBook: 'Book appointment',
+                navBarbers: 'Barbers', navBooking: 'Booking', navNews: 'News', navSettings: 'Settings',
+                heroBadge: 'Professional Team',
+                heroTitle: 'Meet the artists behind every detail.',
+                heroText: 'Explore the full profile of the Goat Style Salon team with a cleaner, more elegant look, ready to inspire confidence at first glance.',
+                heroBack: 'Back to the previous page',
+                sectionTitle: 'All barbers',
+                sectionText: 'Each profile shows experience, availability, specialties and direct links so clients can quickly find their ideal professional.',
+                statTeam: 'barbers on the team',
+                statAvailable: 'currently available',
+                statExperience: 'average years of experience',
+                statClients: 'clients served',
+                statusActive: 'Active', statusDeactivated: 'Deactivated',
+                yearsSuffix: 'yrs',
+                bioFallback: 'Professional profile being updated.',
+                contact: 'Contact', clients: 'Clients', servedSuffix: 'served',
+                email: 'Email', notAvailable: 'Not available',
+                viewProfile: 'View profile', bookWith: 'Book with',
+                ariaInstagram: 'Instagram of', ariaFacebook: 'Facebook of'
+            }
+        };
+
+        // Textos EN de especialidades y bios sembradas (shared-data.js); respaldo: el texto original.
+        const BARBER_EN = {
+            gabriel: { bio: 'General manager and founder of the barbershop.', specialty: { 'Fade Premium': 'Premium Fade', 'Diseño': 'Design', 'Celebridades': 'Celebrities' } },
+            darialex: { bio: "Barber and cosmetologist specializing in gentlemen's cuts, colorimetry and long beards.", specialty: { 'Corte para caballeros': "Gentlemen's cuts", 'Colorimetría': 'Colorimetry', 'Barbas largas': 'Long beards' } },
+            wilo: { bio: '', specialty: {} }
+        };
+
+        function currentLang() {
+            return (window.GabyPreferences && window.GabyPreferences.getPreferredLanguage()) || 'es';
+        }
+
+        function t(key) {
+            const lang = currentLang();
+            return (translations[lang] && translations[lang][key]) || translations.es[key] || key;
+        }
+
+        function locale() {
+            return currentLang() === 'en' ? 'en-US' : 'es-PR';
+        }
+
+        function barberBio(barber) {
+            if (currentLang() === 'en' && BARBER_EN[barber.id]) return BARBER_EN[barber.id].bio || barber.bio || '';
+            return barber.bio || '';
+        }
+
+        function barberSpecialty(barber, item) {
+            if (currentLang() === 'en' && BARBER_EN[barber.id]) return BARBER_EN[barber.id].specialty[item] || item;
+            return item;
+        }
+
         function getDb() {
             return window.GabyData.getState();
         }
@@ -554,7 +629,7 @@
         }
 
         function barberStatusLabel(barber) {
-            return barber.active !== false ? 'Disponible hoy' : 'Fuera de línea';
+            return barber.active !== false ? t('statusActive') : t('statusDeactivated');
         }
 
         function renderHeroStats(barbers) {
@@ -563,10 +638,10 @@
             const totalVip = barbers.reduce((sum, barber) => sum + Number(barber.vipClients || 0), 0);
             const avgExp = total ? Math.round(barbers.reduce((sum, barber) => sum + Number(barber.yearsExperience || 0), 0) / total) : 0;
             document.getElementById('hero-stats').innerHTML = `
-                <div class="stat"><strong>${total}</strong><span>barberos en el equipo</span></div>
-                <div class="stat"><strong>${active}</strong><span>disponibles actualmente</span></div>
-                <div class="stat"><strong>${avgExp}+</strong><span>años promedio de experiencia</span></div>
-                <div class="stat"><strong>${totalVip.toLocaleString('en-US')}+</strong><span>clientes atendidos</span></div>
+                <div class="stat"><strong>${total}</strong><span>${t('statTeam')}</span></div>
+                <div class="stat"><strong>${active}</strong><span>${t('statAvailable')}</span></div>
+                <div class="stat"><strong>${avgExp}+</strong><span>${t('statExperience')}</span></div>
+                <div class="stat"><strong>${totalVip.toLocaleString(locale())}+</strong><span>${t('statClients')}</span></div>
             `;
         }
 
@@ -580,40 +655,36 @@
                     <div class="card-cover" style="background-image:url('${barber.avatar || barber.gallery?.[0] || ''}')">
                         <div class="card-badges">
                             <span class="chip ${barberStatusClass(barber)}"><span class="dot"></span>${barberStatusLabel(barber)}</span>
-                            <span class="chip gold"><i class="fas fa-award"></i>${barber.yearsExperience || 0}+ años</span>
+                            <span class="chip gold"><i class="fas fa-award"></i>${barber.yearsExperience || 0}+ ${t('yearsSuffix')}</span>
                         </div>
                     </div>
                     <div class="card-body">
                         <h2>${barber.name}</h2>
                         <span class="alias">${barber.alias}</span>
-                        <p class="bio">${barber.bio || 'Perfil profesional en actualización.'}</p>
-                        <div class="tags">${(barber.specialty || []).map(item => `<span>${item}</span>`).join('')}</div>
+                        <p class="bio">${barberBio(barber) || t('bioFallback')}</p>
+                        <div class="tags">${(barber.specialty || []).map(item => `<span>${barberSpecialty(barber, item)}</span>`).join('')}</div>
                         <div class="meta">
                             <div class="meta-card">
-                                <small>Contacto</small>
-                                <strong><i class="fas fa-phone" style="color:#d4af37"></i> ${barber.phone || 'No disponible'}</strong>
+                                <small>${t('contact')}</small>
+                                <strong><i class="fas fa-phone" style="color:#d4af37"></i> ${barber.phone || t('notAvailable')}</strong>
                             </div>
                             <div class="meta-card">
-                                <small>Clientes</small>
-                                <strong>${Number(barber.vipClients || 0).toLocaleString('en-US')}+ atendidos</strong>
+                                <small>${t('clients')}</small>
+                                <strong>${Number(barber.vipClients || 0).toLocaleString(locale())}+ ${t('servedSuffix')}</strong>
                             </div>
                             <div class="meta-card meta-card-wide">
-                                <small>Correo</small>
-                                <strong>${barber.email || 'No disponible'}</strong>
-                            </div>
-                            <div class="meta-card meta-card-hours">
-                                <small><i class="fas fa-clock" style="color:#d4af37"></i> Horario</small>
-                                ${window.GabySchedule.html({ compact: true })}
+                                <small>${t('email')}</small>
+                                <strong>${barber.email || t('notAvailable')}</strong>
                             </div>
                         </div>
                         <div class="footer-row">
                             <div class="socials">
-                                ${barber.socials?.instagram ? `<a class="icon" href="${barber.socials.instagram}" target="_blank" rel="noopener noreferrer" aria-label="Instagram de ${barber.name}"><i class="fab fa-instagram"></i></a>` : ''}
-                                ${barber.socials?.facebook ? `<a class="icon" href="${barber.socials.facebook}" target="_blank" rel="noopener noreferrer" aria-label="Facebook de ${barber.name}"><i class="fab fa-facebook-f"></i></a>` : ''}
+                                ${barber.socials?.instagram ? `<a class="icon" href="${barber.socials.instagram}" target="_blank" rel="noopener noreferrer" aria-label="${t('ariaInstagram')} ${barber.name}"><i class="fab fa-instagram"></i></a>` : ''}
+                                ${barber.socials?.facebook ? `<a class="icon" href="${barber.socials.facebook}" target="_blank" rel="noopener noreferrer" aria-label="${t('ariaFacebook')} ${barber.name}"><i class="fab fa-facebook-f"></i></a>` : ''}
                             </div>
                             <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
-                                <a class="btn-link" href="barber.html?id=${barber.id}">Ver perfil</a>
-                                <a class="btn-link btn-primary" href="booking.html?barber=${barber.id}"><i class="fas fa-calendar-check"></i>Reservar con ${barber.alias || barber.name}</a>
+                                <a class="btn-link" href="barber.html?id=${barber.id}">${t('viewProfile')}</a>
+                                <a class="btn-link btn-primary" href="booking.html?barber=${barber.id}"><i class="fas fa-calendar-check"></i>${t('bookWith')} ${barber.alias || barber.name}</a>
                             </div>
                         </div>
                     </div>
@@ -622,7 +693,7 @@
         }
 
         renderBarbers();
-        window.GabyPreferences.initPreferences({});
+        window.GabyPreferences.initPreferences({ translations });
     </script>
 </body>
 </html>

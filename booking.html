@@ -168,14 +168,14 @@
 <body>
     <div class="topbar" data-mobile-topbar>
         <a class="brand" href="index.html">GOAT STYLE SALON</a>
-        <a class="btn btn-ghost" href="settings.html">Configuración</a>
+        <a class="btn btn-ghost" href="settings.html" data-i18n="settings">Configuración</a>
     </div>
 
     <main class="wrap">
         <section class="hero">
             <span class="eyebrow">Goat Style Salon</span>
-            <h1 id="booking-title">Reserva tu cita</h1>
-            <p class="sub" id="booking-sub">Escoge el servicio, tu barbero, la fecha y la hora. Solo necesitas tu nombre completo.</p>
+            <h1 id="booking-title" data-i18n="bookTitle">Reserva tu cita</h1>
+            <p class="sub" id="booking-sub" data-i18n="bookSub">Escoge el servicio, tu barbero, la fecha y la hora. Solo necesitas tu nombre completo.</p>
         </section>
 
         <div class="layout" data-maintenance-section="reservas">
@@ -183,8 +183,8 @@
                 <!-- Mi cita: aparece si en este dispositivo se reservó una cita que todavía no ha pasado. -->
                 <section class="card my-appointments" id="my-appointments" hidden aria-labelledby="booking-title">
                     <div id="my-appointments-list" class="my-appointments"></div>
-                    <p class="my-appointment-note">Para cambiar o cancelar tu cita, comunícate con la barbería.</p>
-                    <button class="btn btn-ghost new-booking-btn" type="button" id="new-booking-btn"><i class="fas fa-plus"></i> Sacar otra cita</button>
+                    <p class="my-appointment-note" data-i18n="myApptNote">Para cambiar o cancelar tu cita, comunícate con la barbería.</p>
+                    <button class="btn btn-ghost new-booking-btn" type="button" id="new-booking-btn"><i class="fas fa-plus"></i> <span data-i18n="newBooking">Sacar otra cita</span></button>
                 </section>
                 <section class="card booking-card" id="booking-card">
                     <div id="booking-widget"></div>
@@ -193,29 +193,29 @@
 
             <aside class="stack">
                 <div class="card">
-                    <h2 style="margin-bottom: 1rem;">Consultar estado</h2>
+                    <h2 style="margin-bottom: 1rem;" data-i18n="checkStatusTitle">Consultar estado</h2>
                     <div class="field">
-                        <label for="consult-input">Código</label>
+                        <label for="consult-input" data-i18n="codeLabel">Código</label>
                         <input id="consult-input" type="text" placeholder="GS-XXXXXX">
                     </div>
                     <div class="consult-group">
-                        <button class="btn btn-primary" type="button" onclick="checkStatus()">Buscar</button>
+                        <button class="btn btn-primary" type="button" onclick="checkStatus()" data-i18n="search">Buscar</button>
                     </div>
-                    <div class="consult-status" id="consult-result" style="margin-top: 1rem;">Usa tu código para ver el estado de la solicitud.</div>
+                    <div class="consult-status" id="consult-result" style="margin-top: 1rem;" data-i18n="consultHint">Usa tu código para ver el estado de la solicitud.</div>
                 </div>
 
                 <div class="card">
-                    <h2 style="margin-bottom: 1rem;">Próximos espacios</h2>
+                    <h2 style="margin-bottom: 1rem;" data-i18n="nextSlotsTitle">Próximos espacios</h2>
                     <div class="tip-list" id="next-slots"></div>
                 </div>
 
                 <div class="card">
-                    <h2 style="margin-bottom: 1rem;">Antes de reservar</h2>
+                    <h2 style="margin-bottom: 1rem;" data-i18n="beforeBookingTitle">Antes de reservar</h2>
                     <div class="tip-list">
-                        <div class="tip"><strong>Pago presencial</strong>Los precios son informativos. Pagas en la barbería; esta página no cobra nada.</div>
-                        <div class="tip"><strong>Horarios reales</strong>Solo verás horas en que tu barbero realmente está libre.</div>
-                        <div class="tip"><strong>Sin cuenta</strong>Solo escribes tu nombre completo al final. Guarda el código de tu cita para consultar su estado.</div>
-                        <div class="tip"><strong>Cambios y cancelaciones</strong>Comunícate con la barbería para reprogramar o cancelar tu cita según la política.</div>
+                        <div class="tip"><strong data-i18n="tipPayTitle">Pago presencial</strong><span data-i18n="tipPayText">Los precios son informativos. Pagas en la barbería; esta página no cobra nada.</span></div>
+                        <div class="tip"><strong data-i18n="tipHoursTitle">Horarios reales</strong><span data-i18n="tipHoursText">Solo verás horas en que tu barbero realmente está libre.</span></div>
+                        <div class="tip"><strong data-i18n="tipAccountTitle">Sin cuenta</strong><span data-i18n="tipAccountText">Solo escribes tu nombre completo al final. Guarda el código de tu cita para consultar su estado.</span></div>
+                        <div class="tip"><strong data-i18n="tipChangesTitle">Cambios y cancelaciones</strong><span data-i18n="tipChangesText">Comunícate con la barbería para reprogramar o cancelar tu cita según la política.</span></div>
                     </div>
                 </div>
             </aside>
@@ -225,11 +225,11 @@
     <footer data-site-footer></footer>
 
     <div class="mobile-bottom-nav">
-        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
-        <a href="services.html"><i class="fas fa-scissors"></i><span>Servicios</span></a>
-        <a href="booking.html" class="active"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
-        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
-        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+        <a href="index.html"><i class="fas fa-house"></i><span data-i18n="navHome">Inicio</span></a>
+        <a href="services.html"><i class="fas fa-scissors"></i><span data-i18n="navServices">Servicios</span></a>
+        <a href="booking.html" class="active"><i class="fas fa-calendar-check"></i><span data-i18n="navBooking">Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span data-i18n="navNews">Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span data-i18n="navSettings">Config</span></a>
     </div>
 
     <script src="supabase-config.js?v=20261124b"></script>
@@ -237,13 +237,78 @@
     <script src="supabase-sync.js?v=20261124f"></script>
     <script src="site-guard.js?v=20261124b"></script>
     <script src="shared-preferences.js?v=20261124b"></script>
-    <script src="shared-forms.js?v=20261124b"></script>
-    <script src="booking-engine.js?v=20261124e"></script>
-    <script src="booking-widget.js?v=20261124e"></script>
-    <script src="legal.js?v=20261124b"></script>
-    <script src="site-chrome.js?v=20261124f"></script>
+    <script src="shared-forms.js?v=20261201a"></script>
+    <script src="booking-engine.js?v=20261201a"></script>
+    <script src="booking-widget.js?v=20261201a"></script>
+    <script src="legal.js?v=20261201a"></script>
+    <script src="site-chrome.js?v=20261201a"></script>
     <script>
         const B = window.GabyBooking;
+
+        const translations = {
+            es: {
+                settings: 'Configuración',
+                bookTitle: 'Reserva tu cita', myTitleOne: 'Tu cita', myTitleMany: 'Tus citas',
+                bookSub: 'Escoge el servicio, tu barbero, la fecha y la hora. Solo necesitas tu nombre completo.',
+                mySub: 'Aquí ves el estado de la cita que reservaste en este dispositivo.',
+                myApptNote: 'Para cambiar o cancelar tu cita, comunícate con la barbería.',
+                newBooking: 'Sacar otra cita',
+                checkStatusTitle: 'Consultar estado', codeLabel: 'Código', search: 'Buscar',
+                consultHint: 'Usa tu código para ver el estado de la solicitud.',
+                nextSlotsTitle: 'Próximos espacios',
+                beforeBookingTitle: 'Antes de reservar',
+                tipPayTitle: 'Pago presencial', tipPayText: 'Los precios son informativos. Pagas en la barbería; esta página no cobra nada.',
+                tipHoursTitle: 'Horarios reales', tipHoursText: 'Solo verás horas en que tu barbero realmente está libre.',
+                tipAccountTitle: 'Sin cuenta', tipAccountText: 'Solo escribes tu nombre completo al final. Guarda el código de tu cita para consultar su estado.',
+                tipChangesTitle: 'Cambios y cancelaciones', tipChangesText: 'Comunícate con la barbería para reprogramar o cancelar tu cita según la política.',
+                navHome: 'Inicio', navServices: 'Servicios', navBooking: 'Cita', navNews: 'Noticias', navSettings: 'Config',
+                codeWord: 'Código', dateLabel: 'Fecha', timeLabel: 'Hora', barberLabel: 'Barbero',
+                bookWith: 'Reservar con', noSlotsSoon: 'Sin espacios en los próximos días.',
+                statusWord: 'Estado',
+                consultError: 'No se pudo consultar ahora. Intenta de nuevo.',
+                codeNotFound: 'Código no encontrado.',
+                note_PENDIENTE: 'Tu barbero todavía no la ha confirmado.',
+                note_APROBADA: '¡Confirmada! Te esperamos.',
+                note_RECHAZADA: 'El barbero no pudo aceptarla. Puedes sacar otra cita.',
+                note_CANCELADA: 'Esta cita fue cancelada.'
+            },
+            en: {
+                settings: 'Settings',
+                bookTitle: 'Book your appointment', myTitleOne: 'Your appointment', myTitleMany: 'Your appointments',
+                bookSub: 'Choose the service, your barber, the date and the time. You only need your full name.',
+                mySub: 'Here you can see the status of the appointment you booked on this device.',
+                myApptNote: 'To change or cancel your appointment, contact the barbershop.',
+                newBooking: 'Book another appointment',
+                checkStatusTitle: 'Check status', codeLabel: 'Code', search: 'Search',
+                consultHint: 'Use your code to see the status of your request.',
+                nextSlotsTitle: 'Next openings',
+                beforeBookingTitle: 'Before you book',
+                tipPayTitle: 'Pay in person', tipPayText: 'Prices are for reference. You pay at the barbershop; this page charges nothing.',
+                tipHoursTitle: 'Real availability', tipHoursText: 'You will only see times when your barber is actually free.',
+                tipAccountTitle: 'No account', tipAccountText: 'You only write your full name at the end. Keep your appointment code to check its status.',
+                tipChangesTitle: 'Changes and cancellations', tipChangesText: 'Contact the barbershop to reschedule or cancel your appointment according to the policy.',
+                navHome: 'Home', navServices: 'Services', navBooking: 'Booking', navNews: 'News', navSettings: 'Settings',
+                codeWord: 'Code', dateLabel: 'Date', timeLabel: 'Time', barberLabel: 'Barber',
+                bookWith: 'Book with', noSlotsSoon: 'No openings in the next few days.',
+                statusWord: 'Status',
+                consultError: 'We could not check right now. Try again.',
+                codeNotFound: 'Code not found.',
+                note_PENDIENTE: 'Your barber has not confirmed it yet.',
+                note_APROBADA: 'Confirmed! We look forward to seeing you.',
+                note_RECHAZADA: 'The barber could not accept it. You can book another appointment.',
+                note_CANCELADA: 'This appointment was cancelled.'
+            }
+        };
+
+        function currentLang() {
+            return (window.GabyPreferences && window.GabyPreferences.getPreferredLanguage()) || 'es';
+        }
+
+        function t(key) {
+            const lang = currentLang();
+            return (translations[lang] && translations[lang][key]) || translations.es[key] || key;
+        }
+
         function getDb() { return window.GabyData.getState(); }
 
         // Reserva paso a paso (booking-widget.js). No hace falta cuenta: se pide el nombre completo al final.
@@ -251,11 +316,12 @@
 
         // ---------------- Mi cita (citas reservadas desde este dispositivo)
         const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        // Las claves son los valores internos de estado (no cambian); el texto mostrado sale del diccionario.
         const STATUS_NOTES = {
-            PENDIENTE: 'Tu barbero todavía no la ha confirmado.',
-            APROBADA: '¡Confirmada! Te esperamos.',
-            RECHAZADA: 'El barbero no pudo aceptarla. Puedes sacar otra cita.',
-            CANCELADA: 'Esta cita fue cancelada.'
+            PENDIENTE: t('note_PENDIENTE'),
+            APROBADA: t('note_APROBADA'),
+            RECHAZADA: t('note_RECHAZADA'),
+            CANCELADA: t('note_CANCELADA')
         };
         function statusClass(status) {
             if (status === 'APROBADA' || status === 'COMPLETADA') return 'ok';
@@ -274,10 +340,10 @@
             const hasAny = items.length > 0;
             panel.hidden = !hasAny || showingNewBooking;
             card.hidden = hasAny && !showingNewBooking;
-            document.getElementById('booking-title').textContent = hasAny && !showingNewBooking ? (items.length > 1 ? 'Tus citas' : 'Tu cita') : 'Reserva tu cita';
+            document.getElementById('booking-title').textContent = hasAny && !showingNewBooking ? (items.length > 1 ? t('myTitleMany') : t('myTitleOne')) : t('bookTitle');
             document.getElementById('booking-sub').textContent = hasAny && !showingNewBooking
-                ? 'Aquí ves el estado de la cita que reservaste en este dispositivo.'
-                : 'Escoge el servicio, tu barbero, la fecha y la hora. Solo necesitas tu nombre completo.';
+                ? t('mySub')
+                : t('bookSub');
             document.getElementById('my-appointments-list').innerHTML = items.map(item => {
                 const date = String(item.dateTime).slice(0, 10);
                 const time = String(item.dateTime).slice(11, 16);
@@ -286,14 +352,14 @@
                         <div class="my-appointment-head">
                             <div>
                                 <h3>${escapeHtml(item.service)}</h3>
-                                <div class="my-appointment-code">Código ${escapeHtml(item.code)}</div>
+                                <div class="my-appointment-code">${t('codeWord')} ${escapeHtml(item.code)}</div>
                             </div>
                             <span class="status-pill ${statusClass(item.status)}">${escapeHtml(B.statusLabel(item.status))}</span>
                         </div>
                         <dl>
-                            <div><dt>Fecha</dt><dd>${escapeHtml(capitalize(B.formatDate(date, { weekday: 'long', day: 'numeric', month: 'long' })))}</dd></div>
-                            <div><dt>Hora</dt><dd>${escapeHtml(B.formatTime(time))}</dd></div>
-                            ${item.barberName ? `<div><dt>Barbero</dt><dd>${escapeHtml(item.barberName)}</dd></div>` : ''}
+                            <div><dt>${t('dateLabel')}</dt><dd>${escapeHtml(capitalize(B.formatDate(date, { weekday: 'long', day: 'numeric', month: 'long' })))}</dd></div>
+                            <div><dt>${t('timeLabel')}</dt><dd>${escapeHtml(B.formatTime(time))}</dd></div>
+                            ${item.barberName ? `<div><dt>${t('barberLabel')}</dt><dd>${escapeHtml(item.barberName)}</dd></div>` : ''}
                         </dl>
                         <p class="my-appointment-note">${escapeHtml(STATUS_NOTES[item.status] || '')}</p>
                     </article>`;
@@ -328,7 +394,7 @@
             const db = getDb();
             box.innerHTML = db.barbers.filter(barber => barber.active !== false).map(barber => {
                 const next = B.nextAvailable(barber.id, 40);
-                return `<div class="tip"><strong>${barber.alias || barber.name}</strong>${next ? `${B.relativeDay(next.date)} · ${B.formatTime(next.time)} <button class="btn btn-ghost" type="button" style="margin-top:.6rem; padding:.55rem .9rem;" data-book-barber="${barber.id}">Reservar con ${escapeHtml(barber.alias || barber.name)}</button>` : 'Sin espacios en los próximos días.'}</div>`;
+                return `<div class="tip"><strong>${barber.alias || barber.name}</strong>${next ? `${B.relativeDay(next.date)} · ${B.formatTime(next.time)} <button class="btn btn-ghost" type="button" style="margin-top:.6rem; padding:.55rem .9rem;" data-book-barber="${barber.id}">${t('bookWith')} ${escapeHtml(barber.alias || barber.name)}</button>` : t('noSlotsSoon')}</div>`;
             }).join('');
             // "Reservar": deja escogido ese barbero y lleva al paso de reservar (sin recargar la página).
             box.querySelectorAll('[data-book-barber]').forEach(button => button.addEventListener('click', () => {
@@ -347,20 +413,20 @@
                 found = await B.lookupByCode(code);
             } catch (error) {
                 result.style.color = '#f07171';
-                result.innerText = 'No se pudo consultar ahora. Intenta de nuevo.';
+                result.innerText = t('consultError');
                 return;
             }
             if (found) {
                 result.style.color = ['APROBADA', 'COMPLETADA'].includes(found.status) ? '#53d67b' : ['RECHAZADA', 'CANCELADA', 'NO_SHOW'].includes(found.status) ? '#f07171' : '#f3d68a';
-                result.innerText = `Estado: ${B.statusLabel(found.status)} | ${found.service} | ${B.relativeDay(String(found.dateTime).slice(0, 10))} ${B.formatTime(String(found.dateTime).slice(11, 16))}`;
+                result.innerText = `${t('statusWord')}: ${B.statusLabel(found.status)} | ${found.service} | ${B.relativeDay(String(found.dateTime).slice(0, 10))} ${B.formatTime(String(found.dateTime).slice(11, 16))}`;
                 return;
             }
             result.style.color = '#f07171';
-            result.innerText = 'Código no encontrado.';
+            result.innerText = t('codeNotFound');
         }
 
         renderNextSlots();
-        window.GabyPreferences.initPreferences({});
+        window.GabyPreferences.initPreferences({ translations });
     </script>
 </body>
 </html>

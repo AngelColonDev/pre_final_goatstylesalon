@@ -288,11 +288,11 @@
             <div class="top-actions">
                 <a class="btn-link" href="barbers.html">
                     <i class="fas fa-users"></i>
-                    <span>Todos los barberos</span>
+                    <span data-i18n="navAllBarbers">Todos los barberos</span>
                 </a>
                 <a class="btn-link btn-primary" href="booking.html">
                     <i class="fas fa-calendar-check"></i>
-                    <span>Reservar cita</span>
+                    <span data-i18n="navBook">Reservar cita</span>
                 </a>
             </div>
         </div>
@@ -303,11 +303,11 @@
     <footer data-site-footer></footer>
 
     <div class="mobile-bottom-nav site-bottom-nav">
-        <a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a>
-        <a href="barbers.html" class="active"><i class="fas fa-users"></i><span>Barberos</span></a>
-        <a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a>
-        <a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a>
-        <a href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a>
+        <a href="index.html"><i class="fas fa-house"></i><span data-i18n="navHome">Inicio</span></a>
+        <a href="barbers.html" class="active"><i class="fas fa-users"></i><span data-i18n="navBarbers">Barberos</span></a>
+        <a href="booking.html"><i class="fas fa-calendar-check"></i><span data-i18n="navBooking">Cita</span></a>
+        <a href="news.html"><i class="fas fa-newspaper"></i><span data-i18n="navNews">Noticias</span></a>
+        <a href="settings.html"><i class="fas fa-gear"></i><span data-i18n="navSettings">Config</span></a>
     </div>
 
     <script src="supabase-config.js?v=20261124b"></script>
@@ -315,9 +315,106 @@
     <script src="supabase-sync.js?v=20261124f"></script>
     <script src="site-guard.js?v=20261124b"></script>
     <script src="shared-preferences.js?v=20261124b"></script>
-    <script src="legal.js?v=20261124b"></script>
-    <script src="site-chrome.js?v=20261124f"></script>
+    <script src="legal.js?v=20261201a"></script>
+    <script src="site-chrome.js?v=20261201a"></script>
     <script>
+        const translations = {
+            es: {
+                navAllBarbers: 'Todos los barberos', navBook: 'Reservar cita',
+                navHome: 'Inicio', navBarbers: 'Barberos', navBooking: 'Cita', navNews: 'Noticias', navSettings: 'Config',
+                notFoundTitle: 'Barbero no encontrado',
+                notFoundText: 'El perfil que buscas no está disponible o el enlace es incorrecto.',
+                notFoundBtn: 'Ver todos los barberos',
+                statusActive: 'Activo', statusDeactivated: 'Desactivado',
+                whatsappMsg: 'Hola {name}, vi tu perfil en Goat Style Salon y quiero reservar una cita.',
+                contactHeading: 'Contacta directamente con {name}',
+                contactText: 'Escribe por WhatsApp o llama al {phone} para separar tu cita o resolver cualquier duda antes de reservar.',
+                phoneNotAvailable: 'número no disponible',
+                writeWhatsapp: 'Escribir por WhatsApp', callLabel: 'Llamar', bookWith: 'Reservar con',
+                aboutHeading: 'Sobre {name}',
+                bioFallback: 'Perfil profesional en actualización.',
+                yearsExperience: 'Años de experiencia', clientsServed: 'Clientes atendidos',
+                clientReviews: 'Reseñas de clientes', avgRating: 'Calificación promedio',
+                professionalCerts: 'Certificaciones profesionales',
+                contactInfo: 'Información de contacto', phone: 'Teléfono', email: 'Correo', schedule: 'Horario',
+                notAvailable: 'No disponible',
+                socialMedia: 'Redes Sociales', viewPage: 'Ver página', noSocials: 'Redes sociales no disponibles.',
+                reviewsHeading: 'Reseñas de clientes',
+                reviewsIntro: 'Opiniones de clientes, publicadas después de que la barbería las revisa.',
+                noComment: 'Sin comentario.',
+                photoOf: 'Foto de', serviceLabel: 'Servicio', barberLabel: 'Barbero', dateLabel: 'Fecha',
+                dateNotRecorded: 'Fecha no registrada',
+                starsOf: 'de 5 estrellas',
+                noReviews: 'Todavía no hay reseñas públicas.',
+                productsHeading: 'Productos de {name}',
+                productsIntro: 'Productos que {name} vende directamente. Pregunta por ellos en tu próxima cita.',
+                availableSuffix: 'disponibles', soldOut: 'Agotado',
+                ariaOf: 'de'
+            },
+            en: {
+                navAllBarbers: 'All barbers', navBook: 'Book appointment',
+                navHome: 'Home', navBarbers: 'Barbers', navBooking: 'Booking', navNews: 'News', navSettings: 'Settings',
+                notFoundTitle: 'Barber not found',
+                notFoundText: 'The profile you are looking for is not available or the link is incorrect.',
+                notFoundBtn: 'See all barbers',
+                statusActive: 'Active', statusDeactivated: 'Deactivated',
+                whatsappMsg: 'Hi {name}, I saw your profile at Goat Style Salon and I want to book an appointment.',
+                contactHeading: 'Contact {name} directly',
+                contactText: 'Message on WhatsApp or call {phone} to book your appointment or ask any question before booking.',
+                phoneNotAvailable: 'number not available',
+                writeWhatsapp: 'Message on WhatsApp', callLabel: 'Call', bookWith: 'Book with',
+                aboutHeading: 'About {name}',
+                bioFallback: 'Professional profile being updated.',
+                yearsExperience: 'Years of experience', clientsServed: 'Clients served',
+                clientReviews: 'Client reviews', avgRating: 'Average rating',
+                professionalCerts: 'Professional certifications',
+                contactInfo: 'Contact information', phone: 'Phone', email: 'Email', schedule: 'Schedule',
+                notAvailable: 'Not available',
+                socialMedia: 'Social Media', viewPage: 'View page', noSocials: 'Social media not available.',
+                reviewsHeading: 'Client reviews',
+                reviewsIntro: 'Client opinions, published after the barbershop reviews them.',
+                noComment: 'No comment.',
+                photoOf: 'Photo of', serviceLabel: 'Service', barberLabel: 'Barber', dateLabel: 'Date',
+                dateNotRecorded: 'Date not recorded',
+                starsOf: 'of 5 stars',
+                noReviews: 'There are no public reviews yet.',
+                productsHeading: 'Products by {name}',
+                productsIntro: 'Products that {name} sells directly. Ask about them at your next appointment.',
+                availableSuffix: 'available', soldOut: 'Sold out',
+                ariaOf: 'of'
+            }
+        };
+
+        // Textos EN de especialidades y bios sembradas (shared-data.js); respaldo: el texto original.
+        const BARBER_EN = {
+            gabriel: { bio: 'General manager and founder of the barbershop.', specialty: { 'Fade Premium': 'Premium Fade', 'Diseño': 'Design', 'Celebridades': 'Celebrities' } },
+            darialex: { bio: "Barber and cosmetologist specializing in gentlemen's cuts, colorimetry and long beards.", specialty: { 'Corte para caballeros': "Gentlemen's cuts", 'Colorimetría': 'Colorimetry', 'Barbas largas': 'Long beards' } },
+            wilo: { bio: '', specialty: {} }
+        };
+
+        function currentLang() {
+            return (window.GabyPreferences && window.GabyPreferences.getPreferredLanguage()) || 'es';
+        }
+
+        function t(key) {
+            const lang = currentLang();
+            return (translations[lang] && translations[lang][key]) || translations.es[key] || key;
+        }
+
+        function locale() {
+            return currentLang() === 'en' ? 'en-US' : 'es-PR';
+        }
+
+        function barberBio(barber) {
+            if (currentLang() === 'en' && BARBER_EN[barber.id]) return BARBER_EN[barber.id].bio || barber.bio || '';
+            return barber.bio || '';
+        }
+
+        function barberSpecialty(barber, item) {
+            if (currentLang() === 'en' && BARBER_EN[barber.id]) return BARBER_EN[barber.id].specialty[item] || item;
+            return item;
+        }
+
         function getDb() {
             return window.GabyData.getState();
         }
@@ -345,9 +442,9 @@
         function renderNotFound() {
             document.getElementById('profile-page').innerHTML = `
                 <div class="not-found">
-                    <h1>Barbero no encontrado</h1>
-                    <p>El perfil que buscas no está disponible o el enlace es incorrecto.</p>
-                    <a class="btn-link btn-primary" href="barbers.html"><i class="fas fa-arrow-left"></i><span>Ver todos los barberos</span></a>
+                    <h1>${t('notFoundTitle')}</h1>
+                    <p>${t('notFoundText')}</p>
+                    <a class="btn-link btn-primary" href="barbers.html"><i class="fas fa-arrow-left"></i><span>${t('notFoundBtn')}</span></a>
                 </div>
             `;
         }
@@ -367,7 +464,7 @@
 
             const isActive = barber.active !== false;
             const whatsappNumber = normalizePhoneNumber(barber.phone);
-            const whatsappMessage = encodeURIComponent(`Hola ${barber.alias || barber.name}, vi tu perfil en Goat Style Salon y quiero reservar una cita.`);
+            const whatsappMessage = encodeURIComponent(t('whatsappMsg').replace('{name}', barber.alias || barber.name));
             const whatsappHref = whatsappNumber ? `https://wa.me/${whatsappNumber}?text=${whatsappMessage}` : null;
             const callHref = whatsappNumber ? `tel:+${whatsappNumber}` : null;
             const cover = barber.avatar || barber.gallery?.[0] || '';
@@ -376,97 +473,97 @@
             const products = (db.products || []).filter(product => product.active && product.barberId === barber.id);
             const socialEntries = [
                 barber.socials?.instagram ? { icon: 'fab fa-instagram', label: 'Instagram', handle: barber.socials.instagram.replace(/^https?:\/\/(www\.)?instagram\.com\//i, '@'), href: barber.socials.instagram } : null,
-                barber.socials?.facebook ? { icon: 'fab fa-facebook-f', label: 'Facebook', handle: 'Ver página', href: barber.socials.facebook } : null
+                barber.socials?.facebook ? { icon: 'fab fa-facebook-f', label: 'Facebook', handle: t('viewPage'), href: barber.socials.facebook } : null
             ].filter(Boolean);
 
             document.getElementById('profile-page').innerHTML = `
                 <section class="profile-hero" style="background-image:url('${cover}')">
                     <div class="profile-hero-content">
                         <div class="profile-avatar" style="background-image:url('${barber.avatar || cover}')"></div>
-                        <span class="status-chip ${isActive ? 'online' : 'offline'}"><span class="dot"></span>${isActive ? 'Disponible hoy' : 'Fuera de línea'}</span>
+                        <span class="status-chip ${isActive ? 'online' : 'offline'}"><span class="dot"></span>${isActive ? t('statusActive') : t('statusDeactivated')}</span>
                         <h1>${barber.name}</h1>
                         <span class="profile-alias">${barber.alias || ''}</span>
-                        <div class="tags">${(barber.specialty || []).map(item => `<span>${item}</span>`).join('')}</div>
+                        <div class="tags">${(barber.specialty || []).map(item => `<span>${barberSpecialty(barber, item)}</span>`).join('')}</div>
                     </div>
                 </section>
 
                 <section class="cta-band">
                     <div>
-                        <h2>Contacta directamente con ${barber.alias || barber.name}</h2>
-                        <p>Escribe por WhatsApp o llama al ${barber.phone || 'número no disponible'} para separar tu cita o resolver cualquier duda antes de reservar.</p>
+                        <h2>${t('contactHeading').replace('{name}', barber.alias || barber.name)}</h2>
+                        <p>${t('contactText').replace('{phone}', barber.phone || t('phoneNotAvailable'))}</p>
                     </div>
                     <div class="cta-actions">
-                        ${whatsappHref ? `<a class="btn-link btn-whatsapp" href="${whatsappHref}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i><span>Escribir por WhatsApp</span></a>` : ''}
-                        ${callHref ? `<a class="btn-link" href="${callHref}"><i class="fas fa-phone"></i><span>Llamar: ${barber.phone}</span></a>` : ''}
-                        <a class="btn-link btn-primary" href="booking.html?barber=${barber.id}"><i class="fas fa-calendar-check"></i><span>Reservar con ${barber.alias || barber.name}</span></a>
+                        ${whatsappHref ? `<a class="btn-link btn-whatsapp" href="${whatsappHref}" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i><span>${t('writeWhatsapp')}</span></a>` : ''}
+                        ${callHref ? `<a class="btn-link" href="${callHref}"><i class="fas fa-phone"></i><span>${t('callLabel')}: ${barber.phone}</span></a>` : ''}
+                        <a class="btn-link btn-primary" href="booking.html?barber=${barber.id}"><i class="fas fa-calendar-check"></i><span>${t('bookWith')} ${barber.alias || barber.name}</span></a>
                     </div>
                 </section>
 
                 <section class="grid-2">
                     <div class="card">
-                        <h3>Sobre ${barber.alias || barber.name}</h3>
-                        <p class="bio-text">${barber.bio || 'Perfil profesional en actualización.'}</p>
+                        <h3>${t('aboutHeading').replace('{name}', barber.alias || barber.name)}</h3>
+                        <p class="bio-text">${barberBio(barber) || t('bioFallback')}</p>
                         <div class="stats-row">
-                            <div class="stat-card"><strong>${barber.yearsExperience || 0}+</strong><span>Años de experiencia</span></div>
-                            <div class="stat-card"><strong>${Number(barber.vipClients || 0).toLocaleString('en-US')}+</strong><span>Clientes atendidos</span></div>
-                            <div class="stat-card"><strong>${reviewStats.total}</strong><span>Reseñas de clientes</span></div>
-                            <div class="stat-card">${reviewStats.total ? `<div class="stars">${'★'.repeat(Math.round(reviewStats.avg))}${'☆'.repeat(5 - Math.round(reviewStats.avg))}</div>` : ''}<strong>${reviewStats.total ? reviewStats.avg.toFixed(1) : '-'}</strong><span>Calificación promedio</span></div>
-                            <div class="stat-card stat-card-wide"><strong>${certifications.length}</strong><span>Certificaciones profesionales</span></div>
+                            <div class="stat-card"><strong>${barber.yearsExperience || 0}+</strong><span>${t('yearsExperience')}</span></div>
+                            <div class="stat-card"><strong>${Number(barber.vipClients || 0).toLocaleString(locale())}+</strong><span>${t('clientsServed')}</span></div>
+                            <div class="stat-card"><strong>${reviewStats.total}</strong><span>${t('clientReviews')}</span></div>
+                            <div class="stat-card">${reviewStats.total ? `<div class="stars">${'★'.repeat(Math.round(reviewStats.avg))}${'☆'.repeat(5 - Math.round(reviewStats.avg))}</div>` : ''}<strong>${reviewStats.total ? reviewStats.avg.toFixed(1) : '-'}</strong><span>${t('avgRating')}</span></div>
+                            <div class="stat-card stat-card-wide"><strong>${certifications.length}</strong><span>${t('professionalCerts')}</span></div>
                         </div>
                     </div>
                     <div class="card">
-                        <h3>Información de contacto</h3>
+                        <h3>${t('contactInfo')}</h3>
                         <div class="meta-list">
-                            <div class="meta-item"><i class="fas fa-phone"></i><div><small>Teléfono</small><strong>${barber.phone || 'No disponible'}</strong></div></div>
-                            <div class="meta-item"><i class="fas fa-envelope"></i><div><small>Correo</small><strong>${barber.email || 'No disponible'}</strong></div></div>
-                            <div class="meta-item meta-item-hours"><i class="fas fa-clock"></i><div><small>Horario</small>${window.GabySchedule.html()}</div></div>
+                            <div class="meta-item"><i class="fas fa-phone"></i><div><small>${t('phone')}</small><strong>${barber.phone || t('notAvailable')}</strong></div></div>
+                            <div class="meta-item"><i class="fas fa-envelope"></i><div><small>${t('email')}</small><strong>${barber.email || t('notAvailable')}</strong></div></div>
+                            <div class="meta-item meta-item-hours"><i class="fas fa-clock"></i><div><small>${t('schedule')}</small>${window.GabySchedule.html()}</div></div>
                         </div>
-                        <div class="subhead">Redes Sociales</div>
+                        <div class="subhead">${t('socialMedia')}</div>
                         ${socialEntries.length ? `
                             <div class="socials-row">
                                 ${socialEntries.map(social => `
-                                    <a class="social-link" href="${social.href}" target="_blank" rel="noopener noreferrer" aria-label="${social.label} de ${barber.name}">
+                                    <a class="social-link" href="${social.href}" target="_blank" rel="noopener noreferrer" aria-label="${social.label} ${t('ariaOf')} ${barber.name}">
                                         <span class="icon"><i class="${social.icon}"></i></span>
                                         <div><strong>${social.label}</strong><span>${social.handle}</span></div>
                                     </a>
                                 `).join('')}
                             </div>
-                        ` : '<p class="no-socials">Redes sociales no disponibles.</p>'}
+                        ` : `<p class="no-socials">${t('noSocials')}</p>`}
                     </div>
                 </section>
 
-                <section class="card" style="margin-top:1.5rem;" aria-label="Reseñas de clientes">
-                    <h3>Reseñas de clientes</h3>
-                    <p class="bio-text">Opiniones de clientes, publicadas después de que la barbería las revisa.</p>
+                <section class="card" style="margin-top:1.5rem;" aria-label="${t('reviewsHeading')}">
+                    <h3>${t('reviewsHeading')}</h3>
+                    <p class="bio-text">${t('reviewsIntro')}</p>
                     <div class="grid-2">
                         ${reviewStats.reviews.map(review => {
                             const photo = review.clientPhoto || '';
                             const safePhoto = /^(https?:\/\/|data:image\/(png|jpe?g|webp|gif);base64,)/i.test(photo) ? photo : '';
                             const serviceLabel = String(review.service || '').split(' + ').map(name => name.trim()).filter(name => name && name !== 'No sé cómo se llama el recorte').join(' + ');
                             const sent = review.createdAt ? new Date(review.createdAt) : null;
-                            const when = sent && !Number.isNaN(sent.getTime()) ? sent.toLocaleDateString('es-PR', { day: 'numeric', month: 'long', year: 'numeric' })
-                                : review.serviceDate ? new Date(`${review.serviceDate}T12:00:00`).toLocaleDateString('es-PR', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Fecha no registrada';
+                            const when = sent && !Number.isNaN(sent.getTime()) ? sent.toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' })
+                                : review.serviceDate ? new Date(`${review.serviceDate}T12:00:00`).toLocaleDateString(locale(), { day: 'numeric', month: 'long', year: 'numeric' }) : t('dateNotRecorded');
                             return `
                             <article class="card">
-                                <div class="stars" aria-label="${Number(review.rating)} de 5 estrellas">${'★'.repeat(Math.max(0, Math.min(5, Number(review.rating) || 0)))}</div>
-                                <p class="bio-text">${escapeReview(review.text) || 'Sin comentario.'}</p>
+                                <div class="stars" aria-label="${Number(review.rating)} ${t('starsOf')}">${'★'.repeat(Math.max(0, Math.min(5, Number(review.rating) || 0)))}</div>
+                                <p class="bio-text">${escapeReview(review.text) || t('noComment')}</p>
                                 <div style="display:flex;align-items:center;gap:1rem;">
                                     <div style="position:relative;overflow:hidden;display:grid;place-items:center;width:48px;height:48px;flex-shrink:0;border-radius:50%;background:rgba(212,175,55,.12);color:var(--gold);">
                                         <span aria-hidden="true">${escapeReview(String(review.clientName || 'C').slice(0, 1).toUpperCase())}</span>
-                                        ${safePhoto ? `<img src="${escapeReview(safePhoto)}" alt="Foto de ${escapeReview(review.clientName)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">` : ''}
+                                        ${safePhoto ? `<img src="${escapeReview(safePhoto)}" alt="${t('photoOf')} ${escapeReview(review.clientName)}" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" onerror="this.remove()">` : ''}
                                     </div>
                                     <strong>${escapeReview(review.clientName)}</strong>
                                 </div>
-                                <p class="bio-text" style="margin-bottom:0;">${serviceLabel ? `Servicio: ${escapeReview(serviceLabel)}<br>` : ''}Barbero: ${escapeReview(barber.alias || barber.name)}<br>Fecha: ${escapeReview(when)}</p>
+                                <p class="bio-text" style="margin-bottom:0;">${serviceLabel ? `${t('serviceLabel')}: ${escapeReview(serviceLabel)}<br>` : ''}${t('barberLabel')}: ${escapeReview(barber.alias || barber.name)}<br>${t('dateLabel')}: ${escapeReview(when)}</p>
                             </article>
-                        `; }).join('') || '<p class="bio-text">Todavía no hay reseñas públicas.</p>'}
+                        `; }).join('') || `<p class="bio-text">${t('noReviews')}</p>`}
                     </div>
                 </section>
 
                 ${products.length ? `
                     <section class="card" style="margin-top:1.5rem;">
-                        <h3>Productos de ${barber.alias || barber.name}</h3>
-                        <p class="bio-text" style="margin:0;">Productos que ${barber.alias || barber.name} vende directamente. Pregunta por ellos en tu próxima cita.</p>
+                        <h3>${t('productsHeading').replace('{name}', barber.alias || barber.name)}</h3>
+                        <p class="bio-text" style="margin:0;">${t('productsIntro').replace('{name}', barber.alias || barber.name)}</p>
                         <div class="products-grid">
                             ${products.map(product => `
                                 <article class="product-card">
@@ -476,7 +573,7 @@
                                         <p>${product.desc || ''}</p>
                                         <div class="product-row">
                                             <span class="product-price">${product.price}</span>
-                                            <span class="product-stock">${Number(product.stock) > 0 ? `${product.stock} disponibles` : 'Agotado'}</span>
+                                            <span class="product-stock">${Number(product.stock) > 0 ? `${product.stock} ${t('availableSuffix')}` : t('soldOut')}</span>
                                         </div>
                                     </div>
                                 </article>
@@ -490,7 +587,7 @@
         renderProfile();
         window.addEventListener('gabydatachange', renderProfile);
         window.addEventListener('storage', event => { if (event.key === window.GabyData.STORAGE_KEY) renderProfile(); });
-        window.GabyPreferences.initPreferences({});
+        window.GabyPreferences.initPreferences({ translations });
     </script>
 </body>
 </html>

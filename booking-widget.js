@@ -7,6 +7,187 @@
     const B = () => window.GabyBooking;
     const Data = () => window.GabyData;
     const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+
+    // ---------------------------------------------------------------------
+    // i18n del widget: diccionario propio + mapas EN por id del catálogo
+    // sembrado (shared-data.js). Los valores internos (estados, nombres de
+    // servicios de la casa, ids) NO se traducen: solo los textos mostrados.
+    // ---------------------------------------------------------------------
+    const translations = {
+        es: {
+            stepService: 'Servicio', stepBarber: 'Barbero', stepDateTime: 'Fecha y hora', stepReview: 'Revisar',
+            photoMustBeImage: 'El archivo debe ser una imagen.',
+            photoTooBig: 'La foto es muy grande (máximo 15 MB).',
+            photoReadError: 'No se pudo leer la foto. Prueba con otra imagen (JPG o PNG).',
+            servicesTitle: '¿Qué te vas a hacer?',
+            servicesSub: 'Puedes escoger uno o varios servicios. Los precios son informativos.',
+            barberChosenLabel: 'Barbero', changeBarber: 'Cambiar barbero',
+            unknownHelp: 'Tu barbero te ayuda a escogerlo. Antes de confirmar puedes subir una foto de referencia (opcional).',
+            payInPersonStrong: 'Pago presencial en la barbería.',
+            payServicesText: 'Esta página no cobra ni guarda datos de pago.',
+            payReviewText: 'No se cobra nada en esta página.',
+            chooseAtLeastOne: 'Escoge al menos un servicio.',
+            serviceWord: 'servicio', servicesWord: 'servicios',
+            continueBtn: 'Continuar',
+            barberNotOffers: '{name} no ofrece todos esos servicios. Escoge otro barbero.',
+            barbersTitle: 'Escoge tu barbero',
+            nextSlot: 'Próximo espacio', noUpcomingSlots: 'Sin espacios próximos',
+            noBarberForAll: 'Ningún barbero ofrece todos los servicios escogidos juntos. Prueba con menos servicios.',
+            back: 'Atrás',
+            dateTimeTitle: '¿Cuándo te viene bien?',
+            datesAria: 'Fechas',
+            ariaClosed: 'barbería cerrada', ariaSlots: 'horarios', ariaNoSlots: 'sin horarios',
+            closedWord: 'Cerrado', freeWord: 'libres', fullWord: 'Lleno',
+            morning: 'Mañana', afternoon: 'Tarde', evening: 'Noche',
+            closedDayTitle: 'La barbería está cerrada ese día.',
+            closedDayText: 'Los domingos y lunes la barbería está cerrada. Escoge un día de martes a sábado.',
+            noSlotsDayTitle: 'No hay espacios disponibles este día.',
+            noSlotsDayText: 'Escoge otra fecha o comunícate con la barbería.',
+            shopHoursTitle: 'Horario de la barbería',
+            reviewBtn: 'Revisar',
+            sumName: 'Nombre', sumEmail: 'Correo', sumService: 'Servicio', sumServices: 'Servicios',
+            sumBarber: 'Barbero', sumDate: 'Fecha', sumTime: 'Hora', sumDuration: 'Duración',
+            sumPrice: 'Precio', sumPayInPerson: 'pago presencial',
+            sumPhoto: 'Foto de referencia', sumPhotoAttached: 'Adjunta', sumCode: 'Código',
+            reviewTitle: 'Revisa tu cita',
+            fullNameLabel: 'Nombre completo *', fullNamePlaceholder: 'Tu nombre y apellido',
+            emailLabel: 'Correo electrónico *', emailHint: 'Te enviaremos la confirmación de tu cita a este correo.',
+            vipTitle: '📍 Detalles del servicio VIP a domicilio',
+            vipTownLabel: 'Pueblo *', vipTownPlaceholder: 'Selecciona tu pueblo',
+            vipGuestsLabel: 'Cantidad de personas',
+            vipAddressLabel: 'Dirección y descripción del lugar *',
+            vipAddressPlaceholder: 'Dirección, urbanización, casa/apto, puntos de referencia...',
+            noteLabel: 'Nota para el barbero (opcional)', notePlaceholder: 'Ej. prefiero low fade, barba #2...',
+            photoTitle: 'Foto de referencia (opcional)',
+            photoHelp: 'Sube una foto del recorte que quieres. Solo la ven tu barbero y la barbería.',
+            removePhoto: 'Quitar foto', changePhoto: 'Cambiar foto', uploadPhoto: 'Subir foto',
+            agreeText: 'He revisado la fecha, hora, servicio, precio y política de cancelación aplicable a esta reservación. *',
+            changeCancelNote: 'Para cambiar o cancelar tu cita, comunícate con la barbería.',
+            confirmBtn: 'Confirmar cita', confirmingBtn: 'Confirmando...',
+            toastName: 'Escribe tu nombre completo para confirmar la cita.',
+            toastEmail: 'Escribe un correo electrónico válido para confirmar tu cita.',
+            toastAgree: 'Marca la casilla de confirmación para continuar.',
+            toastVip: 'Completa el pueblo y la dirección del servicio VIP.',
+            confirmError: 'No se pudo confirmar la cita.',
+            noticeUpdateError: 'No se pudo actualizar el aviso.',
+            toastConfirmed: '¡Tu cita fue confirmada!',
+            toastReceived: 'Recibimos tu solicitud de cita.',
+            doneConfirmedTitle: '¡Tu cita fue confirmada!',
+            doneReceivedTitle: '¡Recibimos tu solicitud!',
+            doneBarberWillConfirm: 'Tu barbero la confirmará pronto. ',
+            doneKeepCode: 'Guarda tu código ',
+            doneKeepCodeAfter: ' para consultar el estado de tu cita. Para cambiarla o cancelarla, comunícate con la barbería.',
+            doneEmailTo: 'Te enviaremos la confirmación a {email}.',
+            donePayLabel: 'Pago:', donePayText: 'presencial en la barbería.',
+            backHome: 'Volver al inicio', bookAnother: 'Reservar otra cita'
+        },
+        en: {
+            stepService: 'Service', stepBarber: 'Barber', stepDateTime: 'Date & time', stepReview: 'Review',
+            photoMustBeImage: 'The file must be an image.',
+            photoTooBig: 'The photo is too large (maximum 15 MB).',
+            photoReadError: 'The photo could not be read. Try another image (JPG or PNG).',
+            servicesTitle: 'What are you getting done?',
+            servicesSub: 'You can choose one or more services. Prices are for reference.',
+            barberChosenLabel: 'Barber', changeBarber: 'Change barber',
+            unknownHelp: 'Your barber will help you choose it. Before confirming you can upload a reference photo (optional).',
+            payInPersonStrong: 'Pay in person at the barbershop.',
+            payServicesText: 'This page does not charge or store payment details.',
+            payReviewText: 'Nothing is charged on this page.',
+            chooseAtLeastOne: 'Choose at least one service.',
+            serviceWord: 'service', servicesWord: 'services',
+            continueBtn: 'Continue',
+            barberNotOffers: '{name} does not offer all of those services. Choose another barber.',
+            barbersTitle: 'Choose your barber',
+            nextSlot: 'Next opening', noUpcomingSlots: 'No upcoming openings',
+            noBarberForAll: 'No barber offers all the chosen services together. Try fewer services.',
+            back: 'Back',
+            dateTimeTitle: 'When works for you?',
+            datesAria: 'Dates',
+            ariaClosed: 'barbershop closed', ariaSlots: 'time slots', ariaNoSlots: 'no time slots',
+            closedWord: 'Closed', freeWord: 'open', fullWord: 'Full',
+            morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening',
+            closedDayTitle: 'The barbershop is closed that day.',
+            closedDayText: 'The barbershop is closed on Sundays and Mondays. Choose a day from Tuesday to Saturday.',
+            noSlotsDayTitle: 'There are no openings available this day.',
+            noSlotsDayText: 'Choose another date or contact the barbershop.',
+            shopHoursTitle: 'Barbershop hours',
+            reviewBtn: 'Review',
+            sumName: 'Name', sumEmail: 'Email', sumService: 'Service', sumServices: 'Services',
+            sumBarber: 'Barber', sumDate: 'Date', sumTime: 'Time', sumDuration: 'Duration',
+            sumPrice: 'Price', sumPayInPerson: 'pay in person',
+            sumPhoto: 'Reference photo', sumPhotoAttached: 'Attached', sumCode: 'Code',
+            reviewTitle: 'Review your appointment',
+            fullNameLabel: 'Full name *', fullNamePlaceholder: 'Your first and last name',
+            emailLabel: 'Email *', emailHint: 'We will send your appointment confirmation to this email.',
+            vipTitle: '📍 VIP at-home service details',
+            vipTownLabel: 'Town *', vipTownPlaceholder: 'Select your town',
+            vipGuestsLabel: 'Number of people',
+            vipAddressLabel: 'Address and description of the place *',
+            vipAddressPlaceholder: 'Address, neighborhood, house/apt, landmarks...',
+            noteLabel: 'Note for the barber (optional)', notePlaceholder: 'E.g. I prefer a low fade, beard #2...',
+            photoTitle: 'Reference photo (optional)',
+            photoHelp: 'Upload a photo of the cut you want. Only your barber and the barbershop can see it.',
+            removePhoto: 'Remove photo', changePhoto: 'Change photo', uploadPhoto: 'Upload photo',
+            agreeText: 'I have reviewed the date, time, service, price and cancellation policy that apply to this booking. *',
+            changeCancelNote: 'To change or cancel your appointment, contact the barbershop.',
+            confirmBtn: 'Confirm appointment', confirmingBtn: 'Confirming...',
+            toastName: 'Write your full name to confirm the appointment.',
+            toastEmail: 'Write a valid email to confirm your appointment.',
+            toastAgree: 'Check the confirmation box to continue.',
+            toastVip: 'Complete the town and address for the VIP service.',
+            confirmError: 'The appointment could not be confirmed.',
+            noticeUpdateError: 'The notice could not be updated.',
+            toastConfirmed: 'Your appointment was confirmed!',
+            toastReceived: 'We received your appointment request.',
+            doneConfirmedTitle: 'Your appointment was confirmed!',
+            doneReceivedTitle: 'We received your request!',
+            doneBarberWillConfirm: 'Your barber will confirm it soon. ',
+            doneKeepCode: 'Keep your code ',
+            doneKeepCodeAfter: ' to check the status of your appointment. To change or cancel it, contact the barbershop.',
+            doneEmailTo: 'We will send the confirmation to {email}.',
+            donePayLabel: 'Payment:', donePayText: 'in person at the barbershop.',
+            backHome: 'Back to home', bookAnother: 'Book another appointment'
+        }
+    };
+
+    // Duración/descripción EN por id del catálogo sembrado; respaldo: el texto original.
+    const SERVICE_EN = {
+        'service-1': { duration: 'Includes a drink and a hair wash', description: 'Every cut includes a drink of your choice and a hair wash.' },
+        'service-2': { duration: 'Premium cut', description: 'Premium Fade with a clean, professional finish.' },
+        'service-3': { duration: 'Traditional Hot Towel Shave', description: 'Signature Cut with Traditional Hot Towel Shave.' },
+        'service-4': { duration: 'Up to 12 years old', description: 'Kids Premium for children up to 12 years old.' },
+        'service-5': { duration: 'Prior consultation', description: 'Baby Cut subject to prior consultation.' },
+        'service-6': { duration: 'Color', description: 'Hair Light for a more defined, modern look.' },
+        'service-7': { duration: 'Cut not included', description: 'Full platinum. Cut not included.' },
+        'service-8': { duration: 'Treatment', description: 'Hair hydration treatment.' },
+        'service-9': { duration: 'Treatment', description: 'Keratin to improve texture and control frizz.' },
+        'service-10': { duration: 'Facial', description: 'Deep facial cleansing.' },
+        'service-11': { duration: 'Complete experience', description: 'Includes Signature Cut, beard design, hair wash, hot towels, scalp massage, express facial cleansing, a courtesy drink and premium finishing products.' }
+    };
+
+    const CATEGORY_EN = { 'Cortes': 'Cuts', 'Barba': 'Beard', 'Combos': 'Combos', 'Diseños': 'Designs', 'Tratamientos': 'Treatments', 'Faciales': 'Facials', 'Color': 'Color', 'VIP': 'VIP', 'Otros': 'Other' };
+
+    function currentLang() {
+        return (window.GabyPreferences && window.GabyPreferences.getPreferredLanguage()) || 'es';
+    }
+
+    function t(key) {
+        const lang = currentLang();
+        return (translations[lang] && translations[lang][key]) || translations.es[key] || key;
+    }
+
+    function locale() {
+        return currentLang() === 'en' ? 'en-US' : 'es-PR';
+    }
+
+    function serviceText(service, field) {
+        if (currentLang() === 'en' && SERVICE_EN[service.id] && SERVICE_EN[service.id][field]) return SERVICE_EN[service.id][field];
+        return service[field] || '';
+    }
+
+    function categoryLabel(category) {
+        return currentLang() === 'en' ? (CATEGORY_EN[category] || category) : category;
+    }
     // FormSpark: un formulario por barbero (ya existen y están verificados). El
     // aviso por correo llega al barbero de la cita y a angelcolonnegron@gmail.com,
     // con el asunto "Nueva cita — GOAT Style Salon". Si un barbero no tiene
@@ -135,8 +316,8 @@
     // Reduce la foto de referencia (max. 900 px, JPEG) para que no ocupe mucho espacio.
     function compressPhoto(file) {
         return new Promise((resolve, reject) => {
-            if (file.type && !/^image\//.test(file.type)) return reject(Object.assign(new Error('type'), { userMessage: 'El archivo debe ser una imagen.' }));
-            if (file.size > 15 * 1024 * 1024) return reject(Object.assign(new Error('size'), { userMessage: 'La foto es muy grande (máximo 15 MB).' }));
+            if (file.type && !/^image\//.test(file.type)) return reject(Object.assign(new Error('type'), { userMessage: t('photoMustBeImage') }));
+            if (file.size > 15 * 1024 * 1024) return reject(Object.assign(new Error('size'), { userMessage: t('photoTooBig') }));
             const url = URL.createObjectURL(file);
             const img = new Image();
             img.onload = () => {
@@ -195,7 +376,7 @@
         }
 
         function stepsBar() {
-            const labels = ['Servicio', 'Barbero', 'Fecha y hora', 'Revisar'];
+            const labels = [t('stepService'), t('stepBarber'), t('stepDateTime'), t('stepReview')];
             const current = view.step - 1;
             return `<div class="bw-steps" aria-hidden="true">${labels.map((label, i) => `<span class="bw-step ${i < current ? 'done' : ''} ${i === current ? 'current' : ''}">${label}</span>`).join('')}</div>`;
         }
@@ -211,32 +392,32 @@
             const chosenBarber = view.barberId ? db.barbers.find(b => b.id === view.barberId) : null;
             root.innerHTML = `
                 ${stepsBar()}
-                <h3 class="bw-title">¿Qué te vas a hacer?</h3>
-                <p class="bw-sub">Puedes escoger uno o varios servicios. Los precios son informativos.</p>
-                ${chosenBarber ? `<div class="bw-chosen"><span><i class="fas fa-user-check" aria-hidden="true"></i> Barbero: <strong>${escapeHtml(chosenBarber.alias || chosenBarber.name)}</strong></span><button type="button" data-clear-barber>Cambiar barbero</button></div>` : ''}
+                <h3 class="bw-title">${t('servicesTitle')}</h3>
+                <p class="bw-sub">${t('servicesSub')}</p>
+                ${chosenBarber ? `<div class="bw-chosen"><span><i class="fas fa-user-check" aria-hidden="true"></i> ${t('barberChosenLabel')}: <strong>${escapeHtml(chosenBarber.alias || chosenBarber.name)}</strong></span><button type="button" data-clear-barber>${t('changeBarber')}</button></div>` : ''}
                 <div class="bw-list">
                     <label class="bw-option bw-unknown">
                         <input type="checkbox" data-service="${escapeHtml(unknown.name)}" ${view.services.includes(unknown.name) ? 'checked' : ''}>
-                        <span><strong>${escapeHtml(unknown.name)}</strong><small>Tu barbero te ayuda a escogerlo. Antes de confirmar puedes subir una foto de referencia (opcional).</small></span>
+                        <span><strong>${escapeHtml(unknown.name)}</strong><small>${t('unknownHelp')}</small></span>
                         <span class="bw-q" aria-hidden="true"><i class="fas fa-question"></i></span>
                     </label>
                 </div>
                 ${groups.map(group => `
-                    <div class="bw-cat">${escapeHtml(group.category)}</div>
+                    <div class="bw-cat">${escapeHtml(categoryLabel(group.category))}</div>
                     <div class="bw-list">
                         ${group.items.map(service => `
                             <label class="bw-option">
                                 <input type="checkbox" data-service="${escapeHtml(service.name)}" ${view.services.includes(service.name) ? 'checked' : ''}>
-                                <span><strong>${escapeHtml(service.name)}</strong><small>${B().formatDuration(B().serviceMinutes(service))}${service.duration ? ` · ${escapeHtml(service.duration)}` : ''}</small></span>
+                                <span><strong>${escapeHtml(service.name)}</strong><small>${B().formatDuration(B().serviceMinutes(service))}${serviceText(service, 'duration') ? ` · ${escapeHtml(serviceText(service, 'duration'))}` : ''}</small></span>
                                 <span class="bw-price">${escapeHtml(service.price)}</span>
                             </label>
                         `).join('')}
                     </div>
                 `).join('')}
-                <div class="bw-pay"><i class="fas fa-store" aria-hidden="true"></i><span><strong>Pago presencial en la barbería.</strong> Esta página no cobra ni guarda datos de pago.</span></div>
+                <div class="bw-pay"><i class="fas fa-store" aria-hidden="true"></i><span><strong>${t('payInPersonStrong')}</strong> ${t('payServicesText')}</span></div>
                 <div class="bw-actions">
-                    <span class="bw-sub">${selected.length ? `${selected.length} servicio${selected.length === 1 ? '' : 's'} · ${B().formatDuration(duration())} · ${escapeHtml(B().priceLabel(selected))}` : 'Escoge al menos un servicio.'}</span>
-                    <button class="bw-btn primary" type="button" data-next ${selected.length ? '' : 'disabled'}>Continuar <i class="fas fa-arrow-right"></i></button>
+                    <span class="bw-sub">${selected.length ? `${selected.length} ${selected.length === 1 ? t('serviceWord') : t('servicesWord')} · ${B().formatDuration(duration())} · ${escapeHtml(B().priceLabel(selected))}` : t('chooseAtLeastOne')}</span>
+                    <button class="bw-btn primary" type="button" data-next ${selected.length ? '' : 'disabled'}>${t('continueBtn')} <i class="fas fa-arrow-right"></i></button>
                 </div>
             `;
             root.querySelectorAll('[data-service]').forEach(input => input.addEventListener('change', () => {
@@ -251,7 +432,7 @@
             root.querySelector('[data-next]').addEventListener('click', () => {
                 const offers = chosenBarber && B().barbersForServices(selectedServices()).some(b => b.id === chosenBarber.id);
                 if (chosenBarber && !offers) {
-                    Data().toast(`${chosenBarber.alias || chosenBarber.name} no ofrece todos esos servicios. Escoge otro barbero.`, 'warning');
+                    Data().toast(t('barberNotOffers').replace('{name}', chosenBarber.alias || chosenBarber.name), 'warning');
                     view.barberId = null;
                 }
                 go(offers ? 3 : 2);
@@ -264,7 +445,7 @@
             const barbers = B().barbersForServices(services);
             root.innerHTML = `
                 ${stepsBar()}
-                <h3 class="bw-title">Escoge tu barbero</h3>
+                <h3 class="bw-title">${t('barbersTitle')}</h3>
                 <p class="bw-sub">${escapeHtml(services.map(s => s.name).join(' + '))} · ${B().formatDuration(duration())}</p>
                 ${barbers.length ? `<div class="bw-barbers">${barbers.map(barber => {
                     const next = B().nextAvailable(barber.id, duration());
@@ -275,12 +456,12 @@
                             <span>
                                 <strong>${escapeHtml(barber.alias || barber.name)}</strong>
                                 <small>${escapeHtml(barber.name)}${rating.count ? ` · ⭐ ${rating.avg.toFixed(1)} (${rating.count})` : ''}</small>
-                                <span class="bw-next ${next ? '' : 'none'}">${next ? `Próximo espacio: ${B().relativeDay(next.date)} ${B().formatTime(next.time)}` : 'Sin espacios próximos'}</span>
+                                <span class="bw-next ${next ? '' : 'none'}">${next ? `${t('nextSlot')}: ${B().relativeDay(next.date)} ${B().formatTime(next.time)}` : t('noUpcomingSlots')}</span>
                             </span>
                         </button>`;
-                }).join('')}</div>` : '<div class="bw-alert">Ningún barbero ofrece todos los servicios escogidos juntos. Prueba con menos servicios.</div>'}
+                }).join('')}</div>` : `<div class="bw-alert">${t('noBarberForAll')}</div>`}
                 <div class="bw-actions">
-                    <button class="bw-btn" type="button" data-back><i class="fas fa-arrow-left"></i> Atrás</button>
+                    <button class="bw-btn" type="button" data-back><i class="fas fa-arrow-left"></i> ${t('back')}</button>
                 </div>
             `;
             root.querySelectorAll('[data-barber]').forEach(button => button.addEventListener('click', () => {
@@ -301,20 +482,20 @@
             const closedDay = !B().isShopOpen(view.date);
             const slots = closedDay ? [] : B().getSlots(view.barberId, view.date, duration());
             const groups = [
-                ['Mañana', slots.filter(t => B().toMin(t) < 720)],
-                ['Tarde', slots.filter(t => B().toMin(t) >= 720 && B().toMin(t) < 1020)],
-                ['Noche', slots.filter(t => B().toMin(t) >= 1020)]
+                [t('morning'), slots.filter(t => B().toMin(t) < 720)],
+                [t('afternoon'), slots.filter(t => B().toMin(t) >= 720 && B().toMin(t) < 1020)],
+                [t('evening'), slots.filter(t => B().toMin(t) >= 1020)]
             ].filter(g => g[1].length);
             root.innerHTML = `
                 ${stepsBar()}
-                <h3 class="bw-title">¿Cuándo te viene bien?</h3>
+                <h3 class="bw-title">${t('dateTimeTitle')}</h3>
                 <p class="bw-sub">${escapeHtml(barber ? barber.alias || barber.name : '')} · ${escapeHtml(selectedServices().map(s => s.name).join(' + '))} · ${B().formatDuration(duration())}</p>
-                <div class="bw-dates" role="listbox" aria-label="Fechas">
+                <div class="bw-dates" role="listbox" aria-label="${t('datesAria')}">
                     ${days.map(day => {
                         const date = B().parseKey(day.key);
                         // Los días cerrados se pueden tocar para ver el aviso; los llenos no.
-                        return `<button type="button" class="bw-date ${view.date === day.key ? 'selected' : ''} ${day.closed ? 'closed' : ''}" data-date="${day.key}" ${day.count || day.closed ? '' : 'disabled'} aria-label="${B().formatDate(day.key)}${day.closed ? ', barbería cerrada' : day.count ? `, ${day.count} horarios` : ', sin horarios'}">
-                            <span>${date.toLocaleDateString('es-PR', { weekday: 'short' })}</span><strong>${date.getDate()}</strong><small>${day.closed ? 'Cerrado' : day.count ? `${day.count} libres` : 'Lleno'}</small></button>`;
+                        return `<button type="button" class="bw-date ${view.date === day.key ? 'selected' : ''} ${day.closed ? 'closed' : ''}" data-date="${day.key}" ${day.count || day.closed ? '' : 'disabled'} aria-label="${B().formatDate(day.key)}${day.closed ? `, ${t('ariaClosed')}` : day.count ? `, ${day.count} ${t('ariaSlots')}` : `, ${t('ariaNoSlots')}`}">
+                            <span>${date.toLocaleDateString(locale(), { weekday: 'short' })}</span><strong>${date.getDate()}</strong><small>${day.closed ? t('closedWord') : day.count ? `${day.count} ${t('freeWord')}` : t('fullWord')}</small></button>`;
                     }).join('')}
                 </div>
                 <div>
@@ -324,18 +505,18 @@
                         <div class="bw-times">${times.map(t => `<button type="button" class="bw-time ${view.time === t ? 'selected' : ''}" data-time="${t}">${B().formatTime(t)}</button>`).join('')}</div>
                     `).join('') : closedDay ? `
                         <div class="bw-closed" role="alert">
-                            <strong><i class="fas fa-store-slash" aria-hidden="true"></i> La barbería está cerrada ese día.</strong>
-                            <span class="bw-sub">Los domingos y lunes la barbería está cerrada. Escoge un día de martes a sábado.</span>
+                            <strong><i class="fas fa-store-slash" aria-hidden="true"></i> ${t('closedDayTitle')}</strong>
+                            <span class="bw-sub">${t('closedDayText')}</span>
                         </div>` : `
                         <div class="bw-empty">
-                            <strong>No hay espacios disponibles este día.</strong>
-                            <span class="bw-sub">Escoge otra fecha o comunícate con la barbería.</span>
+                            <strong>${t('noSlotsDayTitle')}</strong>
+                            <span class="bw-sub">${t('noSlotsDayText')}</span>
                         </div>`}
-                    <div class="bw-hours"><span class="bw-hours-title"><i class="fas fa-clock" aria-hidden="true"></i> Horario de la barbería</span>${window.GabySchedule ? window.GabySchedule.html({ compact: true }) : escapeHtml(B().shopHoursSummary())}</div>
+                    <div class="bw-hours"><span class="bw-hours-title"><i class="fas fa-clock" aria-hidden="true"></i> ${t('shopHoursTitle')}</span>${window.GabySchedule ? window.GabySchedule.html({ compact: true }) : escapeHtml(B().shopHoursSummary())}</div>
                 </div>
                 <div class="bw-actions">
-                    <button class="bw-btn" type="button" data-back><i class="fas fa-arrow-left"></i> Atrás</button>
-                    <button class="bw-btn primary" type="button" data-next ${view.time ? '' : 'disabled'}>Revisar <i class="fas fa-arrow-right"></i></button>
+                    <button class="bw-btn" type="button" data-back><i class="fas fa-arrow-left"></i> ${t('back')}</button>
+                    <button class="bw-btn primary" type="button" data-next ${view.time ? '' : 'disabled'}>${t('reviewBtn')} <i class="fas fa-arrow-right"></i></button>
                 </div>
             `;
             root.querySelectorAll('[data-date]').forEach(button => button.addEventListener('click', () => {
@@ -362,16 +543,16 @@
             const time = appointment ? String(appointment.dateTime).slice(11, 16) : view.time;
             return `
                 <dl class="bw-summary">
-                    ${appointment ? `<div><dt>Nombre</dt><dd>${escapeHtml(appointment.client)}</dd></div>` : ''}
-                    ${appointment && appointment.clientEmail ? `<div><dt>Correo</dt><dd>${escapeHtml(appointment.clientEmail)}</dd></div>` : ''}
-                    <div><dt>Servicio${services.length > 1 ? 's' : ''}</dt><dd>${escapeHtml(services.map(s => s.name).join(' + '))}</dd></div>
-                    <div><dt>Barbero</dt><dd>${escapeHtml(barber ? barber.name + (barber.alias ? ` (${barber.alias})` : '') : '')}</dd></div>
-                    <div><dt>Fecha</dt><dd style="text-transform:capitalize;">${B().formatDate(date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</dd></div>
-                    <div><dt>Hora</dt><dd>${B().formatTime(time)}</dd></div>
-                    <div><dt>Duración</dt><dd>${B().formatDuration(duration())}</dd></div>
-                    <div><dt>Precio</dt><dd>${escapeHtml(B().priceLabel(services))} · pago presencial</dd></div>
-                    ${(appointment ? appointment.referencePhoto : view.referencePhoto) ? '<div><dt>Foto de referencia</dt><dd>Adjunta</dd></div>' : ''}
-                    ${appointment ? `<div><dt>Código</dt><dd>${escapeHtml(appointment.code)}</dd></div>` : ''}
+                    ${appointment ? `<div><dt>${t('sumName')}</dt><dd>${escapeHtml(appointment.client)}</dd></div>` : ''}
+                    ${appointment && appointment.clientEmail ? `<div><dt>${t('sumEmail')}</dt><dd>${escapeHtml(appointment.clientEmail)}</dd></div>` : ''}
+                    <div><dt>${services.length > 1 ? t('sumServices') : t('sumService')}</dt><dd>${escapeHtml(services.map(s => s.name).join(' + '))}</dd></div>
+                    <div><dt>${t('sumBarber')}</dt><dd>${escapeHtml(barber ? barber.name + (barber.alias ? ` (${barber.alias})` : '') : '')}</dd></div>
+                    <div><dt>${t('sumDate')}</dt><dd style="text-transform:capitalize;">${B().formatDate(date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</dd></div>
+                    <div><dt>${t('sumTime')}</dt><dd>${B().formatTime(time)}</dd></div>
+                    <div><dt>${t('sumDuration')}</dt><dd>${B().formatDuration(duration())}</dd></div>
+                    <div><dt>${t('sumPrice')}</dt><dd>${escapeHtml(B().priceLabel(services))} · ${t('sumPayInPerson')}</dd></div>
+                    ${(appointment ? appointment.referencePhoto : view.referencePhoto) ? `<div><dt>${t('sumPhoto')}</dt><dd>${t('sumPhotoAttached')}</dd></div>` : ''}
+                    ${appointment ? `<div><dt>${t('sumCode')}</dt><dd>${escapeHtml(appointment.code)}</dd></div>` : ''}
                 </dl>
             `;
         }
@@ -381,35 +562,35 @@
             const vip = services.some(isVip);
             root.innerHTML = `
                 ${stepsBar()}
-                <h3 class="bw-title">Revisa tu cita</h3>
+                <h3 class="bw-title">${t('reviewTitle')}</h3>
                 ${summaryRows()}
-                <label class="bw-field">Nombre completo *<input id="bw-name" type="text" maxlength="80" autocomplete="name" required placeholder="Tu nombre y apellido" value="${escapeHtml(view.name)}"></label>
-                <label class="bw-field">Correo electrónico *<input id="bw-email" type="email" maxlength="120" autocomplete="email" inputmode="email" required placeholder="tu@correo.com" value="${escapeHtml(view.email)}"><span class="bw-sub">Te enviaremos la confirmación de tu cita a este correo.</span></label>
-                <div class="bw-pay"><i class="fas fa-store" aria-hidden="true"></i><span><strong>Pago presencial en la barbería.</strong> No se cobra nada en esta página.</span></div>
+                <label class="bw-field">${t('fullNameLabel')}<input id="bw-name" type="text" maxlength="80" autocomplete="name" required placeholder="${t('fullNamePlaceholder')}" value="${escapeHtml(view.name)}"></label>
+                <label class="bw-field">${t('emailLabel')}<input id="bw-email" type="email" maxlength="120" autocomplete="email" inputmode="email" required placeholder="tu@correo.com" value="${escapeHtml(view.email)}"><span class="bw-sub">${t('emailHint')}</span></label>
+                <div class="bw-pay"><i class="fas fa-store" aria-hidden="true"></i><span><strong>${t('payInPersonStrong')}</strong> ${t('payReviewText')}</span></div>
                 ${vip ? `
                     <div class="bw-empty" style="justify-items:stretch;">
-                        <strong>📍 Detalles del servicio VIP a domicilio</strong>
+                        <strong>${t('vipTitle')}</strong>
                         <div class="bw-grid">
-                            <label class="bw-field">Pueblo *<select id="bw-vip-town" required><option value="">Selecciona tu pueblo</option>${PR_TOWNS.map(t => `<option>${t}</option>`).join('')}</select></label>
-                            <label class="bw-field">Cantidad de personas<input id="bw-vip-guests" type="number" min="1" value="1"></label>
+                            <label class="bw-field">${t('vipTownLabel')}<select id="bw-vip-town" required><option value="">${t('vipTownPlaceholder')}</option>${PR_TOWNS.map(town => `<option>${town}</option>`).join('')}</select></label>
+                            <label class="bw-field">${t('vipGuestsLabel')}<input id="bw-vip-guests" type="number" min="1" value="1"></label>
                         </div>
-                        <label class="bw-field">Dirección y descripción del lugar *<textarea id="bw-vip-address" required placeholder="Dirección, urbanización, casa/apto, puntos de referencia..."></textarea></label>
+                        <label class="bw-field">${t('vipAddressLabel')}<textarea id="bw-vip-address" required placeholder="${t('vipAddressPlaceholder')}"></textarea></label>
                     </div>` : ''}
-                <label class="bw-field">Nota para el barbero (opcional)<textarea id="bw-notes" maxlength="300" placeholder="Ej. prefiero low fade, barba #2...">${escapeHtml(view.notes)}</textarea></label>
+                <label class="bw-field">${t('noteLabel')}<textarea id="bw-notes" maxlength="300" placeholder="${t('notePlaceholder')}">${escapeHtml(view.notes)}</textarea></label>
                 <div class="bw-photo">
-                    <strong style="font-size:.9rem;">Foto de referencia (opcional)</strong>
-                    <span class="bw-sub">Sube una foto del recorte que quieres. Solo la ven tu barbero y la barbería.</span>
+                    <strong style="font-size:.9rem;">${t('photoTitle')}</strong>
+                    <span class="bw-sub">${t('photoHelp')}</span>
                     <div class="bw-photo-drop">
-                        ${view.referencePhoto ? `<span class="bw-photo-preview"><img src="${view.referencePhoto}" alt="Foto de referencia"><button type="button" data-photo-remove aria-label="Quitar foto"><i class="fas fa-times"></i></button></span>` : ''}
-                        <label class="bw-btn" style="position:relative;"><i class="fas fa-camera"></i> ${view.referencePhoto ? 'Cambiar foto' : 'Subir foto'}<input type="file" id="bw-photo" accept="image/*"></label>
+                        ${view.referencePhoto ? `<span class="bw-photo-preview"><img src="${view.referencePhoto}" alt="${t('photoTitle')}"><button type="button" data-photo-remove aria-label="${t('removePhoto')}"><i class="fas fa-times"></i></button></span>` : ''}
+                        <label class="bw-btn" style="position:relative;"><i class="fas fa-camera"></i> ${view.referencePhoto ? t('changePhoto') : t('uploadPhoto')}<input type="file" id="bw-photo" accept="image/*"></label>
                     </div>
                 </div>
                 <div class="booking-summary">${window.GabyLegal ? window.GabyLegal.bookingSummaryHtml(services) : ''}</div>
-                <label class="bw-check"><input type="checkbox" id="bw-agree"><span>He revisado la fecha, hora, servicio, precio y política de cancelación aplicable a esta reservación. *</span></label>
-                <p class="bw-sub">Para cambiar o cancelar tu cita, comunícate con la barbería.</p>
+                <label class="bw-check"><input type="checkbox" id="bw-agree"><span>${t('agreeText')}</span></label>
+                <p class="bw-sub">${t('changeCancelNote')}</p>
                 <div class="bw-actions">
-                    <button class="bw-btn" type="button" data-back><i class="fas fa-arrow-left"></i> Atrás</button>
-                    <button class="bw-btn primary" type="button" data-confirm><i class="fas fa-check"></i> Confirmar cita</button>
+                    <button class="bw-btn" type="button" data-back><i class="fas fa-arrow-left"></i> ${t('back')}</button>
+                    <button class="bw-btn primary" type="button" data-confirm><i class="fas fa-check"></i> ${t('confirmBtn')}</button>
                 </div>
             `;
             root.querySelector('[data-back]').addEventListener('click', () => go(3));
@@ -425,7 +606,7 @@
                     renderReview();
                     if (agreed) root.querySelector('#bw-agree').checked = true;
                 } catch (error) {
-                    Data().toast(error.userMessage || 'No se pudo leer la foto. Prueba con otra imagen (JPG o PNG).', 'error');
+                    Data().toast(error.userMessage || t('photoReadError'), 'error');
                 }
             });
             root.querySelector('[data-photo-remove]')?.addEventListener('click', () => { view.referencePhoto = ''; renderReview(); });
@@ -436,7 +617,7 @@
             const nameInput = root.querySelector('#bw-name');
             view.name = nameInput.value.trim().replace(/\s+/g, ' ');
             if (view.name.length < 2) {
-                Data().toast('Escribe tu nombre completo para confirmar la cita.', 'warning');
+                Data().toast(t('toastName'), 'warning');
                 nameInput.focus();
                 return;
             }
@@ -445,23 +626,23 @@
             const emailInput = root.querySelector('#bw-email');
             view.email = emailInput ? emailInput.value.trim() : '';
             if (!B().isValidEmail(view.email)) {
-                Data().toast('Escribe un correo electrónico válido para confirmar tu cita.', 'warning');
+                Data().toast(t('toastEmail'), 'warning');
                 if (emailInput) emailInput.focus();
                 return;
             }
             if (!root.querySelector('#bw-agree').checked) {
-                Data().toast('Marca la casilla de confirmación para continuar.', 'warning');
+                Data().toast(t('toastAgree'), 'warning');
                 return;
             }
             const vipTown = root.querySelector('#bw-vip-town');
             const vipAddress = root.querySelector('#bw-vip-address');
             if (vipTown && (!vipTown.value || !vipAddress.value.trim())) {
-                Data().toast('Completa el pueblo y la dirección del servicio VIP.', 'warning');
+                Data().toast(t('toastVip'), 'warning');
                 return;
             }
             const button = root.querySelector('[data-confirm]');
             button.disabled = true;
-            button.textContent = 'Confirmando...';
+            button.textContent = t('confirmingBtn');
             let created = null;
             let failure = '';
             const ok = await Data().commit(state => {
@@ -478,10 +659,10 @@
                     throw error;
                 }
                 created = { ...created };
-            }, { success: null, error: 'No se pudo confirmar la cita.' });
+            }, { success: null, error: t('confirmError') });
             if (!ok) {
                 button.disabled = false;
-                button.innerHTML = '<i class="fas fa-check"></i> Confirmar cita';
+                button.innerHTML = `<i class="fas fa-check"></i> ${t('confirmBtn')}`;
                 // Si el horario se ocupó mientras tanto, se refrescan los espacios.
                 if (!failure || /horario/i.test(failure)) {
                     view.time = null;
@@ -518,7 +699,7 @@
                     notice.type = 'aprobada';
                     const suffix = lang === 'es' ? ' Te avisaremos cuando el barbero la confirme.' : ' We will let you know when the barber confirms it.';
                     if (notice.body && notice.body.endsWith(suffix)) notice.body = notice.body.slice(0, -suffix.length);
-                }, { success: null, error: 'No se pudo actualizar el aviso.' });
+                }, { success: null, error: t('noticeUpdateError') });
             }
             // Primero se muestra la confirmación (paso 5) y después se guarda la
             // cita en este dispositivo: guardar dispara 'gabymyappointments' y
@@ -546,7 +727,7 @@
             // El barbero también recibe la cita por correo (FormSpark, un
             // formulario por barbero). Nunca bloquea la confirmación.
             notifyBarberByEmail(created);
-            Data().toast(created.status === 'APROBADA' ? '¡Tu cita fue confirmada!' : 'Recibimos tu solicitud de cita.', 'success');
+            Data().toast(created.status === 'APROBADA' ? t('toastConfirmed') : t('toastReceived'), 'success');
             if (typeof opts.onDone === 'function') opts.onDone(created);
         }
 
@@ -557,15 +738,15 @@
             root.innerHTML = `
                 <div class="bw-done">
                     <span class="bw-check-icon"><i class="fas fa-check"></i></span>
-                    <h3 class="bw-title">${confirmed ? '¡Tu cita fue confirmada!' : '¡Recibimos tu solicitud!'}</h3>
-                    <p class="bw-sub">${confirmed ? '' : 'Tu barbero la confirmará pronto. '}Guarda tu código <strong>${escapeHtml(appointment.code)}</strong> para consultar el estado de tu cita. Para cambiarla o cancelarla, comunícate con la barbería.</p>
-                    ${appointment.clientEmail ? `<p class="bw-sub">Te enviaremos la confirmación a <strong>${escapeHtml(appointment.clientEmail)}</strong>.</p>` : ''}
+                    <h3 class="bw-title">${confirmed ? t('doneConfirmedTitle') : t('doneReceivedTitle')}</h3>
+                    <p class="bw-sub">${confirmed ? '' : t('doneBarberWillConfirm')}${t('doneKeepCode')}<strong>${escapeHtml(appointment.code)}</strong>${t('doneKeepCodeAfter')}</p>
+                    ${appointment.clientEmail ? `<p class="bw-sub">${t('doneEmailTo').replace('{email}', escapeHtml(appointment.clientEmail))}</p>` : ''}
                     ${summaryRows(appointment)}
-                    <div class="bw-pay" style="width:100%;"><i class="fas fa-store"></i><span><strong>Pago:</strong> presencial en la barbería.</span></div>
+                    <div class="bw-pay" style="width:100%;"><i class="fas fa-store"></i><span><strong>${t('donePayLabel')}</strong> ${t('donePayText')}</span></div>
                     <div class="bw-actions" style="justify-content:center;">
-                        <a class="bw-btn primary" href="index.html"><i class="fas fa-house"></i> Volver al inicio</a>
+                        <a class="bw-btn primary" href="index.html"><i class="fas fa-house"></i> ${t('backHome')}</a>
                     </div>
-                    <button class="bw-btn" type="button" data-again style="border:0;">Reservar otra cita</button>
+                    <button class="bw-btn" type="button" data-again style="border:0;">${t('bookAnother')}</button>
                 </div>
             `;
             root.querySelector('[data-again]').addEventListener('click', () => {
