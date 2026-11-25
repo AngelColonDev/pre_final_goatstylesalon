@@ -46,6 +46,44 @@
         }
     }
 
+    // Preferencias del servidor (PR #17, D): state.notificationPreferences, que
+    // supabase-sync.js trae por RPC (cliente, por código de cita) o por sync
+    // (personal). Sin fila, todo activo. La preferencia local (settings.notifications)
+    // y la del servidor se suman: basta que una de las dos apague un aviso para
+    // que no se cree.
+    function serverClientPref(code) {
+        try { return (window.GabyData.getState().notificationPreferences || []).find(p => p.appointmentCode === code) || null; } catch (_) { return null; }
+    }
+
+    function serverBarberPref(barberId) {
+        try { return (window.GabyData.getState().notificationPreferences || []).find(p => p.barberId === barberId) || null; } catch (_) { return null; }
+    }
+
+    // ¿Quiere el cliente este aviso? Local + servidor. Los recordatorios usan el
+    // interruptor de recordatorios; los mensajes manuales, el de mensajes; la
+    // cancelación, el de cancelaciones; el resto de avisos de la cita, el de reservas.
+    function clientWantsNotice(code, type) {
+        const p = prefs();
+        if (type === 'recordatorio-24h' || type === 'recordatorio-1h') { if (!p.reminders) return false; }
+        else if (type === 'manual' || type === 'mensaje') { if (!p.messages) return false; }
+        else if (type === 'cancelada') { if (!p.cancellations) return false; }
+        else if (!p.bookings) return false;
+        const s = serverClientPref(code);
+        if (!s) return true;
+        if (s.bookingAlerts === false) return false;
+        if ((type === 'recordatorio-24h' || type === 'recordatorio-1h') && s.reminders === false) return false;
+        if ((type === 'manual' || type === 'mensaje') && s.messages === false) return false;
+        return true;
+    }
+
+    // Recordatorio de 1 h al barbero: solo lo apaga su interruptor de recordatorios.
+    function barberWantsReminder() {
+        const id = myBarberId();
+        if (!id) return true;
+        const s = serverBarberPref(id);
+        return !s || s.reminders !== false;
+    }
+
     // Códigos de las citas reservadas desde este navegador (sin cuenta).
     function myCodes() {
         try {
@@ -189,16 +227,16 @@
             // Cliente: 24 h y 1 h antes (solo sus citas, por código).
             if (!staff && codes.includes(appt.code)) {
                 const when = `${appt.service} con ${appt.barberName || ''} · ${formatWhen(appt.dateTime)}`;
-                if (hoursUntil <= hours && !appt.reminderSentAt && !exists('recordatorio-24h', 'client')) {
+                if (hoursUntil <= hours && !appt.reminderSentAt && !exists('recordatorio-24h', 'client') && clientWantsNotice(appt.code, 'recordatorio-24h')) {
                     out.push({ appt, type: 'recordatorio-24h', audience: 'client', title: lang() === 'en' ? 'Reminder: your appointment' : 'Recordatorio de tu cita', body: when });
                 }
-                if (hoursUntil <= 1 && !appt.reminder1hSentAt && !exists('recordatorio-1h', 'client')) {
+                if (hoursUntil <= 1 && !appt.reminder1hSentAt && !exists('recordatorio-1h', 'client') && clientWantsNotice(appt.code, 'recordatorio-1h')) {
                     out.push({ appt, type: 'recordatorio-1h', audience: 'client', title: lang() === 'en' ? 'Your appointment is in 1 hour' : 'Tu cita es en 1 hora', body: when });
                 }
             }
             // Barbero: 1 h antes de sus citas.
             if (staff && appt.barber === mine) {
-                if (hoursUntil <= 1 && !appt.reminder1hSentAt && !exists('recordatorio-1h', 'staff')) {
+                if (hoursUntil <= 1 && !appt.reminder1hSentAt && !exists('recordatorio-1h', 'staff') && barberWantsReminder()) {
                     out.push({ appt, type: 'recordatorio-1h', audience: 'staff', title: lang() === 'en' ? 'Appointment in 1 hour' : 'Cita en 1 hora', body: `${appt.client} · ${appt.service} · ${formatWhen(appt.dateTime)}` });
                 }
             }
@@ -518,6 +556,8 @@
     window.GabyNotifications = {
         myCodes, visibleNotifications, unreadCount, updateBell, markRead, markAllRead,
         checkReminders, pushStatus, enablePush, disablePush, refreshPushToken,
-        installApp, canInstall, isIOS, isIOSSafari, isStandalone, prefs
+        installApp, canInstall, isIOS, isIOSSafari, isStandalone, prefs,
+        clientPrefFor: serverClientPref, barberPrefFor: serverBarberPref,
+        clientWantsNotice, barberWantsReminder
     };
 })();

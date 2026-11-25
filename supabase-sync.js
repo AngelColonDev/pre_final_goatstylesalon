@@ -174,6 +174,17 @@
             table: 'push_tokens', key: 'id', staffOnly: true, noDelete: true,
             toRow: t => ({ id: t.id, endpoint: t.endpoint || '', keys_p256dh: (t.keys && t.keys.p256dh) || '', keys_auth: (t.keys && t.keys.auth) || '', appointment_codes: t.appointmentCodes || [], barber_id: t.barberId || null, user_agent: t.userAgent || '', created_at: toDate(t.createdAt) || new Date().toISOString() }),
             fromRow: r => ({ id: r.id, endpoint: r.endpoint, keys: { p256dh: r.keys_p256dh || '', auth: r.keys_auth || '' }, appointmentCodes: r.appointment_codes || [], barberId: r.barber_id, userAgent: r.user_agent || '', createdAt: r.created_at })
+        },
+        notificationPreferences: {
+            // PR #17 (D): preferencias de avisos (tabla notification_preferences).
+            // El personal sincroniza la suya por sync (RLS: cada barbero solo su
+            // fila; el admin, todas). El cliente no la sincroniza: anon no puede
+            // leer ni escribir la tabla y sus preferencias van por RPC
+            // (my_notification_preferences / set_my_notification_preference).
+            table: 'notification_preferences', key: 'id', staffOnly: true,
+            filter: () => Boolean(staffRole),
+            toRow: p => ({ id: p.id, barber_id: p.barberId || null, appointment_code: p.appointmentCode || null, booking_alerts: p.bookingAlerts !== false, reminders: p.reminders !== false, messages: p.messages !== false, created_at: toDate(p.createdAt) || new Date().toISOString(), updated_at: toDate(p.updatedAt) || new Date().toISOString() }),
+            fromRow: r => ({ id: r.id, barberId: r.barber_id, appointmentCode: r.appointment_code, bookingAlerts: r.booking_alerts, reminders: r.reminders, messages: r.messages, createdAt: r.created_at, updatedAt: r.updated_at })
         }
     };
 
@@ -207,6 +218,15 @@
         ['reminder1hSentAt', 'reminder_1h_sent_at', null],
         ['attendance', 'attendance', null], ['referencePhoto', 'reference_photo', ''], ['unknownCut', 'unknown_cut', false]
     ]);
+
+    // Solicitudes de transferencia v2 (PR #17). NO van en `tables`: no hay
+    // escritura por sync (RLS no tiene políticas de escritura; solo las RPCs
+    // request_transfer/respond_transfer escriben). El panel las lee en pull()
+    // y las refleja en local con los ids del servidor (ver requestTransfer
+    // y respondTransfer abajo). Mapeo fila del servidor -> objeto local.
+    function transferRequestFromRow(r) {
+        return { id: r.id, appointmentCode: r.appointment_code, fromBarber: r.from_barber_id, toBarber: r.to_barber_id, status: r.status, requestedBy: r.requested_by || '', reason: r.reason || '', createdAt: r.created_at, decidedAt: r.decided_at, decidedBy: r.decided_by || '' };
+    }
 
     // -------------------------------------------------------------------------
     // Descargar (pull)
@@ -245,6 +265,16 @@
         // Si no se pudo leer nada, el servidor no está disponible: se mantienen los datos locales.
         if (attempted && failed === attempted) raise(new Error('Failed to fetch'));
 
+        // Solicitudes de transferencia (v2): solo el personal las lee (RLS con
+        // ámbito). Si la migración aún no se aplicó, la tabla no existe: se
+        // avisa y se sigue con lo que haya en local.
+        let transferRows = null;
+        if (staffRole) {
+            const { data: trData, error: trError } = await client.from('transfer_requests').select('*').order('created_at', { ascending: false });
+            if (trError) console.warn('[GabyCloud] No se pudieron leer las solicitudes de transferencia:', trError.message);
+            else transferRows = trData;
+        }
+
         const { data: settingsRow } = await client.from('shop_settings').select('*').eq('id', 1).maybeSingle();
         // Modo mantenimiento global (lo cambia el desarrollador desde ops/).
         const { data: siteConfig } = await client.from('site_config').select('maintenance').eq('id', 1).maybeSingle();
@@ -260,6 +290,8 @@
             const state = window.GabyData.getState();
             state.busySlots = (busySlots || []).map(row => ({ barber: row.barber_id, dateTime: toLocalDateTime(row.date_time), duration: row.duration, code: row.own_code }));
             Object.entries(results).forEach(([collection, rows]) => { state[collection] = rows; });
+            if (transferRows) state.transferRequests = transferRows.map(transferRequestFromRow);
+            else if (!staffRole) state.transferRequests = [];
             if (!staffRole) Object.entries(tables).forEach(([collection, map]) => { if (map.staffOnly) state[collection] = []; });
             // Avisos del cliente: no puede leer la tabla; los pide por sus códigos de cita (RPC my_notifications).
             if (!staffRole) {
@@ -267,6 +299,15 @@
                 if (codes.length) {
                     try { state.notifications = await myNotifications(codes); }
                     catch (error) { console.warn('[GabyCloud] No se pudieron leer tus avisos:', error.message); }
+                }
+            }
+            // Preferencias del cliente (PR #17, D): por sus códigos de cita (RPC
+            // my_notification_preferences), igual que sus avisos.
+            if (!staffRole) {
+                const codes = myAppointmentCodes();
+                if (codes.length) {
+                    try { state.notificationPreferences = await myNotificationPreferences(codes); }
+                    catch (error) { console.warn('[GabyCloud] No se pudieron leer tus preferencias de avisos:', error.message); }
                 }
             }
             if (!staffRole && !results.appointments) state.appointments = [];
@@ -465,7 +506,71 @@
         return row;
     }
 
-    // Elimina una cita y sus avisos (RPC SECURITY DEFINER: solo el admin puede
+    // Transferencia v2 (PR #17): solicitud con aceptación.
+    // request_transfer() crea la solicitud y el aviso al receptor en el
+    // servidor; respond_transfer() mueve la cita solo al aceptar y avisa al
+    // barbero original y al cliente. Aquí se refleja lo que la RPC devuelve
+    // con saveState (sin commit): si pasara por commit, el push intentaría
+    // volver a insertar los avisos (mismo id) y fallaría. El push al teléfono
+    // se dispara por cada aviso devuelto (el guardado automático no empuja
+    // avisos del personal, y estos avisos no pasan por él). Si el espejo
+    // local falla (estado desactualizado), se hace pull() y la próxima
+    // lectura ya trae lo del servidor.
+    async function requestTransfer(code, toBarberId, reason, actorName) {
+        const client = await getClient();
+        if (!client) return null;
+        const { data, error } = await client.rpc('request_transfer', {
+            p_code: String(code || '').trim().toUpperCase(), p_to_barber_id: toBarberId, p_reason: String(reason || '').trim()
+        });
+        if (error) raise(error);
+        if (!data) return null;
+        // OJO: al motor se le pasa la fila del servidor TAL CUAL (snake_case);
+        // es él quien la mapea a objeto local. Mapearla aquí dos veces
+        // dejaría los campos en undefined.
+        const server = {
+            request: data.request,
+            notifications: data.notifications || []
+        };
+        try {
+            const state = window.GabyData.getState();
+            if (window.GabyBooking?.requestTransfer) {
+                window.GabyBooking.requestTransfer(state, String(code || '').trim().toUpperCase(), { toBarberId, reason, by: actorName || 'Personal', server });
+                window.GabyData.saveState(state);
+            }
+        } catch (mirrorError) {
+            console.warn('[GabyCloud] No se pudo reflejar la solicitud en local:', mirrorError);
+            pull().catch(() => { /* se verá al recargar */ });
+        }
+        server.notifications.forEach(notice => { sendPushForNotification(notice.id); });
+        return transferRequestFromRow(data.request);
+    }
+
+    async function respondTransfer(requestId, accept, actorName) {
+        const client = await getClient();
+        if (!client) return null;
+        const { data, error } = await client.rpc('respond_transfer', { p_request_id: requestId, p_accept: Boolean(accept) });
+        if (error) raise(error);
+        if (!data) return null;
+        const server = {
+            request: data.request,
+            appointment: data.appointment || null,
+            notifications: data.notifications || []
+        };
+        try {
+            const state = window.GabyData.getState();
+            if (window.GabyBooking?.respondTransfer) {
+                window.GabyBooking.respondTransfer(state, requestId, { accept: Boolean(accept), by: actorName || 'Personal', server });
+                window.GabyData.saveState(state);
+            }
+        } catch (mirrorError) {
+            console.warn('[GabyCloud] No se pudo reflejar la respuesta en local:', mirrorError);
+            pull().catch(() => { /* se verá al recargar */ });
+        }
+        server.notifications.forEach(notice => { sendPushForNotification(notice.id); });
+        return transferRequestFromRow(data.request);
+    }
+
+
     // borrar citas por sync directo — appointments_admin_delete). Como en la
     // transferencia, el borrado local va por saveState (sin commit) para que el
     // próximo commit no intente borrarlo por sync.
@@ -598,6 +703,71 @@
         }
     }
 
+    // Preferencias de avisos del cliente por sus códigos de cita (sin cuenta).
+    // El servidor solo devuelve las de esos códigos (RPC my_notification_preferences).
+    async function myNotificationPreferences(codes) {
+        const client = await getClient();
+        if (!client || !codes || !codes.length) return [];
+        const { data, error } = await client.rpc('my_notification_preferences', { p_codes: codes });
+        if (error) raise(error);
+        return (data || []).map(tables.notificationPreferences.fromRow);
+    }
+
+    // Guarda la preferencia del cliente para UNA cita (RPC SECURITY DEFINER: el
+    // visitante no puede escribir en notification_preferences por RLS). Actualiza
+    // también el estado local para que la página la respete de inmediato. Nunca
+    // lanza: si falla, la preferencia local sigue valiendo en este navegador y se
+    // reintentará al abrir la página. Sin configuración de Supabase no hace nada.
+    async function setMyNotificationPreference(code, patch) {
+        try {
+            const cleanCode = String(code || '').trim().toUpperCase();
+            if (!cleanCode) return null;
+            const values = {
+                bookingAlerts: patch && patch.bookingAlerts !== false,
+                reminders: patch && patch.reminders !== false,
+                messages: patch && patch.messages !== false
+            };
+            window.GabyData.updateState(state => {
+                state.notificationPreferences = state.notificationPreferences || [];
+                const row = state.notificationPreferences.find(p => p.appointmentCode === cleanCode);
+                if (row) Object.assign(row, values, { updatedAt: new Date().toISOString() });
+                else state.notificationPreferences.push({ id: `pref-${cleanCode}`, barberId: null, appointmentCode: cleanCode, ...values, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+            });
+            const client = await getClient();
+            if (!client) return null;
+            const { data, error } = await client.rpc('set_my_notification_preference', {
+                p_code: cleanCode,
+                p_booking_alerts: values.bookingAlerts,
+                p_reminders: values.reminders,
+                p_messages: values.messages
+            });
+            if (error) throw error;
+            return data || null;
+        } catch (error) {
+            console.error('[GabyCloud] No se pudo guardar tu preferencia de avisos en el servidor:', error);
+            return null;
+        }
+    }
+
+    // Guarda la preferencia del barbero con sesión (commit normal: el sync la sube
+    // a notification_preferences; RLS solo le deja tocar su propia fila, salvo admin).
+    // Devuelve true si se guardó. La usa el panel del personal (staff/admin-pro.js).
+    async function saveBarberPreference(barberId, patch) {
+        if (!barberId) return false;
+        const values = {
+            bookingAlerts: patch && patch.bookingAlerts !== false,
+            reminders: patch && patch.reminders !== false,
+            messages: patch && patch.messages !== false
+        };
+        return window.GabyData.commit(state => {
+            state.notificationPreferences = state.notificationPreferences || [];
+            const id = `pref-barber-${barberId}`;
+            const row = state.notificationPreferences.find(p => p.id === id);
+            if (row) Object.assign(row, values, { updatedAt: new Date().toISOString() });
+            else state.notificationPreferences.push({ id, barberId, appointmentCode: null, ...values, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+        }, { success: null, error: 'No se pudo guardar la preferencia.' });
+    }
+
     // -------------------------------------------------------------------------
     let ready = Promise.resolve();
     if (enabled) {
@@ -623,12 +793,17 @@
         requireStaff,
         appointmentStatus,
         myNotifications,
+        myNotificationPreferences,
+        setMyNotificationPreference,
+        saveBarberPreference,
         markNotificationsRead,
         registerPushToken,
         registerClientForAppointment,
         myAppointmentCodes,
         transferClient,
         transferAppointment,
+        requestTransfer,
+        respondTransfer,
         deleteAppointment,
         sendPushForNotification,
         friendly

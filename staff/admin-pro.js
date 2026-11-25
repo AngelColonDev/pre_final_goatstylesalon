@@ -18,7 +18,8 @@
         apptQuick: 'today', apptBarber: 'all', apptService: 'all', apptStatus: 'all', apptSearch: '',
         clientSearch: '', clientId: null, scheduleBarber: null, reportRange: '30', reportBarber: 'all', reportFrom: '', reportTo: '',
         reviewFilter: 'all', search: '',
-        notifyTitle: '', notifyBody: '', notifyMode: 'one', notifyCode: '', notifySelect: ''
+        notifyTitle: '', notifyBody: '', notifyMode: 'one', notifyCode: '', notifySelect: '',
+        transferFilter: 'pending'
     };
 
     // ---------------------------------------------------------------------
@@ -90,8 +91,10 @@
         const start = B().parseLocal(a.dateTime);
         const late = B().ACTIVE.includes(a.status) && start && Date.now() > start.getTime() + grace * 60000;
         const active = B().ACTIVE.includes(a.status);
+        const transferPending = B().pendingTransferRequest(db, a.code);
+        const transferAccepted = B().acceptedTransferRequest(db, a.code);
         const modal = openModal(`
-            <div class="section-title">Cita ${esc(a.code)} ${statusBadge(a.status)}</div>
+            <div class="section-title">Cita ${esc(a.code)} ${statusBadge(a.status)}${transferBadgeFor(ctx, a)}</div>
             ${late ? `<div class="ap-warning"><strong>El cliente pasó el periodo de tolerancia (${grace} min).</strong> Puedes atenderlo igual, reprogramar, cancelar o marcar no-show.</div>` : ''}
             <div class="ap-kv ap-kv-boxes">
                 <div class="wide"><small>Cliente</small>${esc(a.client)}${client ? '' : ' <span class="ap-badge amber">Sin ficha</span>'}</div>
@@ -99,6 +102,8 @@
                 <div><small>Servicio</small>${esc(a.service)}</div>
                 <div><small>Duración</small>${B().formatDuration(B().appointmentDuration(a, db))}</div>
                 <div class="wide"><small>Barbero</small>${esc(a.barberName || ctx.barberName(a.barber))}</div>
+                ${transferPending ? `<div class="wide"><small>Transferencia</small><span class="ap-badge amber ap-badge-transfer-pending">Transferencia pendiente</span> Esperando respuesta de ${esc(ctx.barberName(transferPending.toBarber))}${transferPending.reason ? ` · Motivo: ${esc(transferPending.reason)}` : ''}</div>` : ''}
+                ${transferAccepted ? `<div class="wide"><small>Transferencia</small><span class="ap-badge gold ap-badge-transferred">Transferida</span> Llegó de ${esc(ctx.barberName(transferAccepted.fromBarber))} (solicitud aceptada).</div>` : ''}
                 <div><small>Teléfono</small>${esc((client && client.phone) || a.clientPhone || '—')}</div>
                 <div><small>Precio informativo</small>${esc(a.price || '—')}<br><span class="item-meta">Pago presencial</span></div>
                 <div class="wide"><small>Correo</small>${esc((client && client.email) || a.clientEmail || '—')}</div>
@@ -117,7 +122,7 @@
                     ${moreButton(a.code, 'Más opciones', true)}
                 </div>
                 <div class="form-actions" style="justify-content:flex-start; flex-wrap:wrap; align-items:center;">
-                    ${active ? `<button class="action-btn notify" type="button" data-notify-modal="${esc(a.code)}"><i class="fas fa-paper-plane"></i> Avisar al cliente</button><button class="action-btn notify" type="button" data-transfer-modal="${esc(a.code)}"><i class="fas fa-arrow-right-arrow-left"></i> Transferir cita</button>` : ''}
+                    ${active ? `<button class="action-btn notify" type="button" data-notify-modal="${esc(a.code)}"><i class="fas fa-paper-plane"></i> Avisar al cliente</button><button class="action-btn notify" type="button" data-transfer-modal="${esc(a.code)}"><i class="fas fa-arrow-right-arrow-left"></i> Pedir transferencia</button>` : ''}
                     ${a.status === 'APROBADA' ? `<a class="action-btn approve" href="${esc(B().googleCalendarUrl(a, db))}" target="_blank" rel="noopener"><i class="fas fa-calendar-plus"></i> Añadir a Google Calendar</a>` : ''}
                     ${!active ? `<button class="action-btn reject" type="button" data-delete-modal="${esc(a.code)}"><i class="fas fa-trash"></i> Eliminar cita</button>` : ''}
                 </div>
@@ -156,52 +161,79 @@
             { success: `Cita ${code} ${labels[status] || B().statusLabel(status)}.`, error: 'No se pudo actualizar la cita.' });
     }
 
-    // Transfiere una cita a otro barbero: primero se valida en local (mismo
-    // motor que reserva), luego la RPC mueve la cita en el servidor y por
-    // último un commit crea los avisos (al barbero nuevo y al cliente). El
-    // commit no vuelve a subir la cita: la RPC ya la movió y saveState la
-    // reflejó en local.
-    async function transferAppointmentHandler(ctx, code, toBarberId) {
+    // Transferencia v2 (PR #17): pedir una transferencia CREA UNA SOLICITUD.
+    // La cita NO cambia de barbero: queda con quien la transfiere hasta que
+    // el receptor la acepte en Transferencias (o la rechace y todo siga igual).
+    // Con nube: la RPC crea la solicitud y el aviso al receptor; el espejo
+    // local va por saveState dentro de GabyCloud (sin commit) para no duplicar
+    // el aviso por sync. Sin nube: el motor crea solicitud y aviso en local
+    // con un commit normal.
+    async function requestTransferHandler(ctx, code, toBarberId, reason) {
         const db = ctx.getDb();
         const a = db.appointments.find(item => item.code === code);
         if (!a) return false;
         const target = db.barbers.find(b => b.id === toBarberId);
         if (!target) { window.GabyData.toast('Escoge el barbero que recibirá la cita.', 'error'); return false; }
         try {
-            // Validación en local (servicios, horario libre) sin tocar los datos.
-            B().transferAppointment(window.GabyData.clone(db), code, { toBarberId, by: ctx.actorName });
+            // Validación en local (servicios, horario libre, sin duplicados)
+            // sin tocar los datos.
+            B().requestTransfer(window.GabyData.clone(db), code, { toBarberId, reason, by: ctx.actorName });
         } catch (error) {
-            window.GabyData.toast(error.userMessage || 'No se puede transferir esta cita.', 'error');
+            window.GabyData.toast(error.userMessage || 'No se puede pedir la transferencia.', 'error');
             return false;
         }
-        let staffNoticeId = null;
         try {
             if (window.GabyCloud?.enabled) {
-                await window.GabyCloud.transferAppointment(code, toBarberId, ctx.actorName);
+                await window.GabyCloud.requestTransfer(code, toBarberId, reason, ctx.actorName);
+                window.GabyData.toast(`Solicitud enviada a ${ctx.barberLabel(target)}. La cita sigue contigo hasta que la acepte.`, 'success');
+            } else {
+                const saved = await ctx.commit(state => {
+                    B().requestTransfer(state, code, { toBarberId, reason, by: ctx.actorName });
+                }, { success: `Solicitud enviada a ${ctx.barberLabel(target)}. La cita sigue contigo hasta que la acepte.`, error: 'No se pudo enviar la solicitud.' });
+                if (!saved) return false;
             }
-            const saved = await ctx.commit(state => {
-                const result = B().transferAppointment(state, code, { toBarberId, by: ctx.actorName });
-                staffNoticeId = result.staffNotice && result.staffNotice.id;
-            }, { success: `Cita ${code} transferida a ${ctx.barberLabel(target)}. Se avisó al barbero y al cliente.`, error: 'No se pudo transferir la cita.' });
-            if (!saved) return false;
         } catch (error) {
-            window.GabyData.toast(error.userMessage || 'No se pudo transferir la cita.', 'error');
+            window.GabyData.toast(error.userMessage || 'No se pudo enviar la solicitud.', 'error');
             return false;
-        }
-        // Push al barbero nuevo (best-effort): el aviso al cliente ya lo empuja
-        // el guardado; el del personal no, así que se invoca aquí, como el compositor.
-        if (staffNoticeId && window.GabyCloud?.sendPushForNotification) {
-            window.GabyCloud.sendPushForNotification(staffNoticeId);
         }
         return true;
     }
 
-    // Formulario de transferencia dentro del detalle de la cita.
+    // Responder una solicitud (aceptar o rechazar). Solo la decide el barbero
+    // receptor. Al aceptar, la cita cambia de barbero y se avisa al barbero
+    // original y al cliente; al rechazar, todo queda como estaba.
+    async function respondTransferHandler(ctx, requestId, accept) {
+        const db = ctx.getDb();
+        const request = (db.transferRequests || []).find(r => r.id === requestId);
+        if (!request) { window.GabyData.toast('No encontramos esa solicitud.', 'error'); return false; }
+        const a = db.appointments.find(item => item.code === request.appointmentCode);
+        const action = accept ? 'aceptar' : 'rechazar';
+        if (!window.confirm(`¿${accept ? 'Aceptar' : 'Rechazar'} la transferencia de la cita ${request.appointmentCode}${a ? ` (${a.client}, ${fmtDateTime(a)})` : ''}?${accept ? ' La cita pasará a tu lista.' : ' La cita seguirá con el barbero original.'}`)) return false;
+        try {
+            if (window.GabyCloud?.enabled) {
+                await window.GabyCloud.respondTransfer(requestId, accept, ctx.actorName);
+                window.GabyData.toast(accept ? `Cita ${request.appointmentCode} transferida a tu lista. Se avisó al barbero y al cliente.` : `Solicitud rechazada. La cita ${request.appointmentCode} sigue con el barbero original.`, 'success');
+            } else {
+                const saved = await ctx.commit(state => {
+                    B().respondTransfer(state, requestId, { accept, by: ctx.actorName });
+                }, { success: accept ? `Cita ${request.appointmentCode} transferida a tu lista.` : 'Solicitud rechazada.', error: `No se pudo ${action} la solicitud.` });
+                if (!saved) return false;
+            }
+        } catch (error) {
+            window.GabyData.toast(error.userMessage || `No se pudo ${action} la solicitud.`, 'error');
+            return false;
+        }
+        ctx.rerender();
+        return true;
+    }
+
+    // Formulario de solicitud de transferencia dentro del detalle de la cita.
     function renderTransferForm(ctx, appointment, modal) {
         const db = ctx.getDb();
         const box = modal.el.querySelector('#ap-transfer');
         const targets = db.barbers.filter(b => b.active !== false && b.id !== appointment.barber);
         if (!targets.length) { window.GabyData.toast('No hay otro barbero disponible para recibir la cita.', 'warning'); return; }
+        if (B().pendingTransferRequest(db, appointment.code)) { window.GabyData.toast('Ya hay una solicitud de transferencia pendiente para esta cita.', 'warning'); return; }
         box.innerHTML = `
             <form class="ap-transfer-form" id="ap-transfer-form">
                 <div class="form-group full">
@@ -210,18 +242,23 @@
                         <option value="">Escoge un barbero</option>
                         ${targets.map(b => `<option value="${esc(b.id)}">${esc(ctx.barberLabel(b))}</option>`).join('')}
                     </select>
-                    <p class="item-meta">La cita pasa a la lista del barbero nuevo a la misma fecha y hora. Se le avisa a él y al cliente.</p>
+                    <p class="item-meta">Se le enviará una solicitud. La cita seguirá contigo a la misma fecha y hora hasta que la acepte; si la rechaza, todo queda como estaba. Se le avisa a él, y al aceptar o rechazar se avisa también al cliente.</p>
                 </div>
-                <div class="form-group full"><div class="form-actions"><button class="btn btn-primary" type="submit">Transferir cita</button><button class="btn btn-ghost" type="button" data-transfer-cancel>Cancelar</button></div></div>
+                <div class="form-group full">
+                    <label class="form-label" for="ap-transfer-reason">Motivo (opcional)</label>
+                    <input class="form-input" id="ap-transfer-reason" maxlength="300" placeholder="Ej.: Tengo un compromiso a esa hora">
+                </div>
+                <div class="form-group full"><div class="form-actions"><button class="btn btn-primary" type="submit">Enviar solicitud</button><button class="btn btn-ghost" type="button" data-transfer-cancel>Cancelar</button></div></div>
             </form>
         `;
         box.querySelector('[data-transfer-cancel]').addEventListener('click', () => { box.innerHTML = ''; });
         box.querySelector('#ap-transfer-form').addEventListener('submit', async event => {
             event.preventDefault();
             const toBarberId = box.querySelector('#ap-transfer-barber').value;
+            const reason = box.querySelector('#ap-transfer-reason').value;
             const submit = box.querySelector('[type="submit"]');
             submit.disabled = true;
-            const ok = await transferAppointmentHandler(ctx, appointment.code, toBarberId);
+            const ok = await requestTransferHandler(ctx, appointment.code, toBarberId, reason);
             submit.disabled = false;
             if (ok) modal.close();
         });
@@ -298,7 +335,7 @@
             active ? '<button type="button" data-m="COMPLETADA"><i class="fas fa-circle-check"></i>Marcar completada</button>' : '',
             active ? '<button type="button" data-m="NO_SHOW"><i class="fas fa-user-slash"></i>Marcar no-show</button>' : '',
             active ? '<button type="button" data-m="edit"><i class="fas fa-pen"></i>Editar / reprogramar</button>' : '',
-            active ? '<button type="button" data-m="transfer"><i class="fas fa-arrow-right-arrow-left"></i>Transferir cita</button>' : '',
+            active ? '<button type="button" data-m="transfer"><i class="fas fa-arrow-right-arrow-left"></i>Pedir transferencia</button>' : '',
             active ? '<button type="button" data-m="notify-app"><i class="fas fa-bell"></i>Avisar en la app</button>' : '',
             a.status === 'APROBADA' ? `<a href="${esc(B().googleCalendarUrl(a, db))}" target="_blank" rel="noopener"><i class="fas fa-calendar-plus"></i>Añadir a Google Calendar</a>` : '',
             '<button type="button" data-m="notify"><i class="fas fa-paper-plane"></i>Avisar por WhatsApp</button>',
@@ -369,6 +406,39 @@
 
     function pendingRequests(ctx) {
         return scopedAppointments(ctx).filter(a => a.status === 'PENDIENTE').sort((a, b) => String(a.dateTime).localeCompare(String(b.dateTime)));
+    }
+
+    // --- Transferencia v2 (PR #17): estado DERIVADO de transferRequests ---
+    // Sin columna en appointments: 'pendiente' = hay solicitud sin responder,
+    // 'transferida' = hay una aceptada. El panel es por barbero: cada uno ve
+    // solo las solicitudes donde es origen o destino (igual que sus citas).
+    function transferBadgeFor(ctx, a) {
+        const status = B().transferStatusFor(ctx.getDb(), a.code);
+        if (status === 'pendiente') return '<span class="ap-badge amber ap-badge-transfer-pending">Transferencia pendiente</span>';
+        if (status === 'transferida') return '<span class="ap-badge gold ap-badge-transferred">Transferida</span>';
+        return '';
+    }
+
+    function transferEventLabel(ctx, a) {
+        const status = B().transferStatusFor(ctx.getDb(), a.code);
+        if (status === 'transferida') return '<em class="ap-event-transfer">Transferida</em>';
+        if (status === 'pendiente') return '<em class="ap-event-transfer pending">Transferencia pendiente</em>';
+        return '';
+    }
+
+    function scopedTransferRequests(ctx) {
+        const list = ctx.getDb().transferRequests || [];
+        if (!isBarberRole(ctx)) return list;
+        return list.filter(r => r.fromBarber === ctx.config.role || r.toBarber === ctx.config.role);
+    }
+
+    function incomingTransferRequests(ctx) {
+        return B().incomingTransferRequests(ctx.getDb(), ctx.config.role);
+    }
+
+    function bindTransferResponseButtons(ctx, root) {
+        (root || content()).querySelectorAll('[data-transfer-accept]').forEach(b => b.addEventListener('click', async () => { b.disabled = true; await respondTransferHandler(ctx, b.dataset.transferAccept, true); }));
+        (root || content()).querySelectorAll('[data-transfer-reject]').forEach(b => b.addEventListener('click', async () => { b.disabled = true; await respondTransferHandler(ctx, b.dataset.transferReject, false); }));
     }
 
     // Formulario de edicion: fecha, hora (solo espacios libres), servicios y barbero.
@@ -474,13 +544,26 @@
         const todays = list.filter(a => dayOf(a) === t).sort((a, b) => String(a.dateTime).localeCompare(String(b.dateTime)));
         const now = new Date();
         const next = list.filter(a => B().ACTIVE.includes(a.status) && B().parseLocal(a.dateTime) >= now).sort((a, b) => String(a.dateTime).localeCompare(String(b.dateTime)))[0];
-        const newClients = db.clients.filter(c => String(c.registeredAt || '').slice(0, 10) === t).length;
+        const newClients = (db.clients || []).filter(c => String(c.registeredAt || '').slice(0, 10) === t).length;
         const weekFrom = B().dateKey(B().addDays(now, -6));
-        const statsWeek = B().stats(db, { barberId: ctx.isAdmin() ? null : ctx.config.role, from: weekFrom, to: t });
-        const stats30 = B().stats(db, { barberId: ctx.isAdmin() ? null : ctx.config.role, from: B().dateKey(B().addDays(now, -29)), to: t });
-        const lowStock = db.inventory.filter(i => Number(i.qty) <= Number(i.minQty));
+        // PR #17 (B): las estadísticas no pueden tumbar el inicio. Si una cita
+        // trae una fecha rota, stats() lanzaba y renderSection mostraba solo el
+        // aviso de error: el inicio quedaba vacío. Se usa un respaldo vacío.
+        const safeStats = options => {
+            try { return B().stats(db, options); } catch (error) { console.error('[Panel] No se pudieron calcular las estadísticas del inicio:', error); return { barbers: [], services: [] }; }
+        };
+        const statsWeek = safeStats({ barberId: ctx.isAdmin() ? null : ctx.config.role, from: weekFrom, to: t });
+        const stats30 = safeStats({ barberId: ctx.isAdmin() ? null : ctx.config.role, from: B().dateKey(B().addDays(now, -29)), to: t });
+        const lowStock = (db.inventory || []).filter(i => Number(i.qty) <= Number(i.minQty));
         const pending = pendingRequests(ctx);
-        const alerts = db.notifications.filter(n => n.audience === 'staff' && !n.readAt && (n.type === 'alerta-noshow' || n.type === 'bloqueo'));
+        const alerts = (db.notifications || []).filter(n => n.audience === 'staff' && !n.readAt && (n.type === 'alerta-noshow' || n.type === 'bloqueo'));
+        // PR #17 (B): conteos por estado, directos de las citas del barbero
+        // (sin pasar por stats). "Citas hoy" incluye canceladas y rechazadas.
+        const countByStatus = status => list.filter(a => a.status === status).length;
+        const counts = { today: todays.length, pendiente: countByStatus('PENDIENTE'), aprobada: countByStatus('APROBADA'), cancelada: countByStatus('CANCELADA'), rechazada: countByStatus('RECHAZADA') };
+        // Actividad reciente: las 8 citas más recientes, INCLUYENDO canceladas y
+        // rechazadas (antes el inicio no las mostraba en ningún lado).
+        const recent = list.slice().sort((a, b) => String(b.dateTime || b.createdAt || '').localeCompare(String(a.dateTime || a.createdAt || ''))).slice(0, 8);
         const me = db.barbers.find(b => b.id === ctx.config.role);
         const available = !me || me.active !== false;
         const online = db.settings.shopMode !== 'offline';
@@ -514,10 +597,13 @@
             <section class="card">
                 <div class="section-title-row"><div class="section-title">Hoy · ${B().formatDate(t)}</div><button class="btn btn-primary" type="button" data-new>+ Nueva cita</button></div>
                 <div class="ap-tiles">
-                    <div class="ap-tile"><span>Citas hoy</span><strong>${todays.filter(a => a.status !== 'CANCELADA' && a.status !== 'RECHAZADA').length}</strong></div>
+                    <div class="ap-tile"><span>Citas hoy</span><strong data-ap-count="today">${counts.today}</strong></div>
+                    <div class="ap-tile"><span>Pendientes</span><strong data-ap-count="pendiente">${counts.pendiente}</strong><small>En total</small></div>
+                    <div class="ap-tile"><span>Aprobadas</span><strong data-ap-count="aprobada">${counts.aprobada}</strong><small>En total</small></div>
+                    <div class="ap-tile"><span>Canceladas</span><strong data-ap-count="cancelada">${counts.cancelada}</strong><small>En total</small></div>
+                    <div class="ap-tile"><span>Rechazadas</span><strong data-ap-count="rechazada">${counts.rechazada}</strong><small>En total</small></div>
                     <div class="ap-tile"><span>Completadas</span><strong>${todays.filter(a => a.status === 'COMPLETADA').length}</strong></div>
                     <div class="ap-tile"><span>Por atender</span><strong>${todays.filter(a => B().ACTIVE.includes(a.status)).length}</strong></div>
-                    <div class="ap-tile"><span>Canceladas</span><strong>${todays.filter(a => a.status === 'CANCELADA').length}</strong></div>
                     <div class="ap-tile"><span>No-shows</span><strong>${todays.filter(a => a.status === 'NO_SHOW').length}</strong></div>
                     <div class="ap-tile"><span>Clientes nuevos</span><strong>${newClients}</strong></div>
                     <div class="ap-tile"><span>Próxima cita</span><strong style="font-size:1.1rem;">${next ? `${B().relativeDay(dayOf(next))} ${timeOf(next)}` : '—'}</strong><small>${next ? esc(`${next.client} · ${next.service}`) : 'Sin citas próximas'}</small></div>
@@ -544,6 +630,11 @@
                     <div class="ap-search-results" id="ap-quick-results"></div>
                 </section>
             </div>
+            <section class="card" style="margin-top:18px;">
+                <div class="section-title-row"><div class="section-title">Actividad reciente</div><button class="action-btn notify" type="button" data-go="appointments">Ver todas las citas</button></div>
+                <div class="item-meta" style="margin-bottom:10px;">Las citas más recientes, incluyendo canceladas y rechazadas.</div>
+                ${recent.length ? `<div class="ap-recent-list">${recent.map(a => `<div class="ap-recent-row"><time>${esc(B().formatDate(dayOf(a), { day: 'numeric', month: 'short' }))}<br>${timeOf(a)}</time><button type="button" class="ap-event ap-s-${esc(a.status)}" data-open="${esc(a.code)}"><strong>${esc(a.client)} · ${esc(a.service)}</strong><span>${esc(a.barberName || ctx.barberName(a.barber))} · ${esc(B().statusLabel(a.status))}</span></button></div>`).join('')}</div>` : '<div class="empty">Sin citas todavía.</div>'}
+            </section>
             ${ctx.renderBarberDirectLinks()}
         `;
         bindCommon(ctx);
@@ -569,7 +660,7 @@
         const appts = scopedAppointments(ctx).filter(a => [a.code, a.client, a.clientEmail, a.clientPhone, a.service, a.barberName, ctx.barberName(a.barber)].some(v => String(v || '').toLowerCase().includes(q)))
             .sort((a, b) => String(b.dateTime).localeCompare(String(a.dateTime))).slice(0, 8);
         box.innerHTML = (clients.map(c => `<button type="button" data-client="${c.id}"><i class="fas fa-user"></i> <strong>${esc(c.name)}</strong> · ${esc(c.phone || '')} · ${esc(c.email || '')}</button>`).join('')
-            + appts.map(a => `<button type="button" data-open="${a.code}"><i class="fas fa-calendar"></i> <strong>${esc(a.code)}</strong> · ${esc(a.client)} · ${esc(a.service)} · <span style="text-transform:capitalize;">${esc(fmtDateTime(a))}</span> ${statusBadge(a.status)}</button>`).join(''))
+            + appts.map(a => `<button type="button" data-open="${a.code}"><i class="fas fa-calendar"></i> <strong>${esc(a.code)}</strong> · ${esc(a.client)} · ${esc(a.service)} · <span style="text-transform:capitalize;">${esc(fmtDateTime(a))}</span> ${statusBadge(a.status)}${transferBadgeFor(ctx, a)}</button>`).join(''))
             || '<div class="item-meta">Sin resultados.</div>';
         box.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => openAppointment(ctx, b.dataset.open)));
         box.querySelectorAll('[data-client]').forEach(b => b.addEventListener('click', () => { ui.clientId = b.dataset.client; ctx.go('clients'); }));
@@ -595,7 +686,7 @@
         const base = B().parseKey(ui.calDate);
         let title = '';
         let body = '';
-        const eventBtn = a => `<button type="button" class="ap-event ap-s-${a.status}" data-open="${a.code}"><strong>${timeOf(a)} · ${esc(a.client)}</strong><span>${esc(a.service)} · ${B().appointmentDuration(a, db)} min</span><span>${esc(ctx.barberName(a.barber))}</span><em class="ap-event-status">${esc(B().statusLabel(a.status))}</em></button>`;
+        const eventBtn = a => `<button type="button" class="ap-event ap-s-${a.status}" data-open="${a.code}"><strong>${timeOf(a)} · ${esc(a.client)}</strong><span>${esc(a.service)} · ${B().appointmentDuration(a, db)} min</span><span>${esc(ctx.barberName(a.barber))}</span><em class="ap-event-status">${esc(B().statusLabel(a.status))}</em>${transferEventLabel(ctx, a)}</button>`;
         const blocksHtml = key => db.timeBlocks.filter(bl => (barberFilter === 'all' || bl.barberId === barberFilter || bl.barberId === 'all') && key >= bl.startDate && key <= (bl.endDate || bl.startDate))
             .map(bl => `<div class="ap-event ap-block-event"><strong>${bl.allDay ? 'Todo el día' : `${B().formatTime(bl.startTime)}–${B().formatTime(bl.endTime)}`}</strong><span>${esc(bl.reason || 'Bloqueado')} · ${esc(ctx.barberName(bl.barberId))}</span></div>`).join('');
         const dayList = key => list.filter(a => dayOf(a) === key).sort((a, b) => String(a.dateTime).localeCompare(String(b.dateTime)));
@@ -683,6 +774,12 @@
                 <div class="item-meta" style="margin-bottom:10px;">El horario ya está apartado. Apruébala o recházala; si la rechazas, el horario vuelve a quedar libre.</div>
                 <div class="list-grid">${requests.map(a => requestRow(ctx, a)).join('')}</div>
             </section>` : ''}
+            ${incomingTransferRequests(ctx).length ? `
+            <section class="card" style="margin-bottom:18px;">
+                <div class="section-title">Transferencias para ti (${incomingTransferRequests(ctx).length})</div>
+                <div class="item-meta" style="margin-bottom:10px;">Te quieren pasar estas citas. Acéptalas o recházalas; la cita solo cambia de barbero al aceptar.</div>
+                <div class="list-grid">${incomingTransferRequests(ctx).map(r => transferRequestCard(ctx, r)).join('')}</div>
+            </section>` : ''}
             <section class="card">
                 <div class="section-title-row"><div class="section-title">Citas</div><button class="btn btn-primary" type="button" data-new>+ Nueva cita</button></div>
                 <div class="ap-toolbar">
@@ -696,12 +793,13 @@
                 </div>
                 <div class="table-wrap"><table>
                     <thead><tr><th>Fecha y hora</th><th>Cliente</th><th>Servicio</th><th>Barbero</th><th>Estado</th><th>Código</th><th></th></tr></thead>
-                    <tbody>${list.map(a => `<tr><td style="text-transform:capitalize;">${esc(fmtDateTime(a))}</td><td>${esc(a.client)}</td><td>${esc(a.service)}</td><td>${esc(ctx.barberName(a.barber))}</td><td>${statusBadge(a.status)}</td><td>${esc(a.code)}</td><td><div class="ap-row-actions">${a.status === 'PENDIENTE' ? `<button class="action-btn approve" type="button" data-decide-code="${esc(a.code)}" data-decide="APROBADA">Aprobar</button><button class="action-btn reject" type="button" data-decide-code="${esc(a.code)}" data-decide="RECHAZADA">Rechazar</button>` : `<button class="action-btn notify" type="button" data-open="${esc(a.code)}">Ver</button>`}${B().ACTIVE.includes(a.status) ? `<button class="action-btn notify" type="button" data-notify-code="${esc(a.code)}">Avisar</button>` : ''}${moreButton(a.code)}</div></td></tr>`).join('') || '<tr><td colspan="7" class="empty">No hay citas con estos filtros.</td></tr>'}</tbody>
+                    <tbody>${list.map(a => `<tr class="${B().transferStatusFor(db, a.code) ? 'ap-row-transferred' : ''}"><td style="text-transform:capitalize;">${esc(fmtDateTime(a))}</td><td>${esc(a.client)}</td><td>${esc(a.service)}</td><td>${esc(ctx.barberName(a.barber))}</td><td>${statusBadge(a.status)}${transferBadgeFor(ctx, a)}</td><td>${esc(a.code)}</td><td><div class="ap-row-actions">${a.status === 'PENDIENTE' ? `<button class="action-btn approve" type="button" data-decide-code="${esc(a.code)}" data-decide="APROBADA">Aprobar</button><button class="action-btn reject" type="button" data-decide-code="${esc(a.code)}" data-decide="RECHAZADA">Rechazar</button>` : `<button class="action-btn notify" type="button" data-open="${esc(a.code)}">Ver</button>`}${B().ACTIVE.includes(a.status) ? `<button class="action-btn notify" type="button" data-notify-code="${esc(a.code)}">Avisar</button>` : ''}${moreButton(a.code)}</div></td></tr>`).join('') || '<tr><td colspan="7" class="empty">No hay citas con estos filtros.</td></tr>'}</tbody>
                 </table></div>
                 <div class="item-meta" style="margin-top:10px;">${list.length} cita(s)</div>
             </section>
         `;
         bindCommon(ctx);
+        bindTransferResponseButtons(ctx, content());
         content().querySelectorAll('[data-quick]').forEach(b => b.addEventListener('click', () => { ui.apptQuick = b.dataset.quick; renderAppointments(ctx); }));
         const search = content().querySelector('#ap-appt-search');
         search.addEventListener('input', () => { ui.apptSearch = search.value; window.clearTimeout(search.t); search.t = window.setTimeout(() => { renderAppointments(ctx); const s = content().querySelector('#ap-appt-search'); s.focus(); s.setSelectionRange(s.value.length, s.value.length); }, 250); });
@@ -1405,6 +1503,16 @@
             window.GabyData.toast('No hay citas próximas para avisar.', 'error');
             return;
         }
+        // PR #17 (D): el cliente que apagó los mensajes no recibe avisos manuales.
+        const targeted = targets.length;
+        targets = targets.filter(a => {
+            const pref = (ctx.getDb().notificationPreferences || []).find(p => p.appointmentCode === a.code);
+            return !pref || pref.messages !== false;
+        });
+        if (!targets.length) {
+            window.GabyData.toast(targeted === 1 ? 'Ese cliente tiene los mensajes apagados.' : 'Esos clientes tienen los mensajes apagados.', 'warning');
+            return;
+        }
         const now = new Date().toISOString();
         const rows = targets.map(a => ({
             id: window.GabyData.makeId('ntf'), audience: 'client', barberId: a.barber || null,
@@ -1430,6 +1538,74 @@
         ctx.rerender();
     }
 
+    // --- Bandeja de solicitudes de transferencia (PR #17) ---
+    function renderTransfers(ctx) {
+        const mine = scopedTransferRequests(ctx);
+        const filter = ui.transferFilter;
+        const list = mine.filter(r => {
+            if (filter === 'incoming') return r.toBarber === ctx.config.role && r.status === 'pendiente';
+            if (filter === 'outgoing') return r.fromBarber === ctx.config.role && r.status === 'pendiente';
+            if (filter === 'decided') return r.status !== 'pendiente';
+            if (filter === 'all') return true;
+            return r.status === 'pendiente';
+        }).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+        const counts = {
+            pending: mine.filter(r => r.status === 'pendiente').length,
+            incoming: mine.filter(r => r.toBarber === ctx.config.role && r.status === 'pendiente').length,
+            outgoing: mine.filter(r => r.fromBarber === ctx.config.role && r.status === 'pendiente').length,
+            decided: mine.filter(r => r.status !== 'pendiente').length
+        };
+        content().innerHTML = `
+            <section class="card">
+                <div class="section-title-row"><div class="section-title">Solicitudes de transferencia</div></div>
+                <p class="item-meta">Cuando te pasan una cita, la aceptas o la rechazas aquí. La cita solo cambia de barbero al aceptar; si rechazas, sigue con el barbero original a la misma fecha y hora.</p>
+                <div class="ap-chips" style="margin:12px 0;">
+                    ${[['pending', `Pendientes (${counts.pending})`], ['incoming', `Recibidas (${counts.incoming})`], ['outgoing', `Enviadas (${counts.outgoing})`], ['decided', `Resueltas (${counts.decided})`], ['all', `Todas (${mine.length})`]].map(([id, label]) => `<button class="ap-chip ${filter === id ? 'active' : ''}" data-transfer-filter="${id}">${label}</button>`).join('')}
+                </div>
+                <div class="list-grid">${list.map(r => transferRequestCard(ctx, r)).join('') || '<div class="empty">No hay solicitudes con este filtro.</div>'}</div>
+            </section>
+        `;
+        bindCommon(ctx);
+        bindTransferResponseButtons(ctx, content());
+        content().querySelectorAll('[data-transfer-filter]').forEach(b => b.addEventListener('click', () => { ui.transferFilter = b.dataset.transferFilter; renderTransfers(ctx); }));
+    }
+
+    function transferRequestCard(ctx, r) {
+        const db = ctx.getDb();
+        const a = db.appointments.find(item => item.code === r.appointmentCode);
+        const incoming = r.toBarber === ctx.config.role;
+        const statusHtml = r.status === 'pendiente'
+            ? '<span class="ap-badge amber ap-badge-transfer-pending">Pendiente</span>'
+            : r.status === 'aceptada'
+                ? '<span class="ap-badge gold ap-badge-transferred">Aceptada · Transferida</span>'
+                : '<span class="ap-badge red">Rechazada</span>';
+        return `
+            <div class="ap-transfer-card ${r.status === 'aceptada' ? 'accepted' : ''}">
+                <div>
+                    <strong>${a ? esc(a.client) : 'Cita'} · ${a ? esc(a.service) : esc(r.appointmentCode)}</strong> ${statusHtml}
+                    <div class="item-meta">${esc(r.appointmentCode)}${a ? ` · <span style="text-transform:capitalize;">${esc(fmtDateTime(a))}</span>` : ''} · De ${esc(ctx.barberName(r.fromBarber))} a ${esc(ctx.barberName(r.toBarber))}</div>
+                    ${r.reason ? `<div class="item-meta">Motivo: ${esc(r.reason)}</div>` : ''}
+                    <div class="item-meta">Pedida ${fmtStamp(r.createdAt)}${r.decidedAt ? ` · Resuelta ${fmtStamp(r.decidedAt)}${r.decidedBy && r.decidedBy !== 'Sistema' ? ` por ${esc(ctx.barberName(r.decidedBy))}` : r.decidedBy === 'Sistema' ? ' por el sistema' : ''}` : ''}</div>
+                </div>
+                <div class="ap-request-actions">
+                    ${a ? `<button class="action-btn notify" type="button" data-open="${esc(a.code)}">Ver cita</button>` : ''}
+                    ${r.status === 'pendiente' && incoming ? `<button class="action-btn approve" type="button" data-transfer-accept="${esc(r.id)}"><i class="fas fa-check"></i> Aceptar</button><button class="action-btn reject" type="button" data-transfer-reject="${esc(r.id)}"><i class="fas fa-xmark"></i> Rechazar</button>` : ''}
+                    ${r.status === 'pendiente' && !incoming ? `<span class="item-meta">Esperando respuesta de ${esc(ctx.barberName(r.toBarber))}</span>` : ''}
+                </div>
+            </div>`;
+    }
+
+    // Preferencia del barbero (PR #17, D): avisos de reserva/cancelación de sus citas.
+    function barberPref(ctx) {
+        const db = ctx.getDb();
+        return (db.notificationPreferences || []).find(p => p.barberId === ctx.config.role) || null;
+    }
+
+    function barberWantsBookingNotices(ctx) {
+        const p = barberPref(ctx);
+        return !p || p.bookingAlerts !== false;
+    }
+
     function renderNotifications(ctx) {
         const list = staffNotifications(ctx);
         const key = `staff:${ctx.config.role}`;
@@ -1438,6 +1614,12 @@
         const db = ctx.getDb();
         const allLabel = ctx.isAdmin() ? 'Todas las citas próximas' : 'Todas mis citas próximas';
         content().innerHTML = `
+            <section class="card" style="margin-bottom:18px;">
+                <div class="section-title">Mis avisos de reservas</div>
+                <p class="item-meta">Activa o apaga los avisos cuando reserven o cancelen una cita contigo. Está activado por defecto.</p>
+                <label class="policy-check"><input type="checkbox" id="ap-barber-alerts" ${barberWantsBookingNotices(ctx) ? 'checked' : ''}> Avisarme cuando reserven o cancelen</label>
+                <p class="item-meta">Si lo apagas, no te llegará nada de reservas ni cancelaciones de tus citas. Los demás avisos (reseñas, transferencias, alertas) siguen igual.</p>
+            </section>
             <section class="card">
                 <div class="section-title">Enviar aviso a clientes</div>
                 <p class="item-meta">El aviso aparece en la app del cliente y, si tiene las notificaciones activadas, también le llega al teléfono.</p>
@@ -1480,6 +1662,20 @@
             </section>
         `;
         bindCommon(ctx);
+        // PR #17 (D): guardar la preferencia del barbero (commit normal: el sync la
+        // sube a notification_preferences; RLS solo le deja tocar su propia fila).
+        const barberAlerts = content().querySelector('#ap-barber-alerts');
+        if (barberAlerts) barberAlerts.addEventListener('change', async () => {
+            const on = barberAlerts.checked;
+            const saved = await ctx.commit(s => {
+                s.notificationPreferences = s.notificationPreferences || [];
+                const id = `pref-barber-${ctx.config.role}`;
+                const row = s.notificationPreferences.find(p => p.id === id);
+                if (row) { row.bookingAlerts = on; row.updatedAt = new Date().toISOString(); }
+                else s.notificationPreferences.unshift({ id, barberId: ctx.config.role, appointmentCode: null, bookingAlerts: on, reminders: true, messages: true, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+            }, { success: on ? 'Avisos de reservas activados.' : 'Avisos de reservas apagados. No te llegarán reservas ni cancelaciones nuevas.', error: 'No se pudo guardar la preferencia.' });
+            if (!saved) barberAlerts.checked = !on;
+        });
         const form = content().querySelector('#notify-form');
         form.querySelectorAll('[data-template]').forEach(b => b.addEventListener('click', () => {
             const tpl = NOTIFY_TEMPLATES[b.dataset.template];
@@ -1578,7 +1774,7 @@
     const RENDERERS = {
         dashboard: renderDashboard, calendar: renderCalendar, appointments: renderAppointments, clients: renderClients,
         services: renderServices, schedule: renderSchedule, reviews: renderReviews,
-        inventory: renderInventory, notifications: renderNotifications, settings: renderSettings
+        inventory: renderInventory, notifications: renderNotifications, settings: renderSettings, transfers: renderTransfers
     };
 
     window.GabyAdminPro = {
@@ -1587,6 +1783,7 @@
         badge: (id, ctx) => {
             if (id === 'notifications') return unreadCount(ctx);
             if (id === 'appointments') return pendingRequests(ctx).length;
+            if (id === 'transfers') return incomingTransferRequests(ctx).length;
             if (id === 'inventory') return ctx.getDb().inventory.filter(i => Number(i.qty) <= Number(i.minQty)).length;
             return 0;
         },

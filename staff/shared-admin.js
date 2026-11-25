@@ -6,6 +6,7 @@
     const sections = [
         { id: 'dashboard', label: 'Inicio', icon: 'fa-house', group: 'Agenda' },
         { id: 'appointments', label: 'Citas', icon: 'fa-calendar-check', group: 'Agenda' },
+        { id: 'transfers', label: 'Transferencias', icon: 'fa-arrow-right-arrow-left', group: 'Agenda' },
         { id: 'calendar', label: 'Calendario', icon: 'fa-calendar-days', group: 'Agenda' },
         { id: 'clients', label: 'Clientes', icon: 'fa-users', group: 'Clientes' },
         { id: 'reviews', label: 'Reseñas', icon: 'fa-star', group: 'Clientes' },
@@ -614,8 +615,8 @@
                     <div class="nav-footer">
                         <a class="nav-btn" href="../../index.html"><i class="fas fa-arrow-left"></i><span>Página principal</span></a>
                         <div class="nav-group ap-panels">
-                            <div class="nav-group-label">Todos los paneles</div>
-                            ${[['gaby', 'Panel de Gaby', 'gabriel'], ['darialex', 'Panel de Darialex', 'darialex'], ['wilo', 'Panel de Wilo', 'wilo']].map(([folder, label, role]) => `<a class="nav-btn ${config.role === role ? 'active' : ''}" href="../${folder}/index.html"><i class="fas fa-user-tie"></i><span>${label}</span></a>`).join('')}
+                            <div class="nav-group-label">Paneles</div>
+                            <button class="nav-btn ap-panels-btn" type="button" data-panels-open aria-haspopup="dialog"><i class="fas fa-user-tie"></i><span>Todos los paneles</span><i class="fas fa-chevron-right ap-panels-chevron" aria-hidden="true"></i></button>
                         </div>
                         <button class="nav-btn nav-logout" type="button" data-staff-logout><i class="fas fa-right-from-bracket"></i><span>Cerrar sesión</span></button>
                     </div>
@@ -663,7 +664,47 @@
         app.querySelector('[data-nav-open]')?.addEventListener('click', () => setNavOpen(true));
         app.querySelector('[data-nav-close]')?.addEventListener('click', () => setNavOpen(false));
         app.querySelector('[data-staff-logout]')?.addEventListener('click', staffLogout);
+        app.querySelector('[data-panels-open]')?.addEventListener('click', openPanelsSelector);
         bindCancellationAlertActions();
+    }
+
+    // PR #17 (A): un solo botón "Todos los paneles" que abre un selector con
+    // los 3 paneles. Antes eran 3 botones siempre visibles en el pie del menú.
+    // Cada panel es una página distinta y valida su propia sesión al entrar,
+    // así que el login por barbero no cambia.
+    const PANELS = [
+        { folder: 'gaby', label: 'Panel de Gaby', role: 'gabriel', note: 'Gabriel Andres Ortiz (Gaby) · Administrador general' },
+        { folder: 'darialex', label: 'Panel de Darialex', role: 'darialex', note: 'Darialex Rivera Aponte (Tazmania)' },
+        { folder: 'wilo', label: 'Panel de Wilo', role: 'wilo', note: 'Wilo' }
+    ];
+
+    function openPanelsSelector() {
+        closePanelsSelector();
+        const overlay = document.createElement('div');
+        overlay.className = 'admin-modal-overlay active ap-panels-modal';
+        overlay.id = 'ap-panels-modal';
+        overlay.innerHTML = `<div class="admin-modal-card" role="dialog" aria-modal="true" aria-label="Todos los paneles">
+            <button class="admin-modal-close" type="button" data-panels-close aria-label="Cerrar"><i class="fas fa-times"></i></button>
+            <div class="section-title">Todos los paneles</div>
+            <p class="item-meta" style="margin-bottom:14px;">Cambia de panel. Cada panel pide su propia sesión.</p>
+            <div class="ap-panels-list">
+                ${PANELS.map(panel => `<a class="nav-btn ap-panels-item ${config.role === panel.role ? 'active' : ''}" href="../${panel.folder}/index.html" ${config.role === panel.role ? 'aria-current="page"' : ''}><i class="fas fa-user-tie"></i><span><strong>${panel.label}</strong><small>${panel.note}</small></span>${config.role === panel.role ? '<em class="ap-panels-current">Actual</em>' : ''}</a>`).join('')}
+            </div>
+        </div>`;
+        document.body.appendChild(overlay);
+        overlay.querySelector('[data-panels-close]').addEventListener('click', closePanelsSelector);
+        overlay.addEventListener('click', event => { if (event.target === overlay) closePanelsSelector(); });
+        document.addEventListener('keydown', onPanelsEscape);
+        setNavOpen(false);
+    }
+
+    function onPanelsEscape(event) {
+        if (event.key === 'Escape') closePanelsSelector();
+    }
+
+    function closePanelsSelector() {
+        document.getElementById('ap-panels-modal')?.remove();
+        document.removeEventListener('keydown', onPanelsEscape);
     }
 
     function pendingBadgeTotal() {

@@ -102,37 +102,78 @@
 
     <div class="mobile-bottom-nav"><a href="index.html"><i class="fas fa-house"></i><span>Inicio</span></a><a href="services.html"><i class="fas fa-scissors"></i><span>Servicios</span></a><a href="booking.html"><i class="fas fa-calendar-check"></i><span>Cita</span></a><a href="news.html"><i class="fas fa-newspaper"></i><span>Noticias</span></a><a class="active" href="settings.html"><i class="fas fa-gear"></i><span>Config</span></a></div>
     <script src="supabase-config.js?v=20261124b"></script>
-    <script src="shared-data.js?v=20261124b"></script>
-    <script src="supabase-sync.js?v=20261124d"></script>
+    <script src="shared-data.js?v=20261124e"></script>
+    <script src="supabase-sync.js?v=20261124e"></script>
     <script src="site-guard.js?v=20261124b"></script>
     <script src="shared-preferences.js?v=20261124b"></script>
     <script src="legal.js?v=20261124b"></script>
     <script src="site-chrome.js?v=20261124b"></script>
     <script>
         window.GabyPreferences.initPreferences({});
+        // PR #17 (E3): el aviso por correo de una solicitud va SOLAMENTE a Gaby
+        // (gaby@goatstylesalon.com, administrador y fundador). Formulario real de
+        // FormSpark "Únete como barbero — GOAT Style Salon", creado en el dashboard
+        // con destinatario SOLO gaby@goatstylesalon.com (endpoint real, no inventado).
+        // PENDIENTE (acción de persona, no de código): Gaby es invitado nuevo en
+        // ese formulario y debe aceptar el correo de confirmación de FormSpark para
+        // que le lleguen los avisos. Sin esa aceptación, FormSpark lo muestra como
+        // invitado sin confirmar y no le envía los correos.
+        // El correo nunca bloquea el envío de la solicitud: si falla, la solicitud
+        // igual queda guardada en la tabla barberApplications (la ve el admin).
+        // Límite: el currículum (PDF) y las fotos no viajan por FormSpark con este
+        // envío; solo van sus nombres/cantidad. Los archivos quedan en el formulario
+        // y se revisan con la solicitud guardada en barberApplications.
+        const FORMSPARK_BARBER_APPLICATION_URL = 'https://submit-form.com/EPVavih9c';
+        function notifyGabyByEmail(application) {
+            try {
+                if (!FORMSPARK_BARBER_APPLICATION_URL || !application) return;
+                const body = new URLSearchParams({
+                    nombre: application.name || '',
+                    // El correo del solicitante va con el campo `email`: es el que
+                    // FormSpark usa como reply-to del aviso a Gaby.
+                    email: application.email || '',
+                    telefono: application.phone || '',
+                    ciudad: application.city || '',
+                    experiencia: application.experience || '',
+                    especialidades: application.specialties || '',
+                    redes: application.socials || '',
+                    carta: application.cover || '',
+                    // `mensaje`: el mensaje del solicitante (su carta de presentación).
+                    // Es uno de los 4 campos que siempre viajan: nombre, telefono, email, mensaje.
+                    mensaje: application.cover || '',
+                    disponibilidad: application.availability || '',
+                    comentarios: application.comments || '',
+                    curriculum: application.resumeName || '',
+                    fotos: String(application.photosCount || 0)
+                });
+                fetch(FORMSPARK_BARBER_APPLICATION_URL, { method: 'POST', body, keepalive: true }).catch(() => {});
+            } catch (_) { /* el correo nunca bloquea el envío de la solicitud */ }
+        }
         document.getElementById('apply-form').addEventListener('submit', async function (event) {
             event.preventDefault();
             const form = event.target;
+            const application = {
+                id: window.GabyData.makeId('barber-app'),
+                name: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone: document.getElementById('phone').value.trim(),
+                city: document.getElementById('city').value.trim(),
+                experience: document.getElementById('experience').value.trim(),
+                specialties: document.getElementById('specialties').value.trim(),
+                socials: document.getElementById('socials').value.trim(),
+                cover: document.getElementById('cover').value.trim(),
+                availability: document.getElementById('availability').value.trim(),
+                comments: document.getElementById('comments').value.trim(),
+                resumeName: document.getElementById('resume').files[0]?.name || '',
+                photosCount: document.getElementById('photos').files.length,
+                status: 'Pendiente de revisión',
+                createdAt: new Date().toISOString()
+            };
             const ok = await window.GabyData.commit(db => {
-                db.barberApplications.unshift({
-                    id: window.GabyData.makeId('barber-app'),
-                    name: document.getElementById('name').value.trim(),
-                    email: document.getElementById('email').value.trim(),
-                    phone: document.getElementById('phone').value.trim(),
-                    city: document.getElementById('city').value.trim(),
-                    experience: document.getElementById('experience').value.trim(),
-                    specialties: document.getElementById('specialties').value.trim(),
-                    socials: document.getElementById('socials').value.trim(),
-                    cover: document.getElementById('cover').value.trim(),
-                    availability: document.getElementById('availability').value.trim(),
-                    comments: document.getElementById('comments').value.trim(),
-                    resumeName: document.getElementById('resume').files[0]?.name || '',
-                    photosCount: document.getElementById('photos').files.length,
-                    status: 'Pendiente de revisión',
-                    createdAt: new Date().toISOString()
-                });
+                db.barberApplications.unshift(application);
             }, { success: 'Solicitud enviada. Un administrador la revisará pronto.', error: 'No se pudo enviar tu solicitud.' });
             if (!ok) return;
+            notifyGabyByEmail(application);
             document.getElementById('status').innerText = 'Solicitud enviada. Un administrador la revisará pronto.';
             form.reset();
         });
