@@ -55,6 +55,22 @@ language sql stable security definer set search_path = public as $$
     select barber_id from public.staff_roles where user_id = auth.uid();
 $$;
 
+-- ===========================================================================
+-- PR #18 (Super Admin) — bloque A: helper is_super_admin() de schema-sql-block.sql (ítem F).
+-- ===========================================================================
+-- true solo si auth.uid() tiene role = 'super_admin' y estado = 'activo'.
+-- SECURITY DEFINER para no entrar en recursión con las políticas RLS.
+create or replace function public.is_super_admin()
+returns boolean
+language sql stable security definer set search_path = public as $$
+    select exists (
+        select 1 from public.profiles
+        where id = auth.uid() and role = 'super_admin' and estado = 'activo'
+    );
+$$;
+
+
+
 -- -----------------------------------------------------------------------------
 -- Clientes: fichas que crea y maneja el personal. Los clientes no tienen cuenta ni
 -- contraseña; reservan y dejan reseñas escribiendo su nombre completo.
@@ -768,6 +784,101 @@ create table if not exists public.discounts (
 -- Avisos del centro de notificaciones y suscripciones push (Firebase).
 -- Los clientes no tienen cuenta: leen sus avisos por código de cita con
 -- my_notifications(), igual que consultan su cita con appointment_status().
+-- ===========================================================================
+-- PR #18 (Super Admin) — bloque B: tabla profiles + triggers (la tabla NO existía en schema.sql) de schema-sql-block.sql (ítem F).
+-- ===========================================================================
+create table if not exists public.profiles (
+    id uuid primary key references auth.users (id) on delete cascade,
+    email text not null,
+    nombre text not null default '',
+    role text not null default 'cliente'
+        check (role in ('cliente', 'barbero', 'admin', 'super_admin')),
+    estado text not null default 'activo'
+        check (estado in ('activo', 'bloqueado', 'suspendido', 'cancelado')),
+    motivo text,                       -- motivo del último cambio de estado
+    suspendido_hasta timestamptz,      -- solo cuando estado = 'suspendido'
+    ultimo_login_at timestamptz,
+    barber_id text references public.barbers (id) on delete set null,
+    -- Seguridad: la forma honesta de "cerrar sesiones" sin service_role.
+    -- Los paneles revisan estos flags al cargar y obligan a reautenticarse.
+    force_reauth boolean not null default false,
+    force_password_change boolean not null default false,
+    created_at timestamptz not null default now(),
+    updated_at timestamptz not null default now()
+);
+create index if not exists profiles_email_idx on public.profiles (lower(email));
+create index if not exists profiles_role_idx on public.profiles (role);
+create index if not exists profiles_barber_idx on public.profiles (barber_id);
+
+-- Solo el super_admin puede cambiar rol, estado o flags de seguridad de un
+-- perfil. Un barbero/admin puede editar su propio nombre, nada más.
+create or replace function public.profiles_guard()
+returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+    if public.is_super_admin() then
+        return new;
+    end if;
+    if new.role is distinct from old.role
+        or new.estado is distinct from old.estado
+        or new.barber_id is distinct from old.barber_id
+        or new.force_reauth is distinct from old.force_reauth
+        or new.force_password_change is distinct from old.force_password_change
+        or new.suspendido_hasta is distinct from old.suspendido_hasta
+        or new.motivo is distinct from old.motivo then
+        raise exception 'Solo el super administrador puede cambiar rol, estado o flags de seguridad.';
+    end if;
+    if new.id is distinct from old.id or new.email is distinct from old.email then
+        raise exception 'El id y el email de un perfil no se pueden cambiar desde el panel.';
+    end if;
+    return new;
+end;
+$$;
+
+drop trigger if exists profiles_guard on public.profiles;
+create trigger profiles_guard
+    before update on public.profiles
+    for each row execute function public.profiles_guard();
+
+-- updated_at automático.
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql as $$
+begin
+    new.updated_at = now();
+    return new;
+end;
+$$;
+
+drop trigger if exists profiles_updated_at on public.profiles;
+create trigger profiles_updated_at
+    before update on public.profiles
+    for each row execute function public.set_updated_at();
+
+-- Cuando se crea un usuario en Auth, nace su perfil como cliente. El super
+-- admin luego le sube el rol con set_profile_role() / grant_super_admin().
+-- (Si el proyecto no permite triggers sobre auth.users, este bloque avisa y
+-- la migración sigue: el alta de perfiles la hace entonces el super_admin.)
+create or replace function public.handle_new_auth_user()
+returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+    insert into public.profiles (id, email, nombre, role, estado)
+    values (new.id, coalesce(new.email, ''), '', 'cliente', 'activo')
+    on conflict (id) do nothing;
+    return new;
+end;
+$$;
+
+do $$
+begin
+    execute 'drop trigger if exists on_auth_user_created on auth.users';
+    execute 'create trigger on_auth_user_created after insert on auth.users '
+         || 'for each row execute function public.handle_new_auth_user()';
+exception when others then
+    raise notice 'No se pudo crear el trigger sobre auth.users (%). Los perfiles se crearán desde el panel.', sqlerrm;
+end $$;
+
 -- -----------------------------------------------------------------------------
 create table if not exists public.notifications (
     id text primary key,
@@ -940,6 +1051,119 @@ create policy push_tokens_staff_read on public.push_tokens for select using (pub
 create policy push_tokens_staff_delete on public.push_tokens for delete using (public.is_staff());
 
 -- =============================================================================
+-- ===========================================================================
+-- PR #18 (Super Admin) — bloque C: políticas de profiles + acceso total del super_admin (DESPUÉS del bloque DO que borra políticas) de schema-sql-block.sql (ítem F).
+-- ===========================================================================
+alter table public.profiles enable row level security;
+
+drop policy if exists profiles_self_read on public.profiles;
+create policy profiles_self_read on public.profiles
+    for select using (id = auth.uid() or public.is_super_admin());
+
+drop policy if exists profiles_self_update on public.profiles;
+create policy profiles_self_update on public.profiles
+    for update using (id = auth.uid() or public.is_super_admin())
+    with check (id = auth.uid() or public.is_super_admin());
+
+-- Solo el super_admin inserta/borra perfiles directamente (el alta normal la
+-- hace el trigger on_auth_user_created, que es SECURITY DEFINER).
+drop policy if exists profiles_super_admin_write on public.profiles;
+create policy profiles_super_admin_write on public.profiles
+    for all using (public.is_super_admin())
+    with check (public.is_super_admin());
+
+-- -----------------------------------------------------------------------------
+-- 3. El super_admin también ve y gestiona las tablas que ya existen.
+--    Políticas ADITIVAS: no se toca ninguna política existente de schema.sql
+--    (las permisivas se suman con OR; nada de lo que ya funcionaba se rompe).
+--    Los clientes NO tienen cuenta de Auth (reservan por código), así que su
+--    acceso sigue siendo por RPC (appointment_status, my_notifications):
+--    aquí no se inventa un acceso de cliente por RLS sobre clients.
+-- -----------------------------------------------------------------------------
+drop policy if exists barbers_super_admin on public.barbers;
+create policy barbers_super_admin on public.barbers
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists staff_roles_super_admin on public.staff_roles;
+create policy staff_roles_super_admin on public.staff_roles
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists clients_super_admin on public.clients;
+create policy clients_super_admin on public.clients
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists services_super_admin on public.services;
+create policy services_super_admin on public.services
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists products_super_admin on public.products;
+create policy products_super_admin on public.products
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists gallery_super_admin on public.gallery;
+create policy gallery_super_admin on public.gallery
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists news_super_admin on public.news;
+create policy news_super_admin on public.news
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists providers_super_admin on public.providers;
+create policy providers_super_admin on public.providers
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists appointments_super_admin on public.appointments;
+create policy appointments_super_admin on public.appointments
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists reviews_super_admin on public.reviews;
+create policy reviews_super_admin on public.reviews
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists activity_super_admin on public.activity_log;
+create policy activity_super_admin on public.activity_log
+    for select using (public.is_super_admin());
+
+drop policy if exists applications_super_admin on public.barber_applications;
+create policy applications_super_admin on public.barber_applications
+    for select using (public.is_super_admin());
+
+drop policy if exists settings_super_admin on public.shop_settings;
+create policy settings_super_admin on public.shop_settings
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists memos_super_admin on public.memos;
+create policy memos_super_admin on public.memos
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists payments_super_admin on public.payments;
+create policy payments_super_admin on public.payments
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists discounts_super_admin on public.discounts;
+create policy discounts_super_admin on public.discounts
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists notifications_super_admin on public.notifications;
+create policy notifications_super_admin on public.notifications
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists push_tokens_super_admin on public.push_tokens;
+create policy push_tokens_super_admin on public.push_tokens
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists site_config_super_admin on public.site_config;
+create policy site_config_super_admin on public.site_config
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists login_attempts_super_admin on public.login_attempts;
+create policy login_attempts_super_admin on public.login_attempts
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
+drop policy if exists account_locks_super_admin on public.account_locks;
+create policy account_locks_super_admin on public.account_locks
+    for all using (public.is_super_admin()) with check (public.is_super_admin());
+
 -- Datos iniciales (on conflict do nothing: no pisa cambios hechos después)
 -- =============================================================================
 insert into public.barbers (id, name, alias, email, phone, specialty, bio, avatar_url, is_admin, active, years_experience, vip_clients, schedule, socials, certifications, gallery) values
@@ -1000,6 +1224,25 @@ insert into public.shop_settings (id) values (1) on conflict (id) do nothing;
 insert into public.staff_roles (user_id, barber_id, is_admin)
 select id, 'gabriel', true from auth.users where email = 'gaby@goatstylesalon.com'
 on conflict (user_id) do update set barber_id = excluded.barber_id, is_admin = excluded.is_admin;
+
+-- ===========================================================================
+-- PR #18 (Super Admin) — bloque D: seed de profiles desde staff_roles de schema-sql-block.sql (ítem F).
+-- ===========================================================================
+-- Poblar profiles para los 3 barberos existentes desde staff_roles, con sus
+-- emails reales del repo (gaby@, darialex@, wilo@goatstylesalon.com).
+-- gaby es admin; darialex y wilo son barberos. Nunca degrada a un
+-- super_admin ya otorgado.
+insert into public.profiles (id, email, nombre, role, estado, barber_id)
+select u.id, u.email, coalesce(b.name, ''), case when s.is_admin then 'admin' else 'barbero' end, 'activo', s.barber_id
+from public.staff_roles s
+join auth.users u on u.id = s.user_id
+left join public.barbers b on b.id = s.barber_id
+on conflict (id) do update set
+    email = excluded.email,
+    nombre = excluded.nombre,
+    role = case when public.profiles.role = 'super_admin' then public.profiles.role else excluded.role end,
+    barber_id = excluded.barber_id;
+
 insert into public.staff_roles (user_id, barber_id, is_admin)
 select id, 'darialex', false from auth.users where email = 'darialex@goatstylesalon.com'
 on conflict (user_id) do update set barber_id = excluded.barber_id, is_admin = excluded.is_admin;
@@ -1641,3 +1884,13 @@ $$;
 comment on function public.register_client_for_appointment(text) is 'Registra la ficha del cliente de una reserva en línea y la une a la cita y a sus avisos. SECURITY DEFINER porque el visitante anónimo no puede insertar en clients por sync (clients_staff_insert exige is_staff()). Solo recibe el código: el nombre, el correo y el barbero se leen de la cita.';
 revoke all on function public.register_client_for_appointment(text) from public;
 grant execute on function public.register_client_for_appointment(text) to anon, authenticated;
+
+-- ===========================================================================
+-- PR #18 — NOTA (bloque E de schema-sql-block.sql): el resto de tablas y RPCs
+-- del panel (audit_log, maintenance, area_permissions, tickets, error_logs,
+-- admin_settings, RPCs de login y de cuentas) vive SOLO en la migración
+-- supabase/migrations/20261124230000_super_admin.sql. Si schema.sql se
+-- re-ejecuta completo, volver a ejecutar TAMBIÉN esa migración (idempotente).
+-- El primer super_admin se otorga UNA VEZ en el SQL Editor (ver
+-- SETUP-SUPER-ADMIN.md): nunca se crea desde el frontend.
+-- ===========================================================================

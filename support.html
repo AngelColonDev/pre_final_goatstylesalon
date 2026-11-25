@@ -263,6 +263,7 @@
                         <div class="field"><label for="reportEmail" data-i18n="emailOptionalLabel">Correo electrónico (opcional)</label><input id="reportEmail" name="email" type="email" placeholder="tu@email.com" autocomplete="email"></div>
                         <div class="field"><label for="reportArea" data-i18n="areaLabel">Área afectada</label><select id="reportArea" name="area" required><option value="" data-i18n="areaPick">Escoge el área</option><option value="booking" data-i18n="areaBooking">Citas</option><option value="services" data-i18n="areaServices">Servicios</option><option value="news" data-i18n="areaNews">Noticias</option><option value="reviews" data-i18n="areaProfile">Reseñas</option><option value="other" data-i18n="areaOther">Otra</option></select></div>
                         <div class="field" id="reportOtherWrap" hidden><label for="reportOther" data-i18n="areaOtherLabel">¿Cuál otra área?</label><input id="reportOther" name="areaOther" type="text" maxlength="80" placeholder="Escribe qué parte de la página"></div>
+                        <div class="field"><label for="reportCategory" data-i18n="categoryLabel">Categoría</label><select id="reportCategory" name="category" required><option value="cuenta">Cuenta</option><option value="citas">Citas</option><option value="pagos">Pagos</option><option value="error_tecnico" selected>Error técnico</option><option value="otro">Otro</option></select></div>
                         <div class="field"><label for="reportDevice" data-i18n="deviceLabel">Dispositivo</label><input id="reportDevice" name="device" type="text" placeholder="iPhone, Android, laptop..." required></div>
                     </div>
                     <div class="field" style="margin-top:1rem;"><label for="reportMessage" data-i18n="detailsLabel">Detalles</label><textarea id="reportMessage" name="message" placeholder="Describe el problema paso a paso" minlength="10" required></textarea></div>
@@ -304,11 +305,11 @@
 
     <script src="supabase-config.js?v=20261124b"></script>
     <script src="shared-data.js?v=20261124b"></script>
-    <script src="supabase-sync.js?v=20261124d"></script>
+    <script src="supabase-sync.js?v=20261124f"></script>
     <script src="site-guard.js?v=20261124b"></script>
     <script src="shared-preferences.js?v=20261124b"></script>
     <script src="legal.js?v=20261124b"></script>
-    <script src="site-chrome.js?v=20261124b"></script>
+    <script src="site-chrome.js?v=20261124f"></script>
     <script>
         const translations = {
             es: {
@@ -322,9 +323,9 @@
                 faq:'Preguntas frecuentes', faqDesc:'Respuestas sobre citas, productos, ubicación, pagos y servicio.', faqIntro:'Incluye las respuestas visibles en la página principal y otras dudas comunes para ayudar al cliente más rápido.',
                 faqQ1:'¿Necesito cita previa?', faqA1:'Sí, trabajamos exclusivamente con citas para garantizar la experiencia VIP de cada cliente.', faqQ2:'¿Manejan productos premium?', faqA2:'Vendemos productos seleccionados de la más alta calidad para el cuidado de tu cabello y barba.', faqQ3:'¿Dónde están ubicados?', faqA3:'Nos encontramos en Barranquitas, Puerto Rico.', faqQ4:'¿Puedo cancelar mi cita?', faqA4:'Sí. Comunícate con la barbería por teléfono o WhatsApp y te ayudamos a cancelarla o cambiarla.', faqQ5:'¿Cuánto tiempo dura un servicio VIP?', faqA5:'Depende de la opción elegida, pero los servicios VIP pueden durar desde 30 minutos hasta 2 horas y 45 minutos.', faqQ6:'¿Puedo elegir mi barbero favorito?', faqA6:'Claro, escoges tu barbero al reservar tu cita.', faqQ7:'¿Publican avisos importantes?', faqA7:'Sí, contamos con una página de noticias para cierres, horarios especiales y anuncios del equipo.', faqQ8:'¿Qué hago si el horario que quiero no aparece?', faqA8:'Prueba con otro barbero o revisa una fecha distinta. La disponibilidad cambia según las citas ya reservadas.', faqQ9:'¿Puedo consultar precios antes de reservar?', faqA9:'Sí, en la sección de servicios puedes ver el menu completo antes de sacar tu cita.',
                 contact:'Contactar soporte', contactDesc:'Angel Tech Solutions, correo técnico, página web y canales oficiales.', contactIntro:'El soporte técnico es manejado por Angel Tech Solutions. Puedes escribir por correo o usar el formulario disponible en su página oficial.', contactCompany:'Empresa', contactCompanyText:'Angel Tech Solutions ofrece soporte técnico y seguimiento para la plataforma de la barbería.', contactWebsite:'Página web', contactEmail:'Correo de soporte', contactHow:'Cómo contactarlo', contactHowText:'Puedes contactar a Angel Tech Solutions desde el formulario de su página web o escribiendo directamente al correo de soporte técnico.', visitWebsite:'Ir a la página web', sendEmail:'Enviar correo',
-                report:'Reportar un problema', reportDesc:'Envia detalles de errores, fallos o comportamientos inesperados.', reportIntro:'Comparte lo que ocurrio, en que sección paso y que esperabas que sucediera. Mientras más detalles, mejor.', reportFormTitle:'Formulario de problema', reportFormNote:'Este formulario ayuda a preparar la información antes de contactar al equipo técnico.', reportSuccess:'Tu reporte fue preparado. Ahora puedes enviarlo al equipo técnico con toda la información.', sendReport:'Guardar reporte',
+                report:'Reportar un problema', reportDesc:'Envia detalles de errores, fallos o comportamientos inesperados.', reportIntro:'Comparte lo que ocurrio, en que sección paso y que esperabas que sucediera. Mientras más detalles, mejor.', reportFormTitle:'Formulario de problema', reportFormNote:'Este formulario ayuda a preparar la información antes de contactar al equipo técnico.', reportSuccess:'Tu reporte fue preparado. Ahora puedes enviarlo al equipo técnico con toda la información.', reportTicketSuccess:'Tu reporte fue enviado. El equipo técnico lo revisará y te contactará si necesita más detalles.', sendReport:'Guardar reporte',
                 suggestions:'Enviar sugerencias', suggestionsDesc:'Comparte ideas para mejorar la experiencia de la barbería y la app.', suggestionsIntro:'Si tienes ideas para mejorar reservas, perfiles, noticias o soporte, este espacio es para eso.', suggestionsFormTitle:'Formulario de sugerencias', suggestionsFormNote:'Comparte una mejora concreta y explica como ayudaria a los clientes o al equipo.', suggestionSuccess:'Tu sugerencia fue guardada. Puedes copiarla o enviarla luego al equipo técnico.', sendSuggestion:'Guardar sugerencia',
-                nameLabel:'Nombre', fullNameLabel:'Nombre completo', phoneLabel:'Número de teléfono', emailOptionalLabel:'Correo electrónico (opcional)', areaPick:'Escoge el área', areaOtherLabel:'¿Cuál otra área?', reportRequired:'Todos los campos son obligatorios, menos el correo electrónico.', emailLabel:'Correo electrónico', areaLabel:'Área afectada', areaBooking:'Citas', areaServices:'Servicios', areaNews:'Noticias', areaProfile:'Reseñas', areaOther:'Otra', deviceLabel:'Dispositivo', detailsLabel:'Detalles', topicLabel:'Tema', ideaLabel:'Tu idea'
+                nameLabel:'Nombre', fullNameLabel:'Nombre completo', phoneLabel:'Número de teléfono', emailOptionalLabel:'Correo electrónico (opcional)', areaPick:'Escoge el área', areaOtherLabel:'¿Cuál otra área?', reportRequired:'Todos los campos son obligatorios, menos el correo electrónico.', emailLabel:'Correo electrónico', areaLabel:'Área afectada', categoryLabel:'Categoría', areaBooking:'Citas', areaServices:'Servicios', areaNews:'Noticias', areaProfile:'Reseñas', areaOther:'Otra', deviceLabel:'Dispositivo', detailsLabel:'Detalles', topicLabel:'Tema', ideaLabel:'Tu idea'
             },
             en: {
                 back:'← Back', homeTab:'Home', servicesTab:'Services', bookingTab:'Booking', newsTab:'News', configTab:'Settings',
@@ -337,9 +338,9 @@
                 faq:'Frequently asked questions', faqDesc:'Answers about appointments, products, location, payments, and service.', faqIntro:'It includes the answers visible on the main page plus more common questions to help clients faster.',
                 faqQ1:'Do I need an appointment?', faqA1:'Yes, we work exclusively by appointment to guarantee the VIP experience for every client.', faqQ2:'Do you carry premium products?', faqA2:'We sell carefully selected top-quality products for hair and beard care.', faqQ3:'Where are you located?', faqA3:'We are located in Barranquitas, Puerto Rico.', faqQ4:'Can I cancel my appointment?', faqA4:'Yes. Contact the barbershop by phone or WhatsApp and we will help you cancel or change it.', faqQ5:'How long does a VIP service last?', faqA5:'It depends on the option selected, but VIP services can last from 30 minutes to 2 hours and 45 minutes.', faqQ6:'Can I choose my favorite barber?', faqA6:'Of course, you choose your barber when you book.', faqQ7:'Do you post important notices?', faqA7:'Yes, we have a news page for closures, special hours, and team announcements.', faqQ8:'What if the time I want does not appear?', faqA8:'Try a different barber or another date. Availability changes depending on already booked appointments.', faqQ9:'Can I check prices before booking?', faqA9:'Yes, in the services section you can see the full menu before booking your appointment.',
                 contact:'Contact support', contactDesc:'Angel Tech Solutions, technical email, website, and official channels.', contactIntro:'Technical support is handled by Angel Tech Solutions. You can write by email or use the form available on their official website.', contactCompany:'Company', contactCompanyText:'Angel Tech Solutions provides technical support and follow-up for the barbershop platform.', contactWebsite:'Website', contactEmail:'Support email', contactHow:'How to contact them', contactHowText:'You can contact Angel Tech Solutions through the form on their website or by writing directly to the technical support email.', visitWebsite:'Go to website', sendEmail:'Send email',
-                report:'Report a problem', reportDesc:'Send details about bugs, issues, or unexpected behavior.', reportIntro:'Share what happened, where it happened, and what you expected. The more detail, the better.', reportFormTitle:'Issue form', reportFormNote:'This form helps prepare the information before contacting the technical team.', reportSuccess:'Your report was prepared. You can now send it to the technical team with all the details.', sendReport:'Save report',
+                report:'Report a problem', reportDesc:'Send details about bugs, issues, or unexpected behavior.', reportIntro:'Share what happened, where it happened, and what you expected. The more detail, the better.', reportFormTitle:'Issue form', reportFormNote:'This form helps prepare the information before contacting the technical team.', reportSuccess:'Your report was prepared. You can now send it to the technical team with all the details.', reportTicketSuccess:'Your report was sent. The technical team will review it and contact you if they need more details.', sendReport:'Save report',
                 suggestions:'Send suggestions', suggestionsDesc:'Share ideas to improve the barbershop and app experience.', suggestionsIntro:'If you have ideas to improve booking, profiles, news, or support, this is the place.', suggestionsFormTitle:'Suggestion form', suggestionsFormNote:'Share one concrete improvement and explain how it would help clients or the team.', suggestionSuccess:'Your suggestion was saved. You can copy it or send it to the technical team later.', sendSuggestion:'Save suggestion',
-                nameLabel:'Name', fullNameLabel:'Full name', phoneLabel:'Phone number', emailOptionalLabel:'Email (optional)', areaPick:'Choose the area', areaOtherLabel:'Which other area?', reportRequired:'All fields are required except email.', emailLabel:'Email', areaLabel:'Affected area', areaBooking:'Appointments', areaServices:'Services', areaNews:'News', areaProfile:'Reviews', areaOther:'Other', deviceLabel:'Device', detailsLabel:'Details', topicLabel:'Topic', ideaLabel:'Your idea'
+                nameLabel:'Name', fullNameLabel:'Full name', phoneLabel:'Phone number', emailOptionalLabel:'Email (optional)', areaPick:'Choose the area', areaOtherLabel:'Which other area?', reportRequired:'All fields are required except email.', emailLabel:'Email', areaLabel:'Affected area', categoryLabel:'Category', areaBooking:'Appointments', areaServices:'Services', areaNews:'News', areaProfile:'Reviews', areaOther:'Other', deviceLabel:'Device', detailsLabel:'Details', topicLabel:'Topic', ideaLabel:'Your idea'
             }
         };
 
@@ -381,7 +382,53 @@
             reportPhone.setCustomValidity(reportPhone.value && (digits < 10 || digits > 11) ? 'Escribe un número de teléfono de 10 dígitos.' : '');
         });
         if (window.location.hash === '#contacto') activatePanel('contact-panel');
-        wireForm('reportForm', 'reportSuccess');
+        else if (window.location.hash === '#reporte') activatePanel('report-panel');
+        // PR #18: el reporte crea un ticket en la tabla `tickets`
+        // (categoría, descripción, prioridad 'normal'). Sin Supabase o si el
+        // servidor lo rechaza, se muestra el mensaje anterior y el usuario
+        // conserva el texto para enviarlo por correo al equipo técnico.
+        const reportCategory = document.getElementById('reportCategory');
+        let reportCategoryTouched = false;
+        reportCategory.addEventListener('change', () => { reportCategoryTouched = true; });
+        reportArea.addEventListener('change', () => {
+            if (reportCategoryTouched) return;
+            reportCategory.value = reportArea.value === 'booking' ? 'citas' : reportArea.value === 'other' ? 'otro' : 'error_tecnico';
+        });
+        document.getElementById('reportForm').addEventListener('submit', async event => {
+            event.preventDefault();
+            const form = document.getElementById('reportForm');
+            const success = document.getElementById('reportSuccess');
+            const button = form.querySelector('[type=submit]');
+            const lang = (window.GabyData && window.GabyData.getState().settings.defaultLanguage) === 'en' ? 'en' : 'es';
+            const area = reportArea.value;
+            const areaLabel = area === 'other'
+                ? (reportOther.value.trim() || 'Otra')
+                : (reportArea.options[reportArea.selectedIndex] ? reportArea.options[reportArea.selectedIndex].textContent : area);
+            if (button) button.disabled = true;
+            const result = window.GabySuperAdmin
+                ? await window.GabySuperAdmin.createTicket({
+                    category: reportCategory.value,
+                    description: document.getElementById('reportMessage').value,
+                    area: areaLabel,
+                    reporterName: document.getElementById('reportName').value,
+                    reporterPhone: document.getElementById('reportPhone').value,
+                    reporterEmail: document.getElementById('reportEmail').value,
+                    device: document.getElementById('reportDevice').value
+                })
+                : { ok: false, reason: 'no-supabase', message: '' };
+            if (button) button.disabled = false;
+            if (result.ok) {
+                success.textContent = translations[lang].reportTicketSuccess;
+                success.style.display = 'block';
+                window.GabyData.toast(translations[lang].reportTicketSuccess, 'success');
+                form.reset();
+                syncReportOther();
+            } else {
+                success.textContent = translations[lang].reportSuccess;
+                success.style.display = 'block';
+                window.GabyData.toast(result.message || translations[lang].reportSuccess, 'warning');
+            }
+        });
         wireForm('suggestionsForm', 'suggestionSuccess');
         window.GabyPreferences.initPreferences({ translations });
     </script>

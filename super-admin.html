@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin | GOAT Style Salon</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="super-admin.css?v=20261124f">
+</head>
+<body>
+    <!-- ======================= LOGIN SUPER ADMIN ======================= -->
+    <div id="sa-login" class="sa-login">
+        <div class="sa-login-card">
+            <img class="sa-login-logo" src="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png" alt="GOAT Style Salon">
+            <h1>Super Admin</h1>
+            <p class="sa-muted">Acceso exclusivo del super administrador de GOAT Style Salon.</p>
+
+            <!-- Paso 1: correo + contraseña -->
+            <form id="sa-login-form" autocomplete="off">
+                <label class="sa-field">
+                    <span>Correo del super administrador</span>
+                    <input type="email" id="sa-email" required placeholder="tu correo" autocomplete="username">
+                </label>
+                <label class="sa-field">
+                    <span>Contraseña</span>
+                    <input type="password" id="sa-password" required placeholder="tu contraseña" autocomplete="current-password">
+                </label>
+                <p id="sa-login-error" class="sa-error" hidden></p>
+                <button type="submit" class="btn btn-primary sa-block" id="sa-login-btn">Continuar</button>
+                <p class="sa-note">Tras 3 intentos fallidos la cuenta se bloquea. El código de verificación llega a este mismo correo.</p>
+            </form>
+
+            <!-- Paso 2: código OTP por email (2FA de Supabase Auth) -->
+            <form id="sa-otp-form" autocomplete="off" hidden>
+                <p class="sa-muted">Te enviamos un código de 6 dígitos a <strong id="sa-otp-email"></strong>. Escríbelo para completar el inicio de sesión.</p>
+                <label class="sa-field">
+                    <span>Código de verificación</span>
+                    <input type="text" id="sa-otp-code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required placeholder="123456">
+                </label>
+                <p id="sa-otp-error" class="sa-error" hidden></p>
+                <button type="submit" class="btn btn-primary sa-block" id="sa-otp-btn">Verificar y entrar</button>
+                <button type="button" class="btn btn-ghost sa-block" id="sa-otp-resend">Reenviar código</button>
+                <button type="button" class="btn btn-ghost sa-block" id="sa-otp-back">Volver</button>
+            </form>
+
+            <p class="sa-login-foot"><a href="index.html">← Volver a GOAT Style Salon</a></p>
+        </div>
+    </div>
+
+    <!-- ======================= PANEL ======================= -->
+    <div id="sa-app" class="admin-shell" hidden>
+        <aside class="sidebar">
+            <div class="brand-block">
+                <img class="brand-logo" src="https://res.cloudinary.com/dtw3qx4qq/image/upload/v1783972135/b3a13ac1-cac2-4367-9c0d-5946397d4ff9-removebg-preview_xhkncw.png" alt="GOAT Style Salon">
+                <h1>GOAT Style Salon</h1>
+                <p>Panel de Super Admin</p>
+            </div>
+            <nav class="side-nav" id="sa-nav" aria-label="Módulos del super administrador">
+                <button class="nav-btn active" data-module="dashboard"><i class="fas fa-gauge-high"></i><span>Dashboard</span></button>
+                <button class="nav-btn" data-module="accounts"><i class="fas fa-users"></i><span>Barberos y cuentas</span></button>
+                <button class="nav-btn" data-module="blocked"><i class="fas fa-lock"></i><span>Cuentas bloqueadas</span></button>
+                <button class="nav-btn" data-module="support"><i class="fas fa-user-shield"></i><span>Entrar como</span></button>
+                <button class="nav-btn" data-module="permissions"><i class="fas fa-key"></i><span>Permisos por área</span></button>
+                <button class="nav-btn" data-module="maintenance"><i class="fas fa-screwdriver-wrench"></i><span>Mantenimiento</span></button>
+                <button class="nav-btn" data-module="notifications"><i class="fas fa-bell"></i><span>Centro de notificaciones</span></button>
+                <button class="nav-btn" data-module="tickets"><i class="fas fa-life-ring"></i><span>Soporte y tickets</span></button>
+                <button class="nav-btn" data-module="appointments"><i class="fas fa-calendar-check"></i><span>Citas</span></button>
+                <button class="nav-btn" data-module="audit"><i class="fas fa-clipboard-list"></i><span>Auditoría</span></button>
+                <button class="nav-btn" data-module="system"><i class="fas fa-heart-pulse"></i><span>Estado del sistema</span></button>
+            </nav>
+            <div class="sa-session-box">
+                <p class="sa-muted">Sesión: <strong id="sa-user-email">—</strong></p>
+                <p class="sa-muted">Cierre automático en <strong id="sa-countdown">30:00</strong> sin actividad.</p>
+                <button class="btn btn-ghost sa-block" id="sa-logout-btn">Cerrar sesión</button>
+            </div>
+        </aside>
+
+        <main class="content">
+            <!-- Barra roja de MODO SOPORTE (vista de soporte, no suplantación real) -->
+            <div id="sa-support-bar" class="sa-support-bar" hidden>
+                <span><i class="fas fa-eye"></i> <strong>Modo soporte</strong> — estás viendo como <strong id="sa-support-name">—</strong></span>
+                <span class="sa-support-actions">
+                    <label class="sa-switch-label"><input type="checkbox" id="sa-support-edit"> Edición (con confirmación)</label>
+                    <button class="btn btn-danger sa-support-exit" id="sa-support-exit">Salir del modo soporte</button>
+                </span>
+            </div>
+
+            <div class="topbar">
+                <div>
+                    <h2 class="topbar-title" id="sa-module-title">Dashboard</h2>
+                    <p class="topbar-subtitle" id="sa-module-subtitle">Resumen general de la barbería.</p>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-ghost" id="sa-refresh-btn"><i class="fas fa-rotate"></i> Actualizar</button>
+                </div>
+            </div>
+
+            <div id="sa-content">
+                <section class="sa-module" id="module-dashboard" data-title="Dashboard" data-subtitle="Resumen general de la barbería."></section>
+                <section class="sa-module" id="module-accounts" data-title="Barberos y cuentas" data-subtitle="Todas las cuentas: barberos, clientes y administradores." hidden></section>
+                <section class="sa-module" id="module-blocked" data-title="Cuentas bloqueadas" data-subtitle="Cuentas bloqueadas por intentos fallidos." hidden></section>
+                <section class="sa-module" id="module-support" data-title="Entrar como" data-subtitle="Vista de soporte de solo lectura sobre la cuenta de un barbero o barbería." hidden></section>
+                <section class="sa-module" id="module-permissions" data-title="Permisos por área" data-subtitle="Qué puede ver y hacer cada barbero en cada área." hidden></section>
+                <section class="sa-module" id="module-maintenance" data-title="Mantenimiento" data-subtitle="Modo mantenimiento global o por área, con lista blanca." hidden></section>
+                <section class="sa-module" id="module-notifications" data-title="Centro de notificaciones" data-subtitle="Avisos push y en la app para barberos y clientes." hidden></section>
+                <section class="sa-module" id="module-tickets" data-title="Soporte y tickets" data-subtitle="Conversaciones de soporte con clientes y barberos." hidden></section>
+                <section class="sa-module" id="module-appointments" data-title="Citas" data-subtitle="Buscar, cancelar, reasignar o cambiar la hora de cualquier cita." hidden></section>
+                <section class="sa-module" id="module-audit" data-title="Auditoría" data-subtitle="Registro de todo lo que hace el super administrador. No se puede borrar ni editar." hidden></section>
+                <section class="sa-module" id="module-system" data-title="Estado del sistema" data-subtitle="Salud de Supabase y FCM, errores recientes y exportaciones." hidden></section>
+            </div>
+        </main>
+    </div>
+
+    <div id="sa-toasts" class="sa-toasts" aria-live="polite"></div>
+    <div id="sa-modal-root"></div>
+
+    <script src="supabase-config.js?v=20261124f"></script>
+    <script src="supabase-sync.js?v=20261124f"></script>
+    <script src="super-admin-panel.js?v=20261124f"></script>
+</body>
+</html>

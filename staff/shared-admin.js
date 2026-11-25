@@ -3,24 +3,91 @@
     const config = window.AdminPortalConfig || {};
     // Menu agrupado en el orden del trabajo diario. adminOnly: solo lo ve el administrador general.
     const NAV_GROUPS = ['Agenda', 'Clientes', 'Barbería'];
+    // PR #18 (super admin): `area` es el área que controla area_permissions
+    // (Citas, Calendario, Clientes, Servicios y precios, Pagos, Reportes,
+    // Notificaciones, Configuración). Las secciones sin `area` (Inicio,
+    // Reseñas, Horarios y bloqueos, Barberos, Negocio) no se bloquean por
+    // permisos. 'Pagos' no tiene sección propia en el panel (el pago es
+    // presencial): se controla en el servidor (RLS) y en el mantenimiento
+    // de la app pública. 'Reportes' vive dentro de Negocio (ver
+    // appendBusinessSections) y se bloquea ahí.
+    // PR #18 sobre PR #17: la sección 'transfers' (nueva en PR #17) queda
+    // bajo el área 'citas': las transferencias son operaciones sobre citas.
     const sections = [
         { id: 'dashboard', label: 'Inicio', icon: 'fa-house', group: 'Agenda' },
-        { id: 'appointments', label: 'Citas', icon: 'fa-calendar-check', group: 'Agenda' },
-        { id: 'transfers', label: 'Transferencias', icon: 'fa-arrow-right-arrow-left', group: 'Agenda' },
-        { id: 'calendar', label: 'Calendario', icon: 'fa-calendar-days', group: 'Agenda' },
-        { id: 'clients', label: 'Clientes', icon: 'fa-users', group: 'Clientes' },
+        { id: 'appointments', label: 'Citas', icon: 'fa-calendar-check', group: 'Agenda', area: 'citas' },
+        { id: 'transfers', label: 'Transferencias', icon: 'fa-arrow-right-arrow-left', group: 'Agenda', area: 'citas' },
+        { id: 'calendar', label: 'Calendario', icon: 'fa-calendar-days', group: 'Agenda', area: 'calendario' },
+        { id: 'clients', label: 'Clientes', icon: 'fa-users', group: 'Clientes', area: 'clientes' },
         { id: 'reviews', label: 'Reseñas', icon: 'fa-star', group: 'Clientes' },
-        { id: 'notifications', label: 'Notificaciones', icon: 'fa-bell', group: 'Clientes' },
+        { id: 'notifications', label: 'Notificaciones', icon: 'fa-bell', group: 'Clientes', area: 'notificaciones' },
         { id: 'schedule', label: 'Horarios y bloqueos', icon: 'fa-clock', group: 'Barbería' },
-        { id: 'services', label: 'Servicios', icon: 'fa-scissors', group: 'Barbería' },
+        { id: 'services', label: 'Servicios', icon: 'fa-scissors', group: 'Barbería', area: 'servicios' },
         { id: 'profile', label: 'Barberos', icon: 'fa-id-card', group: 'Barbería', adminOnly: true },
         { id: 'inventory', label: 'Negocio', icon: 'fa-boxes-stacked', group: 'Barbería' },
-        { id: 'settings', label: 'Configuración', icon: 'fa-gear', group: 'Barbería' }
+        { id: 'settings', label: 'Configuración', icon: 'fa-gear', group: 'Barbería', area: 'configuracion' }
     ];
 
     function visibleSections() {
-        return sections.filter(section => !section.adminOnly || isAdmin());
+        return sections.filter(section => (!section.adminOnly || isAdmin()) && sectionAllowed(section));
     }
+
+    // ¿Puede este barbero ver la sección? Sin GabySuperAdmin cargado o sin
+    // permisos cargados aún, se permite (fail-open): al llegar los permisos
+    // se vuelve a dibujar el menú (ver applyPermissionVisibility). El super
+    // admin siempre puede entrar. La validación real vive en el servidor.
+    function sectionAllowed(section) {
+        if (!section.area) return true;
+        if (!window.GabySuperAdmin) return true;
+        return window.GabySuperAdmin.canAccess(section.area);
+    }
+
+    // Oculta o muestra los botones del menú según los permisos, sin redibujar
+    // todo el panel (para no borrar lo que el barbero esté escribiendo). Si la
+    // sección abierta quedó sin acceso, se muestra el aviso de bloqueo.
+    function applyPermissionVisibility() {
+        if (!window.GabySuperAdmin || !document.querySelector('.admin-shell')) return;
+        app.querySelectorAll('.nav-btn[data-section]').forEach(button => {
+            const section = sections.find(item => item.id === button.dataset.section);
+            button.style.display = sectionAllowed(section || {}) ? '' : 'none';
+        });
+        app.querySelectorAll('.nav-group').forEach(group => {
+            const buttons = group.querySelectorAll('.nav-btn[data-section]');
+            if (!buttons.length) return;
+            const anyVisible = Array.from(buttons).some(button => button.style.display !== 'none');
+            group.style.display = anyVisible ? '' : 'none';
+        });
+        if (sectionBlockReason(currentSection)) renderSection();
+        // 'Reportes' vive dentro de Negocio (ver appendBusinessSections): si
+        // cambia su permiso, la sección en sí no se bloquea pero el bloque de
+        // reportes sí, así que Negocio se vuelve a dibujar también.
+        else if (currentSection === 'inventory') renderSection();
+    }
+
+    // null si la sección se puede abrir; si no, por qué está bloqueada.
+    function sectionBlockReason(id) {
+        const section = sections.find(item => item.id === id);
+        if (!section || !section.area || !window.GabySuperAdmin) return null;
+        if (window.GabySuperAdmin.isSuperAdmin && window.GabySuperAdmin.isSuperAdmin()) return null;
+        if (!window.GabySuperAdmin.canAccess(section.area)) {
+            return { kind: 'denied', label: section.label };
+        }
+        const maintenance = window.GabySuperAdmin.maintenanceFor
+            ? window.GabySuperAdmin.maintenanceFor(section.area) : null;
+        if (maintenance) return { kind: 'maintenance', label: section.label, message: maintenance.message, endsAt: maintenance.endsAt };
+        return null;
+    }
+
+    function renderBlockedSection(blocked) {
+        const host = document.getElementById('admin-section-content');
+        if (!host) return;
+        const eta = blocked.endsAt ? new Date(blocked.endsAt).toLocaleString('es-PR', { weekday: 'long', day: 'numeric', month: 'long', hour: 'numeric', minute: '2-digit' }) : '';
+        host.innerHTML = blocked.kind === 'maintenance'
+            ? `<section class="card" role="status"><div class="section-title">${blocked.label} en mantenimiento</div><p class="item-meta">${blocked.message || 'Esta área no está disponible en este momento. Estamos trabajando para habilitarla pronto.'}</p>${eta ? `<p class="item-meta">Regresa: ${eta}.</p>` : ''}<div class="form-actions"><button class="btn btn-primary" type="button" data-back-dashboard>Volver al inicio</button></div></section>`
+            : `<section class="card" role="status"><div class="section-title">No tienes acceso a esta área</div><p class="item-meta">El área ${blocked.label} no está habilitada para tu cuenta. Si crees que es un error, comunícate con la barbería.</p><div class="form-actions"><button class="btn btn-primary" type="button" data-back-dashboard>Volver al inicio</button></div></section>`;
+        host.querySelector('[data-back-dashboard]')?.addEventListener('click', () => goToSection('dashboard'));
+    }
+
 
     function sectionLabel(id) {
         return (sections.find(section => section.id === id) || sections[0]).label;
@@ -613,6 +680,7 @@
                         }).join('')}
                     </nav>
                     <div class="nav-footer">
+                        <a class="nav-btn" href="../../support.html#reporte"><i class="fas fa-bug"></i><span>Reportar un problema</span></a>
                         <a class="nav-btn" href="../../index.html"><i class="fas fa-arrow-left"></i><span>Página principal</span></a>
                         <div class="nav-group ap-panels">
                             <div class="nav-group-label">Paneles</div>
@@ -1764,12 +1832,26 @@
             details.addEventListener('toggle', () => { businessOpen[id] = details.open; });
             page.appendChild(details);
             const panel = details.lastElementChild;
+            // PR #18: Reportes es un área controlada por area_permissions.
+            if (id === 'reports' && window.GabySuperAdmin && !window.GabySuperAdmin.canAccess('reportes')) {
+                panel.innerHTML = '<p class="item-meta">No tienes acceso a esta área.</p>';
+                continue;
+            }
             if (id === 'reports') window.GabyAdminPro.renderReports(proContext(), panel);
             else renderNewsSection(panel);
         }
     }
 
     function renderSection() {
+        // PR #18: área sin permiso o en mantenimiento: aviso claro, sin dibujar
+        // la sección (y sin intentar leer sus datos).
+        const blocked = sectionBlockReason(currentSection);
+        if (blocked) {
+            renderBlockedSection(blocked);
+            addRequiredLegends();
+            renderCancellationAlertBanner();
+            return;
+        }
         // Si el dibujo de una sección falla (datos incompletos, por ejemplo),
         // se muestra un aviso en vez de dejar la sección anterior en pantalla
         // como si nada hubiera pasado: el usuario ve que algo falló y puede reintentar.
@@ -1823,6 +1905,7 @@
     }
 
     window.addEventListener('gabydatachange', handleRealtimeAdminUpdate);
+    window.addEventListener('gabysuperadminpermissions', applyPermissionVisibility);
     window.addEventListener('focus', () => window.setTimeout(showCancellationAlertPopup, 80));
     document.addEventListener('visibilitychange', () => { if (!document.hidden) window.setTimeout(showCancellationAlertPopup, 80); });
     window.addEventListener('storage', event => {

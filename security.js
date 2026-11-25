@@ -8,7 +8,13 @@
     //   que decide si la desbloquea (y entonces se exige cambiar la contrasena) o la deja bloqueada.
     // - Espera progresiva entre intentos fallidos en el mismo navegador.
     // - Con Supabase (GabyCloud.enabled): Auth guarda las contrasenas con bcrypt y el conteo de
-    //   intentos/bloqueos vive en la base de datos (funciones login_guard / register_failed_login).
+    //   intentos/bloqueos vive en la base de datos (migración 20261124230000_super_admin.sql:
+    //   tabla login_attempts y RPCs check_login_allowed / record_login_attempt). Antes de
+    //   intentar el login se pregunta si la cuenta está permitida; después de un fallo se
+    //   registra el intento en el servidor. Nunca se guarda el conteo en localStorage:
+    //   lo de sessionStorage es solo una espera progresiva en este navegador, no el conteo.
+    //   Si las RPCs nuevas aún no existen en el servidor, se usan las anteriores
+    //   (login_guard / register_failed_login), que devuelven lo mismo.
     // =========================================================================
     const LOCK_AFTER = 3;
     const ITERATIONS = 600000;
@@ -185,10 +191,52 @@
         return { ok: true, account, mustChangePassword: Boolean(account.auth.mustChangePassword), portal: account.account.portal };
     }
 
+    // ¿Existe esta RPC en el servidor? PostgREST devuelve 404 / PGRST202 o el
+    // error 42883 cuando la función no existe: en ese caso se usa el nombre anterior.
+    function rpcMissing(error) {
+        const raw = String((error && (error.message || error.code)) || '');
+        return /42883|PGRST202|not exist|Could not find the function/i.test(raw);
+    }
+
+    // Pregunta al servidor si esta cuenta puede intentar entrar. Si está
+    // bloqueada, se muestra el bloqueo SIN intentar el login (sin Auth).
+    // Devuelve { locked, attemptsLeft }.
+    async function checkLoginAllowed(client, mail) {
+        let res = await client.rpc('check_login_allowed', { p_email: mail });
+        if (res.error && rpcMissing(res.error)) res = await client.rpc('login_guard', { p_email: mail });
+        if (res.error) throw res.error;
+        const data = res.data || {};
+        const locked = data.locked === true || data.allowed === false;
+        const left = typeof data.attempts_left === 'number' ? data.attempts_left
+            : (typeof data.attemptsLeft === 'number' ? data.attemptsLeft : LOCK_AFTER);
+        return { locked, attemptsLeft: locked ? 0 : left };
+    }
+
+    // Registra UN intento fallido en el servidor. Devuelve { locked, attemptsLeft }.
+    async function recordLoginAttempt(client, mail) {
+        // Migración F: record_login_attempt(p_email, p_exito, p_ip, p_dispositivo)
+        // devuelve { locked, attempts_left, blocked_until }.
+        let res = await client.rpc('record_login_attempt', { p_email: mail, p_exito: false, p_dispositivo: navigator.userAgent });
+        if (res.error && rpcMissing(res.error)) res = await client.rpc('register_failed_login', { p_email: mail, p_user_agent: navigator.userAgent });
+        if (res.error) throw res.error;
+        const data = res.data || {};
+        const locked = data.locked === true;
+        const left = typeof data.attempts_left === 'number' ? data.attempts_left
+            : (typeof data.attemptsLeft === 'number' ? data.attemptsLeft : LOCK_AFTER - 1);
+        return { locked, attemptsLeft: left };
+    }
+
     async function cloudLogin(mail, password) {
         const client = await window.GabyCloud.getClient();
-        const guard = await client.rpc('login_guard', { p_email: mail });
-        if (guard.data && guard.data.locked) return { ok: false, reason: 'locked', message: MESSAGES.locked };
+        let allowed;
+        try {
+            allowed = await checkLoginAllowed(client, mail);
+        } catch (error) {
+            // Sin respuesta del servidor no se puede verificar el bloqueo: se
+            // muestra el error sin intentar el login.
+            return { ok: false, reason: 'error', message: 'No se pudo verificar la cuenta con el servidor. Intenta de nuevo.' };
+        }
+        if (allowed.locked) return { ok: false, reason: 'locked', message: MESSAGES.locked };
         try {
             const result = await window.GabyCloud.staffSignIn(mail, password);
             noteThrottle(mail, true);
@@ -198,10 +246,12 @@
         } catch (error) {
             if (!/incorrectos/i.test(error.userMessage || '')) return { ok: false, reason: 'error', message: error.userMessage || 'No se pudo iniciar sesión.' };
             noteThrottle(mail, false);
-            const { data } = await client.rpc('register_failed_login', { p_email: mail, p_user_agent: navigator.userAgent });
-            if (data && data.locked) return { ok: false, reason: 'locked', message: MESSAGES.locked };
-            const left = data ? data.attempts_left : LOCK_AFTER - 1;
-            return { ok: false, reason: 'invalid', message: MESSAGES.invalid(left), attemptsLeft: left };
+            let recorded = { locked: false, attemptsLeft: LOCK_AFTER - 1 };
+            try {
+                recorded = await recordLoginAttempt(client, mail);
+            } catch (_) { /* el intento ya falló; si no se pudo registrar, se muestra el error normal */ }
+            if (recorded.locked) return { ok: false, reason: 'locked', message: MESSAGES.locked };
+            return { ok: false, reason: 'invalid', message: MESSAGES.invalid(recorded.attemptsLeft), attemptsLeft: recorded.attemptsLeft };
         }
     }
 
