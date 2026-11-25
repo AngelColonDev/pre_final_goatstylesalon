@@ -680,7 +680,6 @@
                         }).join('')}
                     </nav>
                     <div class="nav-footer">
-                        <a class="nav-btn" href="../../support.html#reporte"><i class="fas fa-bug"></i><span>Reportar un problema</span></a>
                         <a class="nav-btn" href="../../index.html"><i class="fas fa-arrow-left"></i><span>Página principal</span></a>
                         <div class="nav-group ap-panels">
                             <div class="nav-group-label">Paneles</div>

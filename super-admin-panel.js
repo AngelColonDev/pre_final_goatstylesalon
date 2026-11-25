@@ -54,7 +54,7 @@
         'basico': { nombre: 'Barbero básico', permisos: { reservas: true, clientes: true, servicios: true, avisos: true, productos: false, galeria: false, noticias: false, pagos: false, descuentos: false, ajustes: false, reportes: false } },
         'encargado': { nombre: 'Barbero encargado', permisos: { reservas: true, clientes: true, servicios: true, avisos: true, productos: true, galeria: true, noticias: true, pagos: true, descuentos: true, ajustes: false, reportes: true } }
     };
-    var MODULES = ['dashboard', 'accounts', 'blocked', 'support', 'permissions', 'maintenance', 'notifications', 'tickets', 'appointments', 'audit', 'system'];
+    var MODULES = ['dashboard', 'accounts', 'blocked', 'support', 'permissions', 'maintenance', 'notifications', 'appointments', 'audit', 'system'];
 
     var state = {
         session: null,          // { email, userId, lastActivity }
@@ -63,7 +63,7 @@
         auditLocal: [],         // respaldo local si audit_log no responde
         timers: [],
         currentModule: 'dashboard',
-        accounts: [], perms: [], ticketsCache: [], apptsCache: []
+        accounts: [], perms: [], apptsCache: []
     };
     var clientOverride = null; // solo para pruebas (harness jsdom)
 
@@ -319,13 +319,11 @@
         try {
             var profiles = await tableSelect('profiles');
             var appts = await tableSelect('appointments');
-            var tickets = await tableSelect('tickets');
             var maint = await tableSelect('maintenance');
             var today = todayKey();
             var barbersActive = profiles.filter(function (p) { return p.role === 'barbero' && p.estado !== 'bloqueado' && p.estado !== 'cancelado'; }).length;
             var blocked = profiles.filter(function (p) { return p.estado === 'bloqueado'; }).length;
             var todayCount = appts.filter(function (a) { return String(a.date_time || '').slice(0, 10) === today; }).length;
-            var openTickets = tickets.filter(function (t) { return t.estado === 'abierto'; }).length;
             var maintAreas = maint.filter(function (m) { return m.activa; }).length;
             var recent = (await tableSelect('audit_log', { order: 'created_at', limit: 8 })).slice(0, 8);
             sec.innerHTML =
@@ -333,7 +331,6 @@
                 card(barbersActive, 'Barberos activos') +
                 card(todayCount, 'Citas de hoy') +
                 card(blocked, 'Cuentas bloqueadas', blocked > 0) +
-                card(openTickets, 'Tickets abiertos', openTickets > 0) +
                 card(maintAreas, 'Áreas en mantenimiento', maintAreas > 0) +
                 card(profiles.length, 'Cuentas totales') +
                 '</div>' +
@@ -342,13 +339,12 @@
                     return '<div class="sa-list-item"><strong>' + esc(r.action || '') + '</strong><span class="sa-meta">' + esc(auditDetail(r)) + ' · ' + fmtDate(r.created_at) + '</span></div>';
                 }).join('') + '</div>' : emptyState('fa-clipboard-list', 'Sin actividad registrada todavía.')) +
                 '</div><div class="sa-panel"><h3>Alertas</h3>' +
-                (blocked || openTickets || maintAreas
+                (blocked || maintAreas
                     ? '<div class="sa-list">' +
                       (blocked ? '<div class="sa-list-item"><strong>' + blocked + ' cuenta(s) bloqueada(s).</strong><span class="sa-meta">Revisa el módulo Cuentas bloqueadas.</span></div>' : '') +
-                      (openTickets ? '<div class="sa-list-item"><strong>' + openTickets + ' ticket(s) abierto(s).</strong><span class="sa-meta">Revisa el módulo Soporte y tickets.</span></div>' : '') +
                       (maintAreas ? '<div class="sa-list-item"><strong>' + maintAreas + ' área(s) en mantenimiento.</strong><span class="sa-meta">Los clientes ven el aviso de mantenimiento.</span></div>' : '') +
                       '</div>'
-                    : emptyState('fa-circle-check', 'Todo en orden: sin cuentas bloqueadas, sin tickets abiertos y sin mantenimiento activo.')) +
+                    : emptyState('fa-circle-check', 'Todo en orden: sin cuentas bloqueadas y sin mantenimiento activo.')) +
                 '</div></div>';
         } catch (err) {
             sec.innerHTML = '<div class="sa-panel">' + emptyState('fa-triangle-exclamation', 'No se pudo cargar el resumen: ' + (err.message || 'sin conexión.')) + '</div>';
@@ -841,72 +837,7 @@
     };
 
     /* ------------------------------------------------------------------ */
-    /* (8) Soporte y tickets                                                */
-    /* ------------------------------------------------------------------ */
-    RENDERERS.tickets = async function () {
-        var sec = $('module-tickets');
-        sec.innerHTML = loadingState('Cargando tickets…');
-        try {
-            var tickets = await tableSelect('tickets', { order: 'created_at', limit: 100 });
-            state.ticketsCache = tickets;
-            if (!tickets.length) { sec.innerHTML = '<div class="sa-panel">' + emptyState('fa-life-ring', 'No hay tickets de soporte.') + '</div>'; return; }
-            sec.innerHTML = '<div class="sa-panel"><div class="sa-table-wrap"><table class="sa-table"><thead><tr><th>Asunto</th><th>De</th><th>Estado</th><th>Fecha</th><th></th></tr></thead><tbody>' +
-                tickets.map(function (t) {
-                    return '<tr><td><strong>' + esc(t.titulo || 'Sin asunto') + '</strong></td><td>' + esc(t.reporter_email || t.reporter_name || '—') + '</td><td>' + statusBadge(t.estado || 'abierto') + '</td><td>' + fmtDate(t.created_at) + '</td>' +
-                        '<td><button class="btn btn-primary btn-sm" data-ticket="' + esc(t.id) + '">Abrir</button></td></tr>';
-                }).join('') + '</tbody></table></div><div id="sa-ticket-detail" style="margin-top:1.25rem"></div></div>';
-            sec.querySelectorAll('[data-ticket]').forEach(function (b) {
-                b.addEventListener('click', function () { openTicket(b.dataset.ticket); });
-            });
-        } catch (err) {
-            sec.innerHTML = '<div class="sa-panel">' + emptyState('fa-life-ring', 'No se pudieron cargar los tickets: ' + (err.message || 'sin conexión.')) + '</div>';
-        }
-    };
-    async function openTicket(ticketId) {
-        var box = $('sa-ticket-detail');
-        var t = state.ticketsCache.find(function (x) { return String(x.id) === String(ticketId); }) || {};
-        box.innerHTML = loadingState('Cargando conversación…');
-        try {
-            var msgs = await tableSelect('ticket_messages', { eq: [['ticket_id', ticketId]], order: 'created_at' });
-            var replies = [];
-            try { replies = await tableSelect('saved_replies'); } catch (_) {}
-            box.innerHTML = '<div class="sa-panel"><h3>' + esc(t.titulo || 'Ticket') + '</h3>' +
-                '<p class="sa-muted">De: ' + esc(t.reporter_email || t.reporter_name || '—') + ' · Estado: ' + esc(t.estado || 'abierto') + '</p>' +
-                '<div class="sa-row-actions" style="margin:.75rem 0"><button class="btn btn-ghost btn-sm" id="sa-tk-support">Entrar como</button>' +
-                '<button class="btn btn-ghost btn-sm" id="sa-tk-unblock">Desbloquear</button>' +
-                '<button class="btn btn-ghost btn-sm" id="sa-tk-appts">Ver sus citas</button></div>' +
-                (msgs.length ? '<div class="sa-list">' + msgs.map(function (m) {
-                    return '<div class="sa-list-item"><strong>' + esc(m.author_role || 'usuario') + (m.is_internal ? ' (nota interna)' : '') + '</strong><span>' + esc(m.mensaje || '') + '</span><span class="sa-meta">' + fmtDate(m.created_at) + '</span></div>';
-                }).join('') + '</div>' : emptyState('fa-comments', 'Sin mensajes en este ticket todavía.')) +
-                '<div class="sa-form" style="margin-top:1rem"><label class="sa-field"><span>Respuesta</span><textarea id="sa-tk-reply" rows="3" placeholder="Escribe tu respuesta…"></textarea></label>' +
-                (replies.length ? '<label class="sa-field"><span>Respuesta guardada</span><select id="sa-tk-saved"><option value="">— Elegir una respuesta guardada —</option>' + replies.map(function (r) { return '<option value="' + esc(r.id) + '">' + esc(r.titulo || r.cuerpo || '') + '</option>'; }).join('') + '</select></label>' : '') +
-                '<div class="sa-row-actions"><button class="btn btn-primary" id="sa-tk-send">Enviar respuesta</button><button class="btn btn-ghost" id="sa-tk-note">Añadir nota interna</button></div></div></div>';
-            $('sa-tk-support').addEventListener('click', function () { enterSupportMode({ id: t.created_by || t.reporter_email || ticketId, name: t.reporter_name || t.reporter_email || 'usuario del ticket', kind: 'cuenta' }); });
-            $('sa-tk-unblock').addEventListener('click', function () { if (t.reporter_email) unblockAccount(t.reporter_email, false); else toast('Este ticket no tiene correo asociado.', 'error'); });
-            $('sa-tk-appts').addEventListener('click', function () { showModule('appointments'); var s = $('sa-appt-search'); if (s) { s.value = t.reporter_name || t.reporter_email || ''; s.dispatchEvent(new Event('input')); } });
-            var savedSel = $('sa-tk-saved');
-            if (savedSel) savedSel.addEventListener('change', function () {
-                var r = replies.find(function (x) { return String(x.id) === String(savedSel.value); });
-                if (r) $('sa-tk-reply').value = r.cuerpo || '';
-            });
-            var sendMsg = async function (internal) {
-                var body = $('sa-tk-reply').value.trim();
-                if (!body) { toast('Escribe la respuesta primero.', 'error'); return; }
-                try { await rpc('add_ticket_reply', { p_ticket_id: ticketId, p_mensaje: body, p_is_internal: !!internal }); }
-                catch (err2) { toast('No se pudo guardar el mensaje: ' + (err2.message || 'la RPC add_ticket_reply no está disponible.'), 'error'); return; }
-                await audit(internal ? 'ticket_nota_interna' : 'ticket_respuesta', 'Ticket ' + ticketId + ': ' + body.slice(0, 120));
-                toast(internal ? 'Nota interna guardada.' : 'Respuesta enviada.', 'success');
-                openTicket(ticketId);
-            };
-            $('sa-tk-send').addEventListener('click', function () { sendMsg(false); });
-            $('sa-tk-note').addEventListener('click', function () { sendMsg(true); });
-        } catch (err) {
-            box.innerHTML = emptyState('fa-comments', 'No se pudo cargar la conversación: ' + (err.message || 'sin conexión.'));
-        }
-    }
-
-    /* ------------------------------------------------------------------ */
-    /* (9) Citas                                                            */
+    /* (8) Citas                                                            */
     /* ------------------------------------------------------------------ */
     RENDERERS.appointments = async function () {
         var sec = $('module-appointments');
@@ -997,7 +928,7 @@
     }
 
     /* ------------------------------------------------------------------ */
-    /* (10) Auditoría                                                       */
+    /* (9) Auditoría                                                       */
     /* ------------------------------------------------------------------ */
     RENDERERS.audit = async function () {
         var sec = $('module-audit');
@@ -1044,7 +975,7 @@
     };
 
     /* ------------------------------------------------------------------ */
-    /* (11) Estado del sistema                                              */
+    /* (10) Estado del sistema                                              */
     /* ------------------------------------------------------------------ */
     RENDERERS.system = async function () {
         var sec = $('module-system');
